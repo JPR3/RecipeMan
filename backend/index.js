@@ -1,15 +1,11 @@
 const express = require('express')
 const bodyParser = require('body-parser')
+const cors = require('cors')
 const app = express()
-const port = 3000
+const port = process.env.PORT || 3000
 
-// Importing the Supabase client
-const { createClient } = require('@supabase/supabase-js')
-const supabaseUrl = process.env.SUPABASE_URL
-const supabaseKey = process.env.SUPABASE_KEY
-const supabase = createClient(supabaseUrl, supabaseKey)
-
-
+// Middleware setup
+app.use(cors())
 app.use(bodyParser.json())
 app.use(
     bodyParser.urlencoded({
@@ -18,7 +14,7 @@ app.use(
 )
 
 app.get('/', (request, response) => {
-    console.log(process.env.TEST)
+    console.log('Received a GET request on /')
     response.json({ message: 'Hello World!' })
 })
 
