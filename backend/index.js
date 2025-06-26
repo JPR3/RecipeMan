@@ -1,16 +1,17 @@
-const express = require('express')
-const bodyParser = require('body-parser')
-const cors = require('cors')
-const usersRoutes = require('./routes/users');
-const recipesRoutes = require('./routes/recipes');
+import express from 'express';
+import pkg from 'body-parser';
+const { json, urlencoded } = pkg;
+import cors from 'cors';
+import usersRoutes from './routes/users.js';
+import recipesRoutes from './routes/recipes.js';
 const app = express()
 const port = process.env.PORT || 3000
 
 // Middleware setup
 app.use(cors())
-app.use(bodyParser.json())
+app.use(json())
 app.use(
-    bodyParser.urlencoded({
+    urlencoded({
         extended: true,
     })
 )
@@ -21,5 +22,4 @@ app.use('/api/recipes', recipesRoutes)
 
 app.listen(port, () => {
     console.log(`App running on port ${port}.`)
-    console.log(process.env.SUPABASE_URL);
 })

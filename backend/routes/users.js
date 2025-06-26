@@ -1,8 +1,8 @@
-const express = require('express');
-const router = express.Router();
-const pool = require('../db');
+import { Router } from 'express';
+const router = Router();
+import pool from '../db.js';
 
-// GET /api/users
+// GET /api/users/{id}
 router.get('/:id', async (req, res) => {
     try {
         const result = await pool.query(`SELECT username, created_at FROM users WHERE id = \'${req.params.id}\'`);
@@ -14,4 +14,4 @@ router.get('/:id', async (req, res) => {
 });
 
 
-module.exports = router;
+export default router;
