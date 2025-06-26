@@ -16,8 +16,8 @@ app.use(
     })
 )
 
-app.use('/api/users', usersRoutes)
-app.use('/api/recipes', recipesRoutes)
+app.use('/api', usersRoutes)
+app.use('/api', recipesRoutes)
 
 
 app.listen(port, () => {

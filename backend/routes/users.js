@@ -3,9 +3,9 @@ const router = Router();
 import pool from '../db.js';
 
 // GET /api/users/{id}
-router.get('/:id', async (req, res) => {
+router.get('/users/:id', async (req, res) => {
     try {
-        const result = await pool.query(`SELECT username, created_at FROM users WHERE id = \'${req.params.id}\'`);
+        const result = await pool.query('SELECT username, created_at FROM users WHERE id = $1', [req.params.id]);
         res.json(result.rows);
     } catch (err) {
         console.error('Error fetching users:', err);
