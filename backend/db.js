@@ -30,4 +30,9 @@ export async function owns_recipe(user_id, recipe_id) {
     return result.rows.length > 0;
 }
 
+export async function list_owns_ingredient(list_id, list_ingredient_id) {
+    const result = await pool.query('SELECT id FROM list_ingredients WHERE list_id = $1 AND id = $2', [list_id, list_ingredient_id]);
+    return result.rows.length > 0;
+}
+
 export default pool;

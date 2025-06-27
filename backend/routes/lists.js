@@ -1,6 +1,6 @@
 import { Router } from 'express';
 const router = Router();
-import pool from '../db.js';
+import pool, { owns_ingredient, owns_unit, owns_tag, owns_list, list_owns_ingredient } from '../db.js';
 
 // GET /api/users/:uid/lists
 router.get('/users/:uid/lists', async (req, res) => {
@@ -25,6 +25,69 @@ router.get('/users/:uid/lists/:id', async (req, res) => {
     } catch (err) {
         console.error('Error fetching shopping list:', err);
         res.status(500).json({ error: 'Failed to fetch shopping list' });
+    }
+});
+//POST /api/users/:uid/lists
+router.post('/users/:uid/lists', async (req, res) => {
+    try {
+        const title = req.body.title;
+        if (!title) {
+            return res.status(400).json({ error: 'Title is required' });
+        }
+        const result = await pool.query('INSERT INTO shopping_lists (user_id, title) VALUES ($1, $2) RETURNING *', [req.params.uid, title]);
+        res.status(201).json({ message: 'Shopping list created successfully', list: result.rows[0] });
+    } catch (err) {
+        console.error('Error inserting shopping list:', err);
+        res.status(500).json({ error: 'Failed to create shopping list' });
+    }
+});
+//POST /api/users/:uid/lists/:id/list_ingredients
+router.post('/users/:uid/lists/:id/list_ingredients', async (req, res) => {
+    try {
+        const ingredient_id = req.body.ingredient_id;
+        const qty = req.body.qty;
+        const unit_id = req.body.unit_id;
+        if (!ingredient_id || !qty || !unit_id) {
+            return res.status(400).json({ error: 'Ingredient ID, quantity, and unit ID are required' });
+        }
+        if (!await owns_list(req.params.uid, req.params.id)) {
+            return res.status(403).json({ error: 'Forbidden - user must own the shopping list' });
+        }
+        if (!await owns_ingredient(req.params.uid, ingredient_id)) {
+            return res.status(403).json({ error: 'Forbidden - user must own the ingredient' });
+        }
+        if (!await owns_unit(req.params.uid, unit_id)) {
+            return res.status(403).json({ error: 'Forbidden - user must own the measurement unit' });
+        }
+        const result = await pool.query('INSERT INTO list_ingredients (list_id, ingredient_id, measurement_qty, measurement_unit_id) VALUES ($1, $2, $3, $4) RETURNING *', [req.params.id, ingredient_id, qty, unit_id]);
+        res.status(201).json({ message: 'List ingredient added successfully', item: result.rows[0] });
+    } catch (err) {
+        console.error('Error inserting list ingredient:', err);
+        res.status(500).json({ error: 'Failed to add list ingredient' });
+    }
+});
+// POST /api/users/:uid/lists/:list_id/list_ingredients/:li_id/tags
+router.post('/users/:uid/lists/:list_id/list_ingredients/:li_id/tags', async (req, res) => {
+    try {
+        if (!await owns_list(req.params.uid, req.params.list_id)) {
+            return res.status(403).json({ error: 'Forbidden - user must own the shopping list' });
+        }
+        const list_ingredient_id = req.params.li_id;
+        const tag_id = req.body.tag_id;
+        if (!tag_id) {
+            return res.status(400).json({ error: 'Tag ID is required' });
+        }
+        if (!await owns_tag(req.params.uid, tag_id)) {
+            return res.status(403).json({ error: 'Forbidden - user must own the tag' });
+        }
+        if (!await list_owns_ingredient(req.params.list_id, list_ingredient_id)) {
+            return res.status(403).json({ error: 'Forbidden - tag must be associated with an ingredient in the list' });
+        }
+        const result = await pool.query('INSERT INTO list_tags (list_id, tag_id) VALUES ($1, $2)', [list_ingredient_id, tag_id]);
+        res.status(201).json({ message: 'Tag added successfully', list_tag: result.rows[0] });
+    } catch (err) {
+        console.error('Error inserting list tag:', err);
+        res.status(500).json({ error: 'Failed to add list tag' });
     }
 });
 
