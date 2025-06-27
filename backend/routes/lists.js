@@ -21,7 +21,7 @@ router.get('/users/:uid/lists/:id', async (req, res) => {
             SELECT ing_table.name, ing_table.measurement_qty, ing_table.unit, array_agg(tags.description) AS tags FROM ing_table LEFT JOIN list_tags ON list_tags.list_id = ing_table.ingredient_id LEFT JOIN tags ON list_tags.tag_id = tags.id
             GROUP BY ing_table.name, ing_table.measurement_qty, ing_table.unit;`, [req.params.id]);
         list_result.rows[0].ingredients = ingredients_result.rows;
-        res.json(list_result.rows);
+        res.json(list_result.rows[0]);
     } catch (err) {
         console.error('Error fetching shopping list:', err);
         res.status(500).json({ error: 'Failed to fetch shopping list' });
