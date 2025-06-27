@@ -6,7 +6,7 @@ import pool from '../db.js';
 router.get('/users/:uid/recipes', async (req, res) => {
     try {
         const result = await pool.query('SELECT title, created_at FROM recipes WHERE user_id = $1', [req.params.uid]);
-        res.json(result.rows);
+        res.json(result.rows[0]);
     } catch (err) {
         console.error('Error fetching recipes:', err);
         res.status(500).json({ error: 'Failed to fetch recipes' });
@@ -20,8 +20,7 @@ router.get('/users/:uid/recipes/:id', async (req, res) => {
         const tag_result = await pool.query('SELECT description FROM tags INNER JOIN recipe_tags ON tags.id = recipe_tags.tag_id WHERE recipe_tags.recipe_id = $1', [req.params.id]);
         recipe_result.rows[0].ingredients = ingredients_result.rows;
         recipe_result.rows[0].tags = tag_result.rows;
-        console.log(ingredients_result.rows);
-        res.json(recipe_result.rows);
+        res.json(recipe_result.rows[0]);
     } catch (err) {
         console.error('Error fetching recipe:', err);
         res.status(500).json({ error: 'Failed to fetch recipe' });

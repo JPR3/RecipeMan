@@ -4,6 +4,7 @@ const { json, urlencoded } = pkg;
 import cors from 'cors';
 import usersRoutes from './routes/users.js';
 import recipesRoutes from './routes/recipes.js';
+import listsRoutes from './routes/lists.js';
 const app = express()
 const port = process.env.PORT || 3000
 
@@ -18,6 +19,7 @@ app.use(
 
 app.use('/api', usersRoutes)
 app.use('/api', recipesRoutes)
+app.use('/api', listsRoutes)
 
 
 app.listen(port, () => {
