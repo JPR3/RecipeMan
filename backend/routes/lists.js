@@ -6,7 +6,7 @@ import pool from '../db.js';
 router.get('/users/:uid/lists', async (req, res) => {
     try {
         const result = await pool.query('SELECT title, created_at FROM shopping_lists WHERE user_id = $1', [req.params.uid]);
-        res.json(result.rows[0]);
+        res.json(result.rows);
     } catch (err) {
         console.error('Error fetching shopping lists:', err);
         res.status(500).json({ error: 'Failed to fetch shopping lists' });
@@ -21,7 +21,7 @@ router.get('/users/:uid/lists/:id', async (req, res) => {
             SELECT ing_table.name, ing_table.measurement_qty, ing_table.unit, array_agg(tags.description) AS tags FROM ing_table LEFT JOIN list_tags ON list_tags.list_id = ing_table.ingredient_id LEFT JOIN tags ON list_tags.tag_id = tags.id
             GROUP BY ing_table.name, ing_table.measurement_qty, ing_table.unit;`, [req.params.id]);
         list_result.rows[0].ingredients = ingredients_result.rows;
-        res.json(list_result.rows[0]);
+        res.json(list_result.rows);
     } catch (err) {
         console.error('Error fetching shopping list:', err);
         res.status(500).json({ error: 'Failed to fetch shopping list' });
