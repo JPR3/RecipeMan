@@ -5,7 +5,7 @@ import pool, { owns_ingredient, owns_recipe, owns_tag, owns_unit } from '../db.j
 // GET /api/users/recipes
 router.get('/users/:uid/recipes', async (req, res) => {
     try {
-        const result = await pool.query('SELECT title, created_at FROM recipes WHERE user_id = $1', [req.params.uid]);
+        const result = await pool.query('SELECT title, created_at, id FROM recipes WHERE user_id = $1', [req.params.uid]);
         res.json(result.rows);
     } catch (err) {
         console.error('Error fetching recipes:', err);
@@ -15,8 +15,8 @@ router.get('/users/:uid/recipes', async (req, res) => {
 // GET /api/users/{uid}/recipes/{id}
 router.get('/users/:uid/recipes/:id', async (req, res) => {
     try {
-        const recipe_result = await pool.query('SELECT title, cook_time, instructions, notes, created_at FROM recipes LEFT JOIN recipe_tags ON recipes.id = recipe_tags.recipe_id WHERE recipes.id = $1 AND recipes.user_id = $2', [req.params.id, req.params.uid]);
-        const ingredients_result = await pool.query('SELECT name, measurement_qty, unit FROM recipe_ingredients LEFT JOIN ingredients ON ingredients.id = recipe_ingredients.ingredient_id LEFT JOIN measurement_units ON recipe_ingredients.measurement_unit_id = measurement_units.id WHERE recipe_id = $1', [req.params.id]);
+        const recipe_result = await pool.query('SELECT title, cook_time, instructions, notes, created_at, recipes.id FROM recipes LEFT JOIN recipe_tags ON recipes.id = recipe_tags.recipe_id WHERE recipes.id = $1 AND recipes.user_id = $2', [req.params.id, req.params.uid]);
+        const ingredients_result = await pool.query('SELECT name, measurement_qty, unit, ingredients.id AS ingredient_id FROM recipe_ingredients LEFT JOIN ingredients ON ingredients.id = recipe_ingredients.ingredient_id LEFT JOIN measurement_units ON recipe_ingredients.measurement_unit_id = measurement_units.id WHERE recipe_id = $1', [req.params.id]);
         const tag_result = await pool.query('SELECT description FROM tags LEFT JOIN recipe_tags ON tags.id = recipe_tags.tag_id WHERE recipe_tags.recipe_id = $1', [req.params.id]);
         recipe_result.rows[0].ingredients = ingredients_result.rows;
         recipe_result.rows[0].tags = tag_result.rows;
