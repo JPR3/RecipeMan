@@ -27,6 +27,23 @@ router.post('/users', async (req, res) => {
         res.status(500).json({ error: 'Failed to create user' });
     }
 });
-
+// PATCH /api/users/{id}
+router.patch('/users/:id', async (req, res) => {
+    try {
+        const username = req.body.username;
+        if (!username) {
+            return res.status(400).json({ error: 'Username is required' });
+        }
+        const userCheck = await pool.query('SELECT id FROM users WHERE id = $1', [req.params.id]);
+        if (userCheck.rows.length === 0) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+        const result = await pool.query('UPDATE users SET username = $1 WHERE id = $2 RETURNING *', [username, req.params.id]);
+        res.json({ message: 'User updated successfully', user: result.rows[0] });
+    } catch (err) {
+        console.error('Error updating user:', err);
+        res.status(500).json({ error: 'Failed to update user' });
+    }
+});
 
 export default router;

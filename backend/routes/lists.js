@@ -93,5 +93,50 @@ router.post('/users/:uid/lists/:list_id/list_ingredients/:li_id/tags', async (re
         res.status(500).json({ error: 'Failed to add list tag' });
     }
 });
-
+// PATCH /api/users/:uid/lists/:id
+router.patch('/users/:uid/lists/:id', async (req, res) => {
+    try {
+        const title = req.body.title;
+        if (!title) {
+            return res.status(400).json({ error: 'Title is required' });
+        }
+        if (!await owns_list(req.params.uid, req.params.id)) {
+            return res.status(403).json({ error: 'Forbidden - user must own the shopping list' });
+        }
+        const result = await pool.query('UPDATE shopping_lists SET title = $1 WHERE id = $2 RETURNING *', [title, req.params.id]);
+        res.json({ message: 'Shopping list updated successfully', list: result.rows[0] });
+    } catch (err) {
+        console.error('Error updating shopping list:', err);
+        res.status(500).json({ error: 'Failed to update shopping list' });
+    }
+});
+//PATCH /api/users/:uid/lists/:list_id/list_ingredients/:li_id
+router.patch('/users/:uid/lists/:list_id/list_ingredients/:li_id', async (req, res) => {
+    try {
+        const qty = req.body.qty;
+        const unit_id = req.body.unit_id;
+        const ingredient_id = req.body.ingredient_id;
+        const checked = req.body.checked;
+        if (!qty && !unit_id && !ingredient_id && checked === undefined) {
+            return res.status(400).json({ error: 'At least one field must be provided' });
+        }
+        if (!await owns_list(req.params.uid, req.params.list_id)) {
+            return res.status(403).json({ error: 'Forbidden - user must own the shopping list' });
+        }
+        if (ingredient_id && !await owns_ingredient(req.params.uid, ingredient_id)) {
+            return res.status(403).json({ error: 'Forbidden - user must own the ingredient' });
+        }
+        if (unit_id && !await owns_unit(req.params.uid, unit_id)) {
+            return res.status(403).json({ error: 'Forbidden - user must own the measurement unit' });
+        }
+        if (!await list_owns_ingredient(req.params.list_id, req.params.li_id)) {
+            return res.status(403).json({ error: 'Forbidden - ingredient must be part of the shopping list' });
+        }
+        const result = await pool.query('UPDATE list_ingredients SET measurement_qty = COALESCE($1, measurement_qty), measurement_unit_id = COALESCE($2, measurement_unit_id), ingredient_id = COALESCE($3, ingredient_id), checked = COALESCE($4, checked) WHERE id = $5 RETURNING *', [qty, unit_id, ingredient_id, checked, req.params.li_id]);
+        res.json({ message: 'List ingredient updated successfully', item: result.rows[0] });
+    } catch (err) {
+        console.error('Error updating list ingredient:', err);
+        res.status(500).json({ error: 'Failed to update list ingredient' });
+    }
+});
 export default router;

@@ -96,4 +96,46 @@ router.post('/users/:uid/recipes/:id/tags', async (req, res) => {
         res.status(500).json({ error: 'Failed to add recipe tag' });
     }
 });
+// PATCH /api/users/:uid/recipes/:id
+router.patch('/users/:uid/recipes/:id', async (req, res) => {
+    try {
+        const { title, cook_time, instructions, notes } = req.body;
+        if (!title && !cook_time && !instructions && !notes) {
+            return res.status(400).json({ error: 'At least one field is required' });
+        }
+        if (!await owns_recipe(req.params.uid, req.params.id)) {
+            return res.status(403).json({ error: 'Forbidden - user must own the recipe' });
+        }
+        const result = await pool.query('UPDATE recipes SET title = COALESCE($1, title), cook_time = COALESCE($2, cook_time), instructions = COALESCE($3, instructions), notes = COALESCE($4, notes) WHERE id = $5 RETURNING *', [title, cook_time, instructions, notes, req.params.id]);
+        res.json({ message: 'Recipe updated successfully', recipe: result.rows[0] });
+    } catch (err) {
+        console.error('Error updating recipe:', err);
+        res.status(500).json({ error: 'Failed to update recipe' });
+    }
+});
+// PATCH /api/users/:uid/recipes/:id/recipe_ingredients/:ri_id
+router.patch('/users/:uid/recipes/:id/recipe_ingredients/:ri_id', async (req, res) => {
+    try {
+        const qty = req.body.qty;
+        const unit_id = req.body.unit_id;
+        const ingredient_id = req.body.ingredient_id;
+        if (!qty || !unit_id || !ingredient_id) {
+            return res.status(400).json({ error: 'Quantity, unit ID, and ingredient ID are required' });
+        }
+        if (!await owns_recipe(req.params.uid, req.params.id)) {
+            return res.status(403).json({ error: 'Forbidden - user must own the recipe' });
+        }
+        if (!await owns_unit(req.params.uid, unit_id)) {
+            return res.status(403).json({ error: 'Forbidden - user must own the measurement unit' });
+        }
+        if (!await owns_ingredient(req.params.uid, ingredient_id)) {
+            return res.status(403).json({ error: 'Forbidden - user must own the ingredient' });
+        }
+        const result = await pool.query('UPDATE recipe_ingredients SET measurement_qty = $1, measurement_unit_id = $2, ingredient_id = $3 WHERE id = $4 RETURNING *', [qty, unit_id, ingredient_id, req.params.ri_id]);
+        res.json({ message: 'Recipe ingredient updated successfully', recipe_ingredient: result.rows[0] });
+    } catch (err) {
+        console.error('Error updating recipe ingredient:', err);
+        res.status(500).json({ error: 'Failed to update recipe ingredient' });
+    }
+});
 export default router;

@@ -60,4 +60,22 @@ router.post('/users/:uid/ingredients/:id/tags', async (req, res) => {
         res.status(500).json({ error: 'Failed to add ingredient tag' });
     }
 });
+// PATCH /api/users/:uid/ingredients/:id
+router.patch('/users/:uid/ingredients/:id', async (req, res) => {
+    try {
+        const name = req.body.name;
+        if (!name) {
+            return res.status(400).json({ error: 'Name is required' });
+        }
+        const ownership_result = await pool.query('SELECT id FROM ingredients WHERE id = $1 AND user_id = $2', [req.params.id, req.params.uid]);
+        if (ownership_result.rows.length === 0) {
+            return res.status(403).json({ error: 'Forbidden - user must own the ingredient' });
+        }
+        const result = await pool.query('UPDATE ingredients SET name = $1 WHERE id = $2 RETURNING *', [name, req.params.id]);
+        res.json({ message: 'Ingredient updated successfully', ingredient: result.rows[0] });
+    } catch (err) {
+        console.error('Error updating ingredient:', err);
+        res.status(500).json({ error: 'Failed to update ingredient' });
+    }
+});
 export default router;

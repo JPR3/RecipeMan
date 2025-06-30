@@ -29,5 +29,22 @@ router.post('/users/:uid/tags', async (req, res) => {
         res.status(500).json({ error: 'Failed to create tag' });
     }
 });
-
+// PATCH /api/users/:uid/tags/:id
+router.patch('/users/:uid/tags/:id', async (req, res) => {
+    try {
+        const description = req.body.description;
+        if (!description) {
+            return res.status(400).json({ error: 'Description is required' });
+        }
+        const ownership_result = await pool.query('SELECT id FROM tags WHERE id = $1 AND user_id = $2', [req.params.id, req.params.uid]);
+        if (ownership_result.rows.length === 0) {
+            return res.status(403).json({ error: 'Forbidden - user must own the tag' });
+        }
+        const result = await pool.query('UPDATE tags SET description = $1 WHERE id = $2 RETURNING *', [description, req.params.id]);
+        res.json({ message: 'Tag updated successfully', tag: result.rows[0] });
+    } catch (err) {
+        console.error('Error updating tag:', err);
+        res.status(500).json({ error: 'Failed to update tag' });
+    }
+});
 export default router;
