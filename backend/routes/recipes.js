@@ -16,7 +16,15 @@ router.get('/users/:uid/recipes', async (req, res) => {
 router.get('/users/:uid/recipes/:id', async (req, res) => {
     try {
         const recipe_result = await pool.query('SELECT title, cook_time, instructions, notes, created_at, recipes.id FROM recipes LEFT JOIN recipe_tags ON recipes.id = recipe_tags.recipe_id WHERE recipes.id = $1 AND recipes.user_id = $2', [req.params.id, req.params.uid]);
-        const ingredients_result = await pool.query('SELECT name, measurement_qty, unit, ingredients.id AS ingredient_id FROM recipe_ingredients LEFT JOIN ingredients ON ingredients.id = recipe_ingredients.ingredient_id LEFT JOIN measurement_units ON recipe_ingredients.measurement_unit_id = measurement_units.id WHERE recipe_id = $1', [req.params.id]);
+        const ing_sql = `SELECT name, measurement_qty, unit, ingredients.id AS ingredient_id, array_agg(DISTINCT tags.description) AS tags
+                        FROM recipe_ingredients 
+                        LEFT JOIN ingredients ON ingredients.id = recipe_ingredients.ingredient_id 
+                        LEFT JOIN measurement_units ON recipe_ingredients.measurement_unit_id = measurement_units.id
+                        LEFT JOIN ingredient_tags ON recipe_ingredients.ingredient_id = ingredient_tags.ingredient_id AND ingredient_tags.user_id = $2
+                        LEFT JOIN tags ON ingredient_tags.tag_id = tags.id
+                        WHERE recipe_id = $1 AND ingredient_tags.user_id = $2
+                        GROUP BY ingredients.name, measurement_qty, ingredients.id, unit;`
+        const ingredients_result = await pool.query(ing_sql, [req.params.id, req.params.uid]);
         const tag_result = await pool.query('SELECT description FROM tags LEFT JOIN recipe_tags ON tags.id = recipe_tags.tag_id WHERE recipe_tags.recipe_id = $1', [req.params.id]);
         recipe_result.rows[0].ingredients = ingredients_result.rows;
         recipe_result.rows[0].tags = tag_result.rows;

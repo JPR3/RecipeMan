@@ -16,10 +16,13 @@ router.get('/users/:uid/lists', async (req, res) => {
 router.get('/users/:uid/lists/:id', async (req, res) => {
     try {
         const list_result = await pool.query('SELECT title, created_at FROM shopping_lists WHERE id = $1 AND user_id = $2', [req.params.id, req.params.uid]);
-        const ingredients_result = await pool.query(`WITH ing_table AS (SELECT list_ingredients.id AS ingredient_id, ingredients.name, list_ingredients.measurement_qty, measurement_units.unit
-            FROM list_ingredients INNER JOIN ingredients ON ingredients.id = list_ingredients.ingredient_id INNER JOIN measurement_units ON list_ingredients.measurement_unit_id = measurement_units.id WHERE list_ingredients.list_id =  $1)
-            SELECT ing_table.name, ing_table.measurement_qty, ing_table.unit, array_agg(tags.description) AS tags, ing_table.ingredient_id FROM ing_table LEFT JOIN list_tags ON list_tags.list_id = ing_table.ingredient_id LEFT JOIN tags ON list_tags.tag_id = tags.id
-            GROUP BY ing_table.name, ing_table.measurement_qty, ing_table.unit, ing_table.ingredient_id;`, [req.params.id]);
+        const ing_sql = `WITH ing_table AS (SELECT li.id AS ingredient_id, i.id AS base_ingredient_id, i.name, li.measurement_qty, mu.unit FROM list_ingredients li INNER JOIN ingredients i ON i.id = li.ingredient_id INNER JOIN measurement_units mu ON li.measurement_unit_id = mu.id WHERE li.list_id = $1),
+                    list_item_tags AS (SELECT lt.list_id AS ingredient_id, t.description FROM list_tags lt JOIN tags t ON t.id = lt.tag_id),
+                    ingredient_level_tags AS (SELECT it.ingredient_id AS base_ingredient_id, t.description FROM ingredient_tags it JOIN tags t ON t.id = it.tag_id WHERE it.user_id = $2)
+                    SELECT ing_table.name, ing_table.measurement_qty, ing_table.unit, array_agg(DISTINCT COALESCE(lit.description, ilt.description)) AS tags
+                    FROM ing_table LEFT JOIN list_item_tags lit ON lit.ingredient_id = ing_table.ingredient_id LEFT JOIN ingredient_level_tags ilt ON ilt.base_ingredient_id = ing_table.base_ingredient_id
+                    GROUP BY ing_table.name, ing_table.measurement_qty, ing_table.unit;`
+        const ingredients_result = await pool.query(ing_sql, [req.params.id, req.params.uid]);
         list_result.rows[0].ingredients = ingredients_result.rows;
         res.json(list_result.rows[0]);
     } catch (err) {

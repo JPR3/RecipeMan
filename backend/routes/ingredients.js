@@ -1,6 +1,6 @@
 import { Router } from 'express';
 const router = Router();
-import pool from '../db.js';
+import pool, { owns_ingredient, owns_tag } from '../db.js';
 // GET /api/users/:uid/ingredients
 router.get('/users/:uid/ingredients', async (req, res) => {
     try {
@@ -11,6 +11,17 @@ router.get('/users/:uid/ingredients', async (req, res) => {
         res.status(500).json({ error: 'Failed to fetch ingredients' });
     }
 });
+// GET /api/users/:uid/ingredients/:id/tags
+router.get('/users/:uid/ingredients/:id/tags', async (req, res) => {
+    try {
+        const result = await pool.query('SELECT t.id, t.description FROM tags t JOIN ingredient_tags it ON t.id = it.tag_id WHERE it.ingredient_id = $1 AND it.user_id = $2', [req.params.id, req.params.uid]);
+        res.json(result.rows);
+    } catch (err) {
+        console.error('Error fetching ingredient tags:', err);
+        res.status(500).json({ error: 'Failed to fetch ingredient tags' });
+    }
+});
+
 // POST /api/users/:uid/ingredients
 router.post('/users/:uid/ingredients', async (req, res) => {
     try {
@@ -29,5 +40,24 @@ router.post('/users/:uid/ingredients', async (req, res) => {
         res.status(500).json({ error: 'Failed to create ingredient' });
     }
 });
-
+// POST /api/users/:uid/ingredients/:id/tags
+router.post('/users/:uid/ingredients/:id/tags', async (req, res) => {
+    try {
+        const tag_id = req.body.tag_id;
+        if (!tag_id) {
+            return res.status(400).json({ error: 'Tag ID is required' });
+        }
+        if (!await owns_tag(req.params.uid, tag_id)) {
+            return res.status(403).json({ error: 'Forbidden - user must own the tag' });
+        }
+        if (!await owns_ingredient(req.params.uid, req.params.id)) {
+            return res.status(403).json({ error: 'Forbidden - user must own the ingredient' });
+        }
+        const result = await pool.query('INSERT INTO ingredient_tags (ingredient_id, tag_id, user_id) VALUES ($1, $2, $3) RETURNING *', [req.params.id, tag_id, req.params.uid]);
+        res.status(201).json({ message: 'Tag added successfully', ingredient_tag: result.rows[0] });
+    } catch (err) {
+        console.error('Error inserting ingredient tag:', err);
+        res.status(500).json({ error: 'Failed to add ingredient tag' });
+    }
+});
 export default router;
