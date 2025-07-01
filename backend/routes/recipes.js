@@ -138,4 +138,47 @@ router.patch('/users/:uid/recipes/:id/recipe_ingredients/:ri_id', async (req, re
         res.status(500).json({ error: 'Failed to update recipe ingredient' });
     }
 });
+// DELETE /api/users/:uid/recipes/:id
+router.delete('/users/:uid/recipes/:id', async (req, res) => {
+    try {
+        if (!await owns_recipe(req.params.uid, req.params.id)) {
+            return res.status(403).json({ error: 'Forbidden - user must own the recipe' });
+        }
+        await pool.query('DELETE FROM recipes WHERE id = $1', [req.params.id]);
+        res.json({ message: 'Recipe deleted successfully' });
+    } catch (err) {
+        console.error('Error deleting recipe:', err);
+        res.status(500).json({ error: 'Failed to delete recipe' });
+    }
+});
+// DELETE /api/users/:uid/recipes/:id/recipe_ingredients/:ri_id
+router.delete('/users/:uid/recipes/:id/recipe_ingredients/:ri_id', async (req, res) => {
+    try {
+        if (!await owns_recipe(req.params.uid, req.params.id)) {
+            return res.status(403).json({ error: 'Forbidden - user must own the recipe' });
+        }
+        await pool.query('DELETE FROM recipe_ingredients WHERE id = $1', [req.params.ri_id]);
+        res.json({ message: 'Recipe ingredient deleted successfully' });
+    } catch (err) {
+        console.error('Error deleting recipe ingredient:', err);
+        res.status(500).json({ error: 'Failed to delete recipe ingredient' });
+    }
+});
+// DELETE /api/users/:uid/recipes/:id/tags
+router.delete('/users/:uid/recipes/:id/tags', async (req, res) => {
+    try {
+        const tag_id = req.body.tag_id;
+        if (!tag_id) {
+            return res.status(400).json({ error: 'Tag ID is required' });
+        }
+        if (!await owns_recipe(req.params.uid, req.params.id)) {
+            return res.status(403).json({ error: 'Forbidden - user must own the recipe' });
+        }
+        await pool.query('DELETE FROM recipe_tags WHERE recipe_id = $1 AND tag_id = $2', [req.params.id, tag_id]);
+        res.json({ message: 'Recipe tags deleted successfully' });
+    } catch (err) {
+        console.error('Error deleting recipe tags:', err);
+        res.status(500).json({ error: 'Failed to delete recipe tags' });
+    }
+});
 export default router;

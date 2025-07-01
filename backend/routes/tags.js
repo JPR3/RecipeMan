@@ -47,4 +47,18 @@ router.patch('/users/:uid/tags/:id', async (req, res) => {
         res.status(500).json({ error: 'Failed to update tag' });
     }
 });
+// DELETE /api/users/:uid/tags/:id
+router.delete('/users/:uid/tags/:id', async (req, res) => {
+    try {
+        const ownership_result = await pool.query('SELECT id FROM tags WHERE id = $1 AND user_id = $2', [req.params.id, req.params.uid]);
+        if (ownership_result.rows.length === 0) {
+            return res.status(403).json({ error: 'Forbidden - user must own the tag' });
+        }
+        await pool.query('DELETE FROM tags WHERE id = $1', [req.params.id]);
+        res.json({ message: 'Tag deleted successfully' });
+    } catch (err) {
+        console.error('Error deleting tag:', err);
+        res.status(500).json({ error: 'Failed to delete tag' });
+    }
+});
 export default router;

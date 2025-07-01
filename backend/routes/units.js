@@ -47,4 +47,18 @@ router.patch('/users/:uid/units/:id', async (req, res) => {
         res.status(500).json({ error: 'Failed to update unit' });
     }
 });
+// DELETE /api/users/:uid/units/:id
+router.delete('/users/:uid/units/:id', async (req, res) => {
+    try {
+        const ownership_result = await pool.query('SELECT id FROM measurement_units WHERE id = $1 AND user_id = $2', [req.params.id, req.params.uid]);
+        if (ownership_result.rows.length === 0) {
+            return res.status(403).json({ error: 'Forbidden - user must own the unit' });
+        }
+        await pool.query('DELETE FROM measurement_units WHERE id = $1', [req.params.id]);
+        res.json({ message: 'Unit deleted successfully' });
+    } catch (err) {
+        console.error('Error deleting unit:', err);
+        res.status(500).json({ error: 'Failed to delete unit' });
+    }
+});
 export default router;

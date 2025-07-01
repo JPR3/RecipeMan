@@ -78,4 +78,38 @@ router.patch('/users/:uid/ingredients/:id', async (req, res) => {
         res.status(500).json({ error: 'Failed to update ingredient' });
     }
 });
+// DELETE /api/users/:uid/ingredients/:id
+router.delete('/users/:uid/ingredients/:id', async (req, res) => {
+    try {
+        const ownership_result = await pool.query('SELECT id FROM ingredients WHERE id = $1 AND user_id = $2', [req.params.id, req.params.uid]);
+        if (ownership_result.rows.length === 0) {
+            return res.status(403).json({ error: 'Forbidden - user must own the ingredient' });
+        }
+        await pool.query('DELETE FROM ingredients WHERE id = $1', [req.params.id]);
+        res.json({ message: 'Ingredient deleted successfully' });
+    } catch (err) {
+        console.error('Error deleting ingredient:', err);
+        res.status(500).json({ error: 'Failed to delete ingredient' });
+    }
+});
+// DELETE /api/users/:uid/ingredients/:id/tags
+router.delete('/users/:uid/ingredients/:id/tags', async (req, res) => {
+    try {
+        const tag_id = req.body.tag_id;
+        if (!tag_id) {
+            return res.status(400).json({ error: 'Tag ID is required' });
+        }
+        if (!await owns_tag(req.params.uid, tag_id)) {
+            return res.status(403).json({ error: 'Forbidden - user must own the tag' });
+        }
+        if (!await owns_ingredient(req.params.uid, req.params.id)) {
+            return res.status(403).json({ error: 'Forbidden - user must own the ingredient' });
+        }
+        await pool.query('DELETE FROM ingredient_tags WHERE ingredient_id = $1 AND tag_id = $2 AND user_id = $3', [req.params.id, tag_id, req.params.uid]);
+        res.json({ message: 'Tag removed successfully from ingredient' });
+    } catch (err) {
+        console.error('Error deleting ingredient tag:', err);
+        res.status(500).json({ error: 'Failed to remove ingredient tag' });
+    }
+});
 export default router;

@@ -139,4 +139,57 @@ router.patch('/users/:uid/lists/:list_id/list_ingredients/:li_id', async (req, r
         res.status(500).json({ error: 'Failed to update list ingredient' });
     }
 });
+//DELETE /api/users/:uid/lists/:id
+router.delete('/users/:uid/lists/:id', async (req, res) => {
+    try {
+        if (!await owns_list(req.params.uid, req.params.id)) {
+            return res.status(403).json({ error: 'Forbidden - user must own the shopping list' });
+        }
+        await pool.query('DELETE FROM shopping_lists WHERE id = $1', [req.params.id]);
+        res.json({ message: 'Shopping list deleted successfully' });
+    } catch (err) {
+        console.error('Error deleting shopping list:', err);
+        res.status(500).json({ error: 'Failed to delete shopping list' });
+    }
+});
+//DELETE /api/users/:uid/lists/:list_id/list_ingredients/:li_id
+router.delete('/users/:uid/lists/:list_id/list_ingredients/:li_id', async (req, res) => {
+    try {
+        if (!await owns_list(req.params.uid, req.params.list_id)) {
+            return res.status(403).json({ error: 'Forbidden - user must own the shopping list' });
+        }
+        if (!await list_owns_ingredient(req.params.list_id, req.params.li_id)) {
+            return res.status(403).json({ error: 'Forbidden - ingredient must be part of the shopping list' });
+        }
+        await pool.query('DELETE FROM list_ingredients WHERE id = $1', [req.params.li_id]);
+        res.json({ message: 'List ingredient deleted successfully' });
+    } catch (err) {
+        console.error('Error deleting list ingredient:', err);
+        res.status(500).json({ error: 'Failed to delete list ingredient' });
+    }
+});
+//DELETE /api/users/:uid/lists/:list_id/list_ingredients/:li_id/tags
+router.delete('/users/:uid/lists/:list_id/list_ingredients/:li_id/tags', async (req, res) => {
+    try {
+        if (!await owns_list(req.params.uid, req.params.list_id)) {
+            return res.status(403).json({ error: 'Forbidden - user must own the shopping list' });
+        }
+        const list_ingredient_id = req.params.li_id;
+        const tag_id = req.body.tag_id;
+        if (!tag_id) {
+            return res.status(400).json({ error: 'Tag ID is required' });
+        }
+        if (!await owns_tag(req.params.uid, tag_id)) {
+            return res.status(403).json({ error: 'Forbidden - user must own the tag' });
+        }
+        if (!await list_owns_ingredient(req.params.list_id, list_ingredient_id)) {
+            return res.status(403).json({ error: 'Forbidden - tag must be associated with an ingredient in the list' });
+        }
+        await pool.query('DELETE FROM list_tags WHERE list_id = $1 AND tag_id = $2', [list_ingredient_id, tag_id]);
+        res.json({ message: 'Tag removed successfully' });
+    } catch (err) {
+        console.error('Error deleting list tag:', err);
+        res.status(500).json({ error: 'Failed to delete list tag' });
+    }
+});
 export default router;
