@@ -14,14 +14,18 @@ const app = express()
 const port = process.env.PORT || 3000
 
 // Middleware setup
-app.use(cors())
+app.use(cors({
+    origin: 'http://localhost:5173',
+    credentials: true,
+}))
 app.use(json())
-app.use(verifySupabaseToken)
 app.use(
     urlencoded({
         extended: true,
     })
 )
+app.use(verifySupabaseToken)
+
 
 app.use('/api', usersRoutes)
 app.use('/api', recipesRoutes)
