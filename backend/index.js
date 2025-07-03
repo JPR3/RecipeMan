@@ -2,6 +2,7 @@ import express from 'express';
 import pkg from 'body-parser';
 const { json, urlencoded } = pkg;
 import cors from 'cors';
+import { verifySupabaseToken } from './auth.js';
 import usersRoutes from './routes/users.js';
 import recipesRoutes from './routes/recipes.js';
 import listsRoutes from './routes/lists.js';
@@ -15,6 +16,7 @@ const port = process.env.PORT || 3000
 // Middleware setup
 app.use(cors())
 app.use(json())
+app.use(verifySupabaseToken)
 app.use(
     urlencoded({
         extended: true,
