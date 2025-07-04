@@ -1,13 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, use } from 'react';
 import supabase from "../components/SupabaseClient.jsx";
 import { useNavigate, Link } from 'react-router-dom';
+import { useAuth } from '../AuthProvider.jsx';
 const SignIn = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState(null);
-    const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
+
         e.preventDefault();
         if (!email || !password) {
             return;
@@ -21,7 +22,6 @@ const SignIn = () => {
             setError(error.message);
         } else {
             setError(null);
-            navigate('/')
         }
     }
 

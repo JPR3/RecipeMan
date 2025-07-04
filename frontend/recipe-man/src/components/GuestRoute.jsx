@@ -1,17 +1,19 @@
-import { Navigate } from 'react-router-dom'
+import { Navigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../AuthProvider'
 
-const ProtectedRoute = ({ children }) => {
+const GuestRoute = ({ children }) => {
     const { user, loading } = useAuth()
+    const location = useLocation();
+    const from = location.state?.from?.pathname || '/';
     if (loading) {
         return <div className="text-white p-4">Loading...</div>
     }
 
-    if (user) {
-        return <Navigate to="/" replace />
+    else if (user) {
+        return <Navigate to={from} replace />
     }
 
     return children
 }
 
-export default ProtectedRoute
+export default GuestRoute
