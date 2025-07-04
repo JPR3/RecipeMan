@@ -10,6 +10,7 @@ import Home from './pages/Home';
 import SignIn from './pages/SignIn';
 import SignUp from './pages/SignUp';
 import Recipes from './pages/Recipes';
+import Profile from './pages/Profile.jsx';
 
 
 
@@ -36,6 +37,7 @@ export default function App() {
           <Route path="/signin" element={<GuestRoute session={session}><SignIn /></GuestRoute>} />
           <Route path="/signup" element={<GuestRoute session={session}><SignUp /></GuestRoute>} />
           <Route path="/recipes" element={<ProtectedRoute session={session}><Recipes /></ProtectedRoute>} />
+          <Route path="/profile" element={<ProtectedRoute session={session}><Profile /></ProtectedRoute>} />
         </Routes>
 
       </div>
