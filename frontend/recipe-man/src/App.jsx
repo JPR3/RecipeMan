@@ -4,6 +4,7 @@ import supabase from "./components/SupabaseClient.jsx";
 import { Auth } from "@supabase/auth-ui-react";
 import { ThemeSupa } from "@supabase/auth-ui-shared";
 import ProtectedRoute from './components/ProtectedRoute';
+import GuestRoute from './components/GuestRoute';
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import SignIn from './pages/SignIn';
@@ -32,13 +33,9 @@ export default function App() {
       <div className="pt-20 w-full flex justify-center">
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/signin" element={<SignIn />} />
-          <Route path="/signup" element={<SignUp />} />
-          <Route path="/recipes" element={
-            <ProtectedRoute session={session}>
-              <Recipes />
-            </ProtectedRoute>
-          } />
+          <Route path="/signin" element={<GuestRoute session={session}><SignIn /></GuestRoute>} />
+          <Route path="/signup" element={<GuestRoute session={session}><SignUp /></GuestRoute>} />
+          <Route path="/recipes" element={<ProtectedRoute session={session}><Recipes /></ProtectedRoute>} />
         </Routes>
 
       </div>
