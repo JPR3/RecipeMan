@@ -6,7 +6,7 @@ const GuestRoute = ({ children }) => {
     const location = useLocation();
     const from = location.state?.from?.pathname || '/';
     if (loading) {
-        return <div className="text-white p-4">Loading...</div>
+        return <div className="text-content p-4">Loading...</div>
     }
 
     else if (user) {
