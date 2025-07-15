@@ -39,7 +39,7 @@ const Recipes = () => {
             <h1>Recipes Page</h1>
             <h2>Welcome, {username}</h2>
             <QueryClientProvider client={queryClient}>
-                <div className="w-full flex flex-col gap-4">
+                <div className="w-full flex flex-col gap-4 items-center">
                     {recipeIds.map((vals) => (
                         <RecipeDropdown key={vals.id} recipeName={vals.title} recipeTags={vals.tags} recipeId={vals.id} />
                     ))}
