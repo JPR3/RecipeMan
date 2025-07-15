@@ -5,7 +5,11 @@ import pool, { owns_ingredient, owns_recipe, owns_tag, owns_unit } from '../db.j
 // GET /api/users/recipes
 router.get('/users/:uid/recipes', async (req, res) => {
     try {
-        const result = await pool.query('SELECT title, created_at, id FROM recipes WHERE user_id = $1', [req.params.uid]);
+        const result = await pool.query(`SELECT title, created_at, recipes.id, array_agg(DISTINCT tags.description) AS tags FROM recipes 
+            LEFT JOIN recipe_tags ON recipes.id = recipe_tags.recipe_id
+            LEFT JOIN tags ON tags.id = recipe_tags.tag_id
+            WHERE recipes.user_id = $1
+            GROUP BY title, created_at, recipes.id`, [req.params.uid]);
         res.json(result.rows);
     } catch (err) {
         console.error('Error fetching recipes:', err);
