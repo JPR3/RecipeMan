@@ -22,7 +22,7 @@ router.get('/users/:uid/recipes/:id', async (req, res) => {
                         LEFT JOIN measurement_units ON recipe_ingredients.measurement_unit_id = measurement_units.id
                         LEFT JOIN ingredient_tags ON recipe_ingredients.ingredient_id = ingredient_tags.ingredient_id AND ingredient_tags.user_id = $2
                         LEFT JOIN tags ON ingredient_tags.tag_id = tags.id
-                        WHERE recipe_id = $1 AND ingredient_tags.user_id = $2
+                        WHERE recipe_id = $1 AND (ingredient_tags.user_id = $2 OR ingredient_tags.user_id IS NULL)
                         GROUP BY ingredients.name, measurement_qty, ingredients.id, unit;`
         const ingredients_result = await pool.query(ing_sql, [req.params.id, req.params.uid]);
         const tag_result = await pool.query('SELECT description FROM tags LEFT JOIN recipe_tags ON tags.id = recipe_tags.tag_id WHERE recipe_tags.recipe_id = $1', [req.params.id]);
