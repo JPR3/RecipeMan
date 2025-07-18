@@ -63,7 +63,9 @@ const RecipeDropdown = ({ recipeName, recipeTags, recipeId }) => {
                         </div>
                     </div>
                     <div className="flex gap-4 justify-center w-full">
-                        <p className="text-content">Cook Time: {data.cook_time}</p>
+                        <p className="text-content">
+                            Cook Time: {(data.cook_time.hours > 0 ? data.cook_time.hours + (data.cook_time.hours > 1 ? " hours" : " hour") + (data.cook_time.minutes > 0 ? ", " : " ") : "") + (data.cook_time.minutes > 0 ? + data.cook_time.minutes + (data.cook_time.minutes > 1 ? " minutes " : " minute ") : "")}
+                        </p>
                         <p className="text-content">|</p>
                         <p className="text-content">Edit</p>
                         <p className="text-content">|</p>
