@@ -1,5 +1,6 @@
 import React, { useState, useRef } from "react";
 import Modal from "../components/Modal";
+import SearchableDropdown from "./SearchableDropdown";
 
 const NewRecipeModal = ({ openModal, closeModal }) => {
     const ref = useRef()
@@ -72,27 +73,17 @@ const NewRecipeModal = ({ openModal, closeModal }) => {
                 <p className="text-xl text-content">Ingredients</p>
                 {ingredients.map((ingredient, index) => {
                     return (
-                        <div key={index} className="flex gap-2 items-center pb-1">
+                        <div key={index} className="flex gap-2 items-top pb-1">
                             <input
                                 type="number"
                                 id={"qty" + index}
                                 name={"qty" + index}
                                 placeholder="0"
-                                className="border border-border bg-fields text-content w-8 hover:w-10 focus:w-10 rounded-md"
+                                className="border border-border bg-fields text-content w-8 hover:w-10 focus:w-10 rounded-md h-6.5"
                                 onChange={(e) => handle(e.target.value, "Q", index)}
                             />
-                            <input
-                                id={"unit" + index}
-                                name={"unit" + index}
-                                className="border border-border bg-fields text-content w-20 rounded-md"
-                                onChange={(e) => handle(e.target.value, "U", index)}
-                            />
-                            <input
-                                id={"name" + index}
-                                name={"name" + index}
-                                className="border border-border bg-fields text-content w-20 rounded-md"
-                                onChange={(e) => handle(e.target.value, "N", index)}
-                            />
+                            <SearchableDropdown type="unit" apiPath="" index={index} onChangeEvent={(val) => handle(val, "U", index)} fieldValue={ingredients[index].ingUnit}></SearchableDropdown>
+                            <SearchableDropdown type="name" apiPath="" index={index} onChangeEvent={(val) => handle(val, "N", index)} fieldValue={ingredients[index].ingName}></SearchableDropdown>
                         </div>
                     )
                 })}
@@ -115,15 +106,18 @@ const NewRecipeModal = ({ openModal, closeModal }) => {
                     onChange={(e) => setNotes(e.target.value)}
                 />
                 <button
+                    type="button"
                     disabled={!isValid}
                     className={`w-full font-semibold py-2 px-4 rounded-md ${isValid
                         ? 'bg-primary hover:bg-primary-hv text-content'
                         : 'bg-button text-content cursor-not-allowed'
                         }`}
+                    onClick={(e) => console.log(ingredients)}
                 >
                     Create
                 </button>
             </form>
+
         </Modal>
     );
 
