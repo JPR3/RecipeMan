@@ -75,7 +75,25 @@ const NewRecipeModal = ({ openModal, closeModal }) => {
                 instructions: instructions,
                 notes: notes
             })
-        })
+        }).then(response => response.json()).then(data => {
+            const recipe_id = data.recipe.id
+            ingredients.map((ing, index) => {
+                fetch(`http://localhost:3000/api/users/${uid}/recipes/${recipe_id}/recipe_ingredients`, {
+                    method: 'POST',
+                    headers: {
+                        Accept: 'application/json',
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${accessToken}`
+                    },
+
+                    body: JSON.stringify({
+                        ingredient_id: ing.nameID,
+                        qty: ing.ingQty,
+                        unit_id: ing.unitID
+                    })
+                })
+            })
+        });
     }
 
     const isValid = title && cookHrs && cookMins && instructions && isIngValid
