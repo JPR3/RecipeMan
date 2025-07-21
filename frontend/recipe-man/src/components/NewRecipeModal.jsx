@@ -46,7 +46,7 @@ const NewRecipeModal = ({ openModal, closeModal }) => {
                     name="title"
                     placeholder="Recipe Name"
                     type="text"
-                    className="border border-border bg-fields text-content p-2 w-full rounded-md mb-2"
+                    className="border border-border bg-fields text-content p-2 w-full rounded-md mb-2 focus:border-2"
                     onChange={(e) => setTitle(e.target.value)}
                 />
                 <p className="text-xl text-content">Cook Time</p>
@@ -56,7 +56,7 @@ const NewRecipeModal = ({ openModal, closeModal }) => {
                         id="cookHrs"
                         name="cookHrs"
                         type="number"
-                        className="border border-border bg-fields text-content p-2 w-12 hover:w-15 focus:w-15 rounded-md"
+                        className="border border-border bg-fields text-content p-2 w-12 hover:w-15 focus:w-15 rounded-md focus:border-2"
                         onChange={(e) => setCookHrs(e.target.value)}
                     />
                     <p>Hours</p>
@@ -65,7 +65,7 @@ const NewRecipeModal = ({ openModal, closeModal }) => {
                         id="cookMins"
                         name="cookMins"
                         type="number"
-                        className="border border-border bg-fields text-content p-2 w-12 hover:w-15 focus:w-15 rounded-md"
+                        className="border border-border bg-fields text-content p-2 w-12 hover:w-15 focus:w-15 rounded-md focus:border-2"
                         onChange={(e) => setCookMins(e.target.value)}
                     />
                     <p>Minutes</p>
@@ -79,11 +79,11 @@ const NewRecipeModal = ({ openModal, closeModal }) => {
                                 id={"qty" + index}
                                 name={"qty" + index}
                                 placeholder="0"
-                                className="border border-border bg-fields text-content w-8 hover:w-10 focus:w-10 rounded-md h-6.5"
+                                className="border border-border bg-fields text-content w-10 rounded-md h-6.5 focus:border-2"
                                 onChange={(e) => handle(e.target.value, "Q", index)}
                             />
-                            <SearchableDropdown type="unit" apiPath="" index={index} onChangeEvent={(val) => handle(val, "U", index)} fieldValue={ingredients[index].ingUnit}></SearchableDropdown>
-                            <SearchableDropdown type="name" apiPath="" index={index} onChangeEvent={(val) => handle(val, "N", index)} fieldValue={ingredients[index].ingName}></SearchableDropdown>
+                            <SearchableDropdown ingredientPart="unit" apiPath="units" index={index} onChangeEvent={(val) => handle(val, "U", index)} fieldValue={ingredients[index].ingUnit}></SearchableDropdown>
+                            <SearchableDropdown ingredientPart="name" apiPath="ingredients" index={index} onChangeEvent={(val) => handle(val, "N", index)} fieldValue={ingredients[index].ingName}></SearchableDropdown>
                         </div>
                     )
                 })}
@@ -94,7 +94,7 @@ const NewRecipeModal = ({ openModal, closeModal }) => {
                     id="instructions"
                     name="instructions"
                     placeholder="Instructions"
-                    className="border border-border bg-fields text-content p-2 w-full rounded-md mb-2"
+                    className="border border-border bg-fields text-content p-2 w-full rounded-md mb-2 focus:border-2"
                     onChange={(e) => setInstructions(e.target.value)}
                 />
                 <label className="text-xl text-content" htmlFor="notes">Notes</label>
@@ -102,7 +102,7 @@ const NewRecipeModal = ({ openModal, closeModal }) => {
                     id="notes"
                     name="notes"
                     placeholder="(Optional)"
-                    className="border border-border bg-fields text-content p-2 w-full rounded-md mb-4"
+                    className="border border-border bg-fields text-content p-2 w-full rounded-md mb-4 focus:border-2"
                     onChange={(e) => setNotes(e.target.value)}
                 />
                 <button
