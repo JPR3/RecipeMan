@@ -1,6 +1,7 @@
 import React, { useState, useRef } from "react";
 import Modal from "../components/Modal";
 import SearchableDropdown from "./SearchableDropdown";
+import { useAuth } from "../AuthProvider";
 
 const NewRecipeModal = ({ openModal, closeModal }) => {
     const ref = useRef()
@@ -13,6 +14,10 @@ const NewRecipeModal = ({ openModal, closeModal }) => {
     }])
     const [notes, setNotes] = useState("")
     const [isIngValid, setIsIngValid] = useState(false)
+    const { session, user, loading } = useAuth();
+    if (loading) return <div>Loading...</div>;
+    const accessToken = session?.access_token;
+    const uid = user?.id;
     const handle = (e, type, index, id) => {
         let localIng = [...ingredients]
         localIng[index].ingQty = (type === "Q" ? e : ingredients[index].ingQty)
@@ -23,7 +28,7 @@ const NewRecipeModal = ({ openModal, closeModal }) => {
             if (id === "0") {
                 console.log("Generate new unit!")
                 //Create a new unit here
-                localIng[index].unitID = "0"
+                localIng[index].unitID = "-1"
             } else {
                 localIng[index].unitID = id
             }
@@ -32,14 +37,14 @@ const NewRecipeModal = ({ openModal, closeModal }) => {
             if (id === "0") {
                 console.log("Generate new name!")
                 //Create a new raw ingredient here
-                localIng[index].unitID = "0"
+                localIng[index].unitID = "-1"
             } else {
                 localIng[index].nameID = id
             }
         }
         let localValid = true
         localIng.forEach(function (data, _index) {
-            localValid = localValid && (data.ingQty !== 0 && data.ingUnit !== "" && data.ingName != "")
+            localValid = localValid && (data.ingQty > 0 && data.ingUnit !== "" && data.ingName != "" && data.nameID != "-1" && data.unitID != "-1")
         })
         setIsIngValid(localValid)
         setIngredients(localIng)
@@ -50,13 +55,38 @@ const NewRecipeModal = ({ openModal, closeModal }) => {
         setIsIngValid(false)
         setIngredients([...ingredients, { ingQty: 0, ingUnit: "", unitID: "-1", ingName: "", nameID: "-1" }])
     }
+
+    const createRecipe = () => {
+        console.log("Title: " + title)
+        console.log("Cook Time: " + `${cookHrs}:${cookMins}:00`)
+        console.log("Instructions: " + instructions)
+        console.log("Notes: " + notes)
+        fetch(`http://localhost:3000/api/users/${uid}/recipes`, {
+            method: 'POST',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${accessToken}`
+            },
+
+            body: JSON.stringify({
+                title: title,
+                cook_time: `${cookHrs}:${cookMins}:00`,
+                instructions: instructions,
+                notes: notes
+            })
+        })
+    }
+
     const isValid = title && cookHrs && cookMins && instructions && isIngValid
+    const closeRecipeModal = () => {
+        closeModal(); ref.current?.reset(); setIngredients([{
+            ingQty: 0, ingUnit: "", unitID: "-1", ingName: "", nameID: "-1"
+        }])
+    };
+
     return (
-        <Modal openModal={openModal} closeModal={() => {
-            closeModal(); ref.current?.reset(); setIngredients([{
-                ingQty: 0, ingUnit: "", unitID: "-1", ingName: "", nameID: "-1"
-            }])
-        }}>
+        <Modal openModal={openModal} closeModal={() => closeRecipeModal()}>
             <h1 className="flex justify-center text-2xl font-semibold">Create New Recipe</h1>
             <form ref={ref}>
                 <label className="text-xl text-content" htmlFor="title">Name</label>
@@ -126,12 +156,12 @@ const NewRecipeModal = ({ openModal, closeModal }) => {
                 />
                 <button
                     type="button"
-                    // disabled={!isValid}
-                    className={`w-full font-semibold py-2 px-4 rounded-md ${true
+                    disabled={!isValid}
+                    className={`w-full font-semibold py-2 px-4 rounded-md ${isValid
                         ? 'bg-primary hover:bg-primary-hv text-content'
                         : 'bg-button text-content cursor-not-allowed'
                         }`}
-                    onClick={(e) => console.log(ingredients)}
+                    onClick={(e) => { createRecipe(); closeRecipeModal() }}
                 >
                     Create
                 </button>

@@ -7,8 +7,9 @@ const SearchableDropdown = ({ ingredientPart, apiPath, onChangeEvent, index, fie
     const [displayAdd, setDisplayAdd] = useState(true)
     const [isOpen, setIsOpen] = useState(false);
     const [ingredients, setIngredients] = useState([])
-    const { session, user, loading } = useAuth();
     const ref = useRef(null);
+    const { session, user, loading } = useAuth();
+
 
     if (loading) return <div>Loading...</div>;
 
