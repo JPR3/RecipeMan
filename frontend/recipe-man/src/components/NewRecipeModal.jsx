@@ -9,15 +9,34 @@ const NewRecipeModal = ({ openModal, closeModal }) => {
     const [cookMins, setCookMins] = useState(0)
     const [instructions, setInstructions] = useState("")
     const [ingredients, setIngredients] = useState([{
-        ingQty: 0, ingUnit: "", ingName: ""
+        ingQty: 0, ingUnit: "", unitID: "-1", ingName: "", nameID: "-1"
     }])
     const [notes, setNotes] = useState("")
     const [isIngValid, setIsIngValid] = useState(false)
-    const handle = (e, type, index) => {
+    const handle = (e, type, index, id) => {
         let localIng = [...ingredients]
         localIng[index].ingQty = (type === "Q" ? e : ingredients[index].ingQty)
         localIng[index].ingUnit = (type === "U" ? e : ingredients[index].ingUnit)
         localIng[index].ingName = (type === "N" ? e : ingredients[index].ingName)
+        if (type === "U") {
+            localIng[index].nameID = ingredients[index].nameID
+            if (id === "0") {
+                console.log("Generate new unit!")
+                //Create a new unit here
+                localIng[index].unitID = "0"
+            } else {
+                localIng[index].unitID = id
+            }
+        } else if (type === "N") {
+            localIng[index].unitID = ingredients[index].unitID
+            if (id === "0") {
+                console.log("Generate new name!")
+                //Create a new raw ingredient here
+                localIng[index].unitID = "0"
+            } else {
+                localIng[index].nameID = id
+            }
+        }
         let localValid = true
         localIng.forEach(function (data, _index) {
             localValid = localValid && (data.ingQty !== 0 && data.ingUnit !== "" && data.ingName != "")
@@ -29,13 +48,13 @@ const NewRecipeModal = ({ openModal, closeModal }) => {
     const handleAddIngredient = (e) => {
         e.preventDefault()
         setIsIngValid(false)
-        setIngredients([...ingredients, { ingQty: 0, ingUnit: "", ingName: "" }])
+        setIngredients([...ingredients, { ingQty: 0, ingUnit: "", unitID: "-1", ingName: "", nameID: "-1" }])
     }
     const isValid = title && cookHrs && cookMins && instructions && isIngValid
     return (
         <Modal openModal={openModal} closeModal={() => {
             closeModal(); ref.current?.reset(); setIngredients([{
-                ingQty: 0, ingUnit: "", ingName: ""
+                ingQty: 0, ingUnit: "", unitID: "-1", ingName: "", nameID: "-1"
             }])
         }}>
             <h1 className="flex justify-center text-2xl font-semibold">Create New Recipe</h1>
@@ -82,12 +101,12 @@ const NewRecipeModal = ({ openModal, closeModal }) => {
                                 className="border border-border bg-fields text-content w-10 rounded-md h-6.5 focus:border-2"
                                 onChange={(e) => handle(e.target.value, "Q", index)}
                             />
-                            <SearchableDropdown ingredientPart="unit" apiPath="units" index={index} onChangeEvent={(val) => handle(val, "U", index)} fieldValue={ingredients[index].ingUnit}></SearchableDropdown>
-                            <SearchableDropdown ingredientPart="name" apiPath="ingredients" index={index} onChangeEvent={(val) => handle(val, "N", index)} fieldValue={ingredients[index].ingName}></SearchableDropdown>
+                            <SearchableDropdown ingredientPart="Unit" apiPath="units" index={index} onChangeEvent={(val, id) => handle(val, "U", index, id)} fieldValue={ingredients[index].ingUnit}></SearchableDropdown>
+                            <SearchableDropdown ingredientPart="Name" apiPath="ingredients" index={index} onChangeEvent={(val, id) => handle(val, "N", index, id)} fieldValue={ingredients[index].ingName}></SearchableDropdown>
                         </div>
                     )
                 })}
-                <button className="cursor-pointer border border-border rounded-2xl bg-primary hover:bg-primary-hv px-2 " onClick={handleAddIngredient}>Add+</button>
+                <button type="button" className="cursor-pointer border border-border rounded-2xl bg-primary hover:bg-primary-hv px-2 " onClick={handleAddIngredient}>Add+</button>
                 <br />
                 <label className="text-xl text-content" htmlFor="instructions">Instructions</label>
                 <textarea
@@ -107,8 +126,8 @@ const NewRecipeModal = ({ openModal, closeModal }) => {
                 />
                 <button
                     type="button"
-                    disabled={!isValid}
-                    className={`w-full font-semibold py-2 px-4 rounded-md ${isValid
+                    // disabled={!isValid}
+                    className={`w-full font-semibold py-2 px-4 rounded-md ${true
                         ? 'bg-primary hover:bg-primary-hv text-content'
                         : 'bg-button text-content cursor-not-allowed'
                         }`}

@@ -3,6 +3,8 @@ import { useAuth } from '../AuthProvider';
 import { useRef } from 'react';
 
 const SearchableDropdown = ({ ingredientPart, apiPath, onChangeEvent, index, fieldValue }) => {
+    const [localValue, setLocalValue] = useState("")
+    const [displayAdd, setDisplayAdd] = useState(true)
     const [isOpen, setIsOpen] = useState(false);
     const [ingredients, setIngredients] = useState([])
     const { session, user, loading } = useAuth();
@@ -15,24 +17,38 @@ const SearchableDropdown = ({ ingredientPart, apiPath, onChangeEvent, index, fie
 
 
     React.useEffect(() => {
-        if (fieldValue.length >= 3) {
-            const url = `http://localhost:3000/api/users/${uid}/${apiPath}?` + new URLSearchParams({ name: fieldValue.toLowerCase() }).toString()
+        if (localValue.length >= 1) {
+            const url = `http://localhost:3000/api/users/${uid}/${apiPath}?` + new URLSearchParams({ name: localValue.toLowerCase().trim() }).toString()
             fetch(url, {
                 headers: {
                     Authorization: `Bearer ${accessToken}`
                 }
             }).then(response => response.json()).then(data => {
+                console.log(data)
                 setIngredients(data)
+                changeAddDisplay(localValue, data)
             });
         } else {
             setIngredients([])
+            setDisplayAdd(true)
         }
 
-    }, [fieldValue]);
+
+    }, [localValue]);
     const handleBlur = (event) => {
         if (!(event.relatedTarget && event.relatedTarget.id.startsWith("dropdown-selectable"))) {
             setIsOpen(false)
+            setLocalValue(fieldValue)
         }
+    }
+    const changeAddDisplay = (val, ingList) => {
+        var localDisplay = true
+        ingList.map((ingredient, index) => {
+            if (localDisplay && ingredient.name === val.toLowerCase().trim()) {
+                localDisplay = false;
+            }
+        })
+        setDisplayAdd(localDisplay)
     }
     const capitalizeEachWord = (str) => {
         // Convert the entire string to lowercase to handle cases where input might have mixed casing
@@ -54,28 +70,40 @@ const SearchableDropdown = ({ ingredientPart, apiPath, onChangeEvent, index, fie
                 id={ingredientPart + "_" + index}
                 name={ingredientPart + "_" + index}
                 ref={ref}
-                className={(isOpen && fieldValue != "" ? "rounded-t-md border-t-2 border-r-2 border-l-2 border-primary " : "rounded-md border border-border focus:border-2 ") + "  bg-fields text-content w-40 h-6.5"}
-                // This can be a string instead of e.target.value, to override with dropdown selection!
-                onChange={(e) => onChangeEvent(e.target.value)}
-                value={fieldValue}
-                placeholder='Search...'
-                onFocus={() => setIsOpen(true)}
+                className={(isOpen && localValue != "" ? "rounded-t-md border-t-2 border-r-2 border-l-2 border-primary " : "rounded-md border border-border focus:border-2 ") + " px-1 bg-fields text-content w-40 h-6.5"}
+                onChange={(e) => { setLocalValue(e.target.value); }}
+                value={isOpen ? localValue : fieldValue}
+                placeholder={ingredientPart + " (Search...)"}
+                onFocus={() => { setIsOpen(true) }}
                 onBlur={handleBlur}
             />
-            {/* <button type="button" onClick={(e) => onChangeEvent("pie")}>pie button</button> */}
-            {isOpen && fieldValue != "" && (
+            {isOpen && localValue != "" && (
                 <div>
                     <div className="overflow-y-auto max-h-26" onBlur={handleBlur}>
                         {ingredients.map((ingredient, index) => {
                             return (
-                                <p id={"dropdown-selectable-" + ingredient.name} onKeyDownCapture={(e) => { if (e.key === "Enter") { setIsOpen(false); onChangeEvent(ingredient.name) } }} onClick={(e) => { setIsOpen(false); onChangeEvent(ingredient.name) }} key={ingredient.name} tabIndex="0" className="border-r-2 border-l-2 border-primary bg-fields text-content w-40 h-6.5 hover:bg-button">{capitalizeEachWord(ingredient.name)}</p>
+                                <p
+                                    id={"dropdown-selectable-" + ingredient.name}
+                                    onKeyDownCapture={(e) => { if (e.key === "Enter") { setIsOpen(false); onChangeEvent(ingredient.name, ingredient.id) } }}
+                                    onClick={(e) => { setIsOpen(false); onChangeEvent(ingredient.name, ingredient.id) }}
+                                    key={ingredient.name}
+                                    tabIndex="0"
+                                    className="border-r-2 border-l-2 border-primary bg-fields text-content w-40 h-6.5 px-1 hover:bg-button"
+                                >
+                                    {capitalizeEachWord(ingredient.name)}
+                                </p>
                             )
                         })}
-
                     </div>
-
-                    <p id={"dropdown-selectable-add"} onKeyDownCapture={(e) => { if (e.key === "Enter") { setIsOpen(false); onChangeEvent("ADDTHIS") } }} onClick={(e) => { setIsOpen(false); onChangeEvent("ADDTHIS") }} tabIndex="0" className="border-r-2 border-l-2 border-b-2 border-primary bg-fields text-content w-40 rounded-b-md  hover:bg-button">Add "{fieldValue}"</p>
-
+                    <p
+                        id={"dropdown-selectable-add"}
+                        onKeyDownCapture={(e) => { if (e.key === "Enter") { setIsOpen(false); onChangeEvent(localValue, "0") } }}
+                        onClick={(e) => { setIsOpen(false); onChangeEvent(localValue, "0") }}
+                        tabIndex="0"
+                        className="border-r-2 border-l-2 border-b-2 border-primary bg-fields text-content w-40 rounded-b-md px-1 hover:bg-button"
+                    >
+                        {displayAdd && ("Add " + localValue)}
+                    </p>
                 </div>
 
             )}
