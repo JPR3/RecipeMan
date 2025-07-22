@@ -26,18 +26,42 @@ const NewRecipeModal = ({ openModal, closeModal }) => {
         if (type === "U") {
             localIng[index].nameID = ingredients[index].nameID
             if (id === "0") {
-                console.log("Generate new unit!")
                 //Create a new unit here
-                localIng[index].unitID = "-1"
+                fetch(`http://localhost:3000/api/users/${uid}/units`, {
+                    method: 'POST',
+                    headers: {
+                        Accept: 'application/json',
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${accessToken}`
+                    },
+
+                    body: JSON.stringify({
+                        unit: localIng[index].ingUnit
+                    })
+                }).then(response => response.json()).then(data => {
+                    localIng[index].unitID = data.unit.id
+                })
             } else {
                 localIng[index].unitID = id
             }
         } else if (type === "N") {
             localIng[index].unitID = ingredients[index].unitID
             if (id === "0") {
-                console.log("Generate new name!")
                 //Create a new raw ingredient here
-                localIng[index].unitID = "-1"
+                fetch(`http://localhost:3000/api/users/${uid}/ingredients`, {
+                    method: 'POST',
+                    headers: {
+                        Accept: 'application/json',
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${accessToken}`
+                    },
+
+                    body: JSON.stringify({
+                        name: localIng[index].ingName
+                    })
+                }).then(response => response.json()).then(data => {
+                    localIng[index].nameID = data.ingredient.id
+                })
             } else {
                 localIng[index].nameID = id
             }
