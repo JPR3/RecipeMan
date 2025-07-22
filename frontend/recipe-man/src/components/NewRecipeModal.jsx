@@ -76,7 +76,6 @@ const NewRecipeModal = ({ openModal, closeModal }) => {
         setIngredients(localIng)
     }
     const handleAddTag = (val, id) => {
-        let localId = "-1"
         if (id === "0") {
             fetch(`http://localhost:3000/api/users/${uid}/tags`, {
                 method: 'POST',
@@ -153,7 +152,7 @@ const NewRecipeModal = ({ openModal, closeModal }) => {
         });
     }
 
-    const isValid = (title !== "") && (cookHrs > 0) && (cookMins > 0) && (instructions !== "") && isIngValid
+    const isValid = (title !== "") && (cookHrs >= 0) && (cookMins >= 0) && (instructions !== "") && isIngValid
     const closeRecipeModal = () => {
         closeModal();
         ref.current?.reset();
@@ -165,7 +164,8 @@ const NewRecipeModal = ({ openModal, closeModal }) => {
         setIsIngValid(false);
         setIngredients([{
             ingQty: 0, ingUnit: "", unitID: "-1", ingName: "", nameID: "-1"
-        }])
+        }]);
+        setTags([]);
     };
 
     return (
@@ -240,15 +240,18 @@ const NewRecipeModal = ({ openModal, closeModal }) => {
                     className="border border-border bg-fields text-content p-2 w-full rounded-md mb-2 focus:border-2"
                     onChange={(e) => setNotes(e.target.value)}
                 />
-                <label className="text-xl text-content" htmlFor="tagDisplay">Tags</label>
-                <TagDisplay id="tagDisplay"
-                    tags={tags.map((val) => (val.name))}>
-                </TagDisplay>
+                <p className="text-xl text-content">Tags</p>
+                <TagDisplay
+                    id="tagDisplay"
+                    className="mb-2"
+                    tags={tags.map((val) => (val.name))}
+                    textSize={"text-sm"}
+                />
                 <SearchableDropdown ingredientPart="Tag" apiPath="tags" index="0" onChangeEvent={(val, id) => handleAddTag(val, id)} fieldValue={""}></SearchableDropdown>
                 <button
                     type="button"
                     disabled={!isValid}
-                    className={`w-full font-semibold py-2 px-4 rounded-md ${isValid
+                    className={`w-full font-semibold py-2 px-4 rounded-md mt-4 mb-2 ${isValid
                         ? 'bg-primary hover:bg-primary-hv text-content'
                         : 'bg-button text-content cursor-not-allowed'
                         }`}
@@ -260,7 +263,6 @@ const NewRecipeModal = ({ openModal, closeModal }) => {
                 </button>
 
             </form>
-            <button type="button" onClick={() => console.log(tags.map((val) => (val.name)))}>show tags</button>
         </Modal>
     );
 

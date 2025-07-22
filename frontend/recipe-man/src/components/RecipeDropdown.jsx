@@ -5,10 +5,6 @@ import { useQuery } from '@tanstack/react-query';
 
 const RecipeDropdown = ({ recipeName, recipeTags, recipeId }) => {
     const [isOpen, setIsOpen] = useState(false);
-    const [recipeIngredients, setRecipeIngredients] = useState([]);
-    const [recipeCookTime, setRecipeCookTime] = useState('');
-    const [recipeInstructions, setRecipeInstructions] = useState([]);
-    const [recipeNotes, setRecipeNotes] = useState('');
     const toggleDropdown = () => {
         setIsOpen(!isOpen);
     };
@@ -30,11 +26,11 @@ const RecipeDropdown = ({ recipeName, recipeTags, recipeId }) => {
         cacheTime: Infinity,
     });
     const closedDiv = (<div onClick={toggleDropdown} className={(isOpen ? "border-t border-r border-l rounded-t-2xl " : "border rounded-2xl ") + "cursor-pointer w-full bg-surface border-border text-content shadow-lg p-4 pl-2 flex"}>
-        <p className={"text-content " + (isOpen ? "font-bold text-xl absolute left-1/2 transform -translate-y-1/4 -translate-x-1/2 pointer-events-none" : "relative ml-2 text-lg")}>
+        <p className={"text-content min-w-1/8 " + (isOpen ? "font-bold text-xl absolute left-1/2 transform -translate-y-1/4 -translate-x-1/2 pointer-events-none" : "relative ml-2 text-lg")}>
             {recipeName}
         </p>
         {!isOpen && (
-            <div className="flex gap-2 ml-4">
+            <div className="flex gap-2 ml-4 ">
                 <TagDisplay tags={recipeTags} />
             </div>
         )}
