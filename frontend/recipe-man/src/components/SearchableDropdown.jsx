@@ -25,6 +25,7 @@ const SearchableDropdown = ({ ingredientPart, apiPath, onChangeEvent, index, fie
                     Authorization: `Bearer ${accessToken}`
                 }
             }).then(response => response.json()).then(data => {
+                console.log(new URLSearchParams({ name: localValue.toLowerCase().trim() }).toString())
                 console.log(data)
                 setIngredients(data)
                 changeAddDisplay(localValue, data)

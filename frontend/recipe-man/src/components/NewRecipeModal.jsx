@@ -36,7 +36,7 @@ const NewRecipeModal = ({ openModal, closeModal }) => {
                     },
 
                     body: JSON.stringify({
-                        unit: localIng[index].ingUnit
+                        unit: localIng[index].ingUnit.trim().toLowerCase()
                     })
                 }).then(response => response.json()).then(data => {
                     localIng[index].unitID = data.unit.id
@@ -57,7 +57,7 @@ const NewRecipeModal = ({ openModal, closeModal }) => {
                     },
 
                     body: JSON.stringify({
-                        name: localIng[index].ingName
+                        name: localIng[index].ingName.trim().toLowerCase()
                     })
                 }).then(response => response.json()).then(data => {
                     localIng[index].nameID = data.ingredient.id
