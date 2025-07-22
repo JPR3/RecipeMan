@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useAuth } from '../AuthProvider';
 import { useRef } from 'react';
 
-const SearchableDropdown = ({ ingredientPart, apiPath, onChangeEvent, index, fieldValue }) => {
+const SearchableDropdown = ({ ingredientPart, apiPath, onChangeEvent, index, fieldValue, existingIdsList }) => {
     const [localValue, setLocalValue] = useState("")
     const [displayAdd, setDisplayAdd] = useState(true)
     const [isOpen, setIsOpen] = useState(false);
@@ -25,9 +25,9 @@ const SearchableDropdown = ({ ingredientPart, apiPath, onChangeEvent, index, fie
                     Authorization: `Bearer ${accessToken}`
                 }
             }).then(response => response.json()).then(data => {
-                console.log(new URLSearchParams({ name: localValue.toLowerCase().trim() }).toString())
                 console.log(data)
-                setIngredients(data)
+                const filteredData = (existingIdsList ? data.filter(item => !existingIdsList.includes(item.id)) : data)
+                setIngredients(filteredData)
                 changeAddDisplay(localValue, data)
             });
         } else {

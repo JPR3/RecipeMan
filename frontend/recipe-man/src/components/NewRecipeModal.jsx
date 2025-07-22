@@ -189,7 +189,7 @@ const NewRecipeModal = ({ openModal, closeModal }) => {
                         name="cookHrs"
                         type="number"
                         value={cookHrs}
-                        className="border border-border bg-fields text-content p-2 w-12 hover:w-15 focus:w-15 rounded-md focus:border-2"
+                        className="border border-border bg-fields text-content px-2 py-1 w-12 hover:w-15 focus:w-15 rounded-md focus:border-2"
                         onChange={(e) => setCookHrs(e.target.value)}
                     />
                     <p>Hours</p>
@@ -199,7 +199,7 @@ const NewRecipeModal = ({ openModal, closeModal }) => {
                         name="cookMins"
                         type="number"
                         value={cookMins}
-                        className="border border-border bg-fields text-content p-2 w-12 hover:w-15 focus:w-15 rounded-md focus:border-2"
+                        className="border border-border bg-fields text-content px-2 py-1 w-12 hover:w-15 focus:w-15 rounded-md focus:border-2"
                         onChange={(e) => setCookMins(e.target.value)}
                     />
                     <p>Minutes</p>
@@ -214,11 +214,24 @@ const NewRecipeModal = ({ openModal, closeModal }) => {
                                 name={"qty" + index}
                                 placeholder="0"
                                 value={ingredients[index].ingQty}
-                                className="border border-border bg-fields text-content w-10 rounded-md h-6.5 focus:border-2"
+                                className="border border-border bg-fields text-content pl-1 w-10 rounded-md h-6.5 focus:border-2"
                                 onChange={(e) => handle(e.target.value, "Q", index)}
                             />
-                            <SearchableDropdown ingredientPart="Unit" apiPath="units" index={index} onChangeEvent={(val, id) => handle(val, "U", index, id)} fieldValue={ingredients[index].ingUnit}></SearchableDropdown>
-                            <SearchableDropdown ingredientPart="Name" apiPath="ingredients" index={index} onChangeEvent={(val, id) => handle(val, "N", index, id)} fieldValue={ingredients[index].ingName}></SearchableDropdown>
+                            <SearchableDropdown
+                                ingredientPart="Unit"
+                                apiPath="units"
+                                index={index}
+                                onChangeEvent={(val, id) => handle(val, "U", index, id)}
+                                fieldValue={ingredients[index].ingUnit}
+                            />
+                            <SearchableDropdown
+                                ingredientPart="Name"
+                                apiPath="ingredients"
+                                index={index}
+                                onChangeEvent={(val, id) => handle(val, "N", index, id)}
+                                fieldValue={ingredients[index].ingName}
+                                existingIdsList={ingredients.map((ing) => (ing.nameID))}
+                            />
                         </div>
                     )
                 })}
@@ -247,7 +260,14 @@ const NewRecipeModal = ({ openModal, closeModal }) => {
                     tags={tags.map((val) => (val.name))}
                     textSize={"text-sm"}
                 />
-                <SearchableDropdown ingredientPart="Tag" apiPath="tags" index="0" onChangeEvent={(val, id) => handleAddTag(val, id)} fieldValue={""}></SearchableDropdown>
+                <SearchableDropdown
+                    ingredientPart="Tag"
+                    apiPath="tags"
+                    index="0"
+                    onChangeEvent={(val, id) => handleAddTag(val, id)}
+                    fieldValue={""}
+                    existingIdsList={tags.map((tag) => (tag.id))}
+                />
                 <button
                     type="button"
                     disabled={!isValid}
