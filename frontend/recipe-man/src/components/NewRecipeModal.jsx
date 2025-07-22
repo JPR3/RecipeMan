@@ -44,7 +44,6 @@ const NewRecipeModal = ({ openModal, closeModal }) => {
         }
         let localValid = true
         localIng.forEach(function (data, _index) {
-            console.log("ingqty: " + data.ingQty)
             localValid = localValid && (data.ingQty > 0 && data.ingUnit !== "" && data.ingName != "" && data.nameID != "-1" && data.unitID != "-1")
         })
         setIsIngValid(localValid)
@@ -58,10 +57,6 @@ const NewRecipeModal = ({ openModal, closeModal }) => {
     }
 
     const createRecipe = () => {
-        console.log("Title: " + title)
-        console.log("Cook Time: " + `${cookHrs}:${cookMins}:00`)
-        console.log("Instructions: " + instructions)
-        console.log("Notes: " + notes)
         fetch(`http://localhost:3000/api/users/${uid}/recipes`, {
             method: 'POST',
             headers: {
@@ -186,19 +181,13 @@ const NewRecipeModal = ({ openModal, closeModal }) => {
                 />
                 <button
                     type="button"
-                    // disabled={!isValid}
-                    className={`w-full font-semibold py-2 px-4 rounded-md ${true
+                    disabled={!isValid}
+                    className={`w-full font-semibold py-2 px-4 rounded-md ${isValid
                         ? 'bg-primary hover:bg-primary-hv text-content'
                         : 'bg-button text-content cursor-not-allowed'
                         }`}
                     onClick={(e) => {
-                        // createRecipe(); closeRecipeModal()
-                        console.log("Title: " + title)
-                        console.log("cookHrs: " + cookHrs)
-                        console.log("cookMins: " + cookMins)
-                        console.log("instructions: " + instructions)
-                        console.log("isIngValid: " + isIngValid)
-                        console.log("isValid: " + isValid)
+                        createRecipe(); closeRecipeModal()
                     }}
                 >
                     Create
