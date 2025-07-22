@@ -38,7 +38,7 @@ router.get('/users/:uid/recipes/:id', async (req, res) => {
         res.status(500).json({ error: 'Failed to fetch recipe' });
     }
 });
-// POST /api/user/:uid/recipes
+// POST /api/users/:uid/recipes
 router.post('/users/:uid/recipes', async (req, res) => {
     try {
         const title = req.body.title;
@@ -55,7 +55,7 @@ router.post('/users/:uid/recipes', async (req, res) => {
         res.status(500).json({ error: 'Failed to create recipe' });
     }
 });
-// POST /api/user/:uid/recipes/{id}/recipe_ingredients
+// POST /api/users/:uid/recipes/{id}/recipe_ingredients
 router.post('/users/:uid/recipes/:id/recipe_ingredients', async (req, res) => {
     try {
         if (!await owns_recipe(req.params.uid, req.params.id)) {
@@ -80,7 +80,7 @@ router.post('/users/:uid/recipes/:id/recipe_ingredients', async (req, res) => {
         res.status(500).json({ error: 'Failed to add recipe ingredient' });
     }
 });
-// POST /api/user/:uid/recipes/{id}/tags
+// POST /api/users/:uid/recipes/{id}/tags
 router.post('/users/:uid/recipes/:id/tags', async (req, res) => {
     try {
         if (!await owns_recipe(req.params.uid, req.params.id)) {

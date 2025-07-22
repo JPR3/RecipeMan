@@ -2,6 +2,7 @@ import React, { useState, useRef } from "react";
 import Modal from "../components/Modal";
 import SearchableDropdown from "./SearchableDropdown";
 import { useAuth } from "../AuthProvider";
+import TagDisplay from "./TagDisplay";
 
 const NewRecipeModal = ({ openModal, closeModal }) => {
     const ref = useRef()
@@ -13,6 +14,7 @@ const NewRecipeModal = ({ openModal, closeModal }) => {
         ingQty: 0, ingUnit: "", unitID: "-1", ingName: "", nameID: "-1"
     }])
     const [notes, setNotes] = useState("")
+    const [tags, setTags] = useState([])
     const [isIngValid, setIsIngValid] = useState(false)
     const { session, user, loading } = useAuth();
     if (loading) return <div>Loading...</div>;
@@ -73,7 +75,28 @@ const NewRecipeModal = ({ openModal, closeModal }) => {
         setIsIngValid(localValid)
         setIngredients(localIng)
     }
+    const handleAddTag = (val, id) => {
+        let localId = "-1"
+        if (id === "0") {
+            fetch(`http://localhost:3000/api/users/${uid}/tags`, {
+                method: 'POST',
+                headers: {
+                    Accept: 'application/json',
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${accessToken}`
+                },
 
+                body: JSON.stringify({
+                    description: val.trim().toLowerCase()
+                })
+            }).then(response => response.json()).then(data => {
+                setTags([...tags, { name: val, id: data.tag.id }])
+            })
+        } else {
+            setTags([...tags, { name: val, id: id }])
+        }
+
+    }
     const handleAddIngredient = (e) => {
         e.preventDefault()
         setIsIngValid(false)
@@ -110,6 +133,20 @@ const NewRecipeModal = ({ openModal, closeModal }) => {
                         ingredient_id: ing.nameID,
                         qty: ing.ingQty,
                         unit_id: ing.unitID
+                    })
+                })
+            })
+            tags.map((tag, index) => {
+                fetch(`http://localhost:3000/api/users/${uid}/recipes/${recipe_id}/tags`, {
+                    method: 'POST',
+                    headers: {
+                        Accept: 'application/json',
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${accessToken}`
+                    },
+
+                    body: JSON.stringify({
+                        tag_id: tag.id
                     })
                 })
             })
@@ -200,9 +237,14 @@ const NewRecipeModal = ({ openModal, closeModal }) => {
                     id="notes"
                     name="notes"
                     placeholder="(Optional)"
-                    className="border border-border bg-fields text-content p-2 w-full rounded-md mb-4 focus:border-2"
+                    className="border border-border bg-fields text-content p-2 w-full rounded-md mb-2 focus:border-2"
                     onChange={(e) => setNotes(e.target.value)}
                 />
+                <label className="text-xl text-content" htmlFor="tagDisplay">Tags</label>
+                <TagDisplay id="tagDisplay"
+                    tags={tags.map((val) => (val.name))}>
+                </TagDisplay>
+                <SearchableDropdown ingredientPart="Tag" apiPath="tags" index="0" onChangeEvent={(val, id) => handleAddTag(val, id)} fieldValue={""}></SearchableDropdown>
                 <button
                     type="button"
                     disabled={!isValid}
@@ -216,8 +258,9 @@ const NewRecipeModal = ({ openModal, closeModal }) => {
                 >
                     Create
                 </button>
-            </form>
 
+            </form>
+            <button type="button" onClick={() => console.log(tags.map((val) => (val.name)))}>show tags</button>
         </Modal>
     );
 

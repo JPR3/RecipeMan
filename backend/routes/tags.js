@@ -4,7 +4,7 @@ import pool from '../db.js';
 // GET /api/users/:uid/tags
 router.get('/users/:uid/tags', async (req, res) => {
     try {
-        const result = await pool.query('SELECT description, id FROM tags WHERE (user_id IS NULL OR user_id = $1) AND description LIKE $2', [req.params.uid, `${req.query.description || ''}%`]);
+        const result = await pool.query('SELECT description AS name, id FROM tags WHERE (user_id IS NULL OR user_id = $1) AND description LIKE $2', [req.params.uid, `${req.query.name || ''}%`]);
         res.json(result.rows);
     } catch (err) {
         console.error('Error fetching tags:', err);
