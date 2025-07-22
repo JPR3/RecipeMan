@@ -44,6 +44,7 @@ const NewRecipeModal = ({ openModal, closeModal }) => {
         }
         let localValid = true
         localIng.forEach(function (data, _index) {
+            console.log("ingqty: " + data.ingQty)
             localValid = localValid && (data.ingQty > 0 && data.ingUnit !== "" && data.ingName != "" && data.nameID != "-1" && data.unitID != "-1")
         })
         setIsIngValid(localValid)
@@ -96,9 +97,17 @@ const NewRecipeModal = ({ openModal, closeModal }) => {
         });
     }
 
-    const isValid = title && cookHrs && cookMins && instructions && isIngValid
+    const isValid = (title !== "") && (cookHrs > 0) && (cookMins > 0) && (instructions !== "") && isIngValid
     const closeRecipeModal = () => {
-        closeModal(); ref.current?.reset(); setIngredients([{
+        closeModal();
+        ref.current?.reset();
+        setTitle("");
+        setCookHrs(0);
+        setCookMins(0);
+        setInstructions("");
+        setNotes("");
+        setIsIngValid(false);
+        setIngredients([{
             ingQty: 0, ingUnit: "", unitID: "-1", ingName: "", nameID: "-1"
         }])
     };
@@ -123,6 +132,7 @@ const NewRecipeModal = ({ openModal, closeModal }) => {
                         id="cookHrs"
                         name="cookHrs"
                         type="number"
+                        value={cookHrs}
                         className="border border-border bg-fields text-content p-2 w-12 hover:w-15 focus:w-15 rounded-md focus:border-2"
                         onChange={(e) => setCookHrs(e.target.value)}
                     />
@@ -132,6 +142,7 @@ const NewRecipeModal = ({ openModal, closeModal }) => {
                         id="cookMins"
                         name="cookMins"
                         type="number"
+                        value={cookMins}
                         className="border border-border bg-fields text-content p-2 w-12 hover:w-15 focus:w-15 rounded-md focus:border-2"
                         onChange={(e) => setCookMins(e.target.value)}
                     />
@@ -146,6 +157,7 @@ const NewRecipeModal = ({ openModal, closeModal }) => {
                                 id={"qty" + index}
                                 name={"qty" + index}
                                 placeholder="0"
+                                value={ingredients[index].ingQty}
                                 className="border border-border bg-fields text-content w-10 rounded-md h-6.5 focus:border-2"
                                 onChange={(e) => handle(e.target.value, "Q", index)}
                             />
@@ -174,12 +186,20 @@ const NewRecipeModal = ({ openModal, closeModal }) => {
                 />
                 <button
                     type="button"
-                    disabled={!isValid}
-                    className={`w-full font-semibold py-2 px-4 rounded-md ${isValid
+                    // disabled={!isValid}
+                    className={`w-full font-semibold py-2 px-4 rounded-md ${true
                         ? 'bg-primary hover:bg-primary-hv text-content'
                         : 'bg-button text-content cursor-not-allowed'
                         }`}
-                    onClick={(e) => { createRecipe(); closeRecipeModal() }}
+                    onClick={(e) => {
+                        // createRecipe(); closeRecipeModal()
+                        console.log("Title: " + title)
+                        console.log("cookHrs: " + cookHrs)
+                        console.log("cookMins: " + cookMins)
+                        console.log("instructions: " + instructions)
+                        console.log("isIngValid: " + isIngValid)
+                        console.log("isValid: " + isValid)
+                    }}
                 >
                     Create
                 </button>

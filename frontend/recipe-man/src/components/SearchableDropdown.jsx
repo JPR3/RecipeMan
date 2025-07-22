@@ -75,7 +75,7 @@ const SearchableDropdown = ({ ingredientPart, apiPath, onChangeEvent, index, fie
                 onChange={(e) => { setLocalValue(e.target.value); }}
                 value={isOpen ? localValue : fieldValue}
                 placeholder={ingredientPart + " (Search...)"}
-                onFocus={() => { setIsOpen(true) }}
+                onFocus={() => { setIsOpen(true); setLocalValue(fieldValue) }}
                 onBlur={handleBlur}
             />
             {isOpen && localValue != "" && (
