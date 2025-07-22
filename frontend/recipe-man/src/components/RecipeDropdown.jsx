@@ -88,7 +88,7 @@ const RecipeDropdown = ({ recipeName, recipeTags, recipeId }) => {
                             ))}
                         </div>
                     </div>
-                    {data.notes != "EMPTY" && (<div>
+                    {data.notes && data.notes != "EMPTY" && (<div>
                         <br />
                         <h1 className="text-content font-semibold text-xl">Notes</h1>
                         <p className="text-content">{data.notes}</p>

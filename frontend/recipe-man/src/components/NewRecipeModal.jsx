@@ -115,7 +115,7 @@ const NewRecipeModal = ({ openModal, closeModal }) => {
                 title: title,
                 cook_time: `${cookHrs}:${cookMins}:00`,
                 instructions: instructions,
-                notes: notes
+                notes: (notes !== "" ? notes : null)
             })
         }).then(response => response.json()).then(data => {
             const recipe_id = data.recipe.id

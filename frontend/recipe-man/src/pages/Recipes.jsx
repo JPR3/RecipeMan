@@ -24,7 +24,6 @@ const Recipes = () => {
                 Authorization: `Bearer ${accessToken}`
             }
         }).then(response => response.json()).then(data => {
-            console.log(data);
             setUsername(data.username);
         });
         fetch(`http://localhost:3000/api/users/${uid}/recipes`, {
@@ -32,10 +31,10 @@ const Recipes = () => {
                 Authorization: `Bearer ${accessToken}`
             }
         }).then(response => response.json()).then(data => {
-            console.log(data);
+            console.log(data)
             setRecipeIds(data);
         });
-    }, [accessToken]);
+    }, [accessToken, modal]);
 
     return (
         <div className="flex flex-col justify-start items-center w-full px-16 gap-2">
@@ -46,7 +45,7 @@ const Recipes = () => {
             </button>
             <NewRecipeModal openModal={modal} closeModal={() => setModal(false)}></NewRecipeModal>
             <QueryClientProvider client={queryClient}>
-                <div className="w-full flex flex-col gap-4 items-center">
+                <div className="w-full flex flex-col gap-4 items-center mb-4">
                     {recipeIds.map((vals) => (
                         <RecipeDropdown key={vals.id} recipeName={vals.title} recipeTags={vals.tags} recipeId={vals.id} />
                     ))}
