@@ -72,7 +72,7 @@ const NewRecipeModal = ({ openModal, closeModal }) => {
         localIng.forEach(function (data, _index) {
             localValid = localValid && (data.ingQty > 0 && data.ingUnit !== "" && data.ingName != "" && data.nameID != "-1" && data.unitID != "-1")
         })
-        setIsIngValid(localValid)
+        setIsIngValid(localValid && localIng.length > 0);
         setIngredients(localIng)
     }
     const handleAddTag = (val, id) => {
@@ -102,6 +102,23 @@ const NewRecipeModal = ({ openModal, closeModal }) => {
         setIngredients([...ingredients, { ingQty: 0, ingUnit: "", unitID: "-1", ingName: "", nameID: "-1" }])
     }
 
+    const handleRemoveIngredient = (index) => {
+        setIsIngValid(false)
+        const localIngredients = [...ingredients]
+        localIngredients.splice(index, 1)
+        setIngredients(localIngredients)
+        let localValid = true
+        localIngredients.forEach(function (data, _index) {
+            localValid = localValid && (data.ingQty > 0 && data.ingUnit !== "" && data.ingName != "" && data.nameID != "-1" && data.unitID != "-1")
+        })
+        setIsIngValid(localValid && localIngredients.length > 0);
+    }
+
+    const handleRemoveTag = (index) => {
+        const localTags = [...tags]
+        localTags.splice(index, 1)
+        setTags(localTags)
+    }
     const createRecipe = () => {
         fetch(`http://localhost:3000/api/users/${uid}/recipes`, {
             method: 'POST',
@@ -154,7 +171,6 @@ const NewRecipeModal = ({ openModal, closeModal }) => {
 
     const isValid = (title !== "") && (cookHrs >= 0) && (cookMins >= 0) && (instructions !== "") && isIngValid
     const closeRecipeModal = () => {
-        closeModal();
         ref.current?.reset();
         setTitle("");
         setCookHrs(0);
@@ -166,6 +182,7 @@ const NewRecipeModal = ({ openModal, closeModal }) => {
             ingQty: 0, ingUnit: "", unitID: "-1", ingName: "", nameID: "-1"
         }]);
         setTags([]);
+        closeModal();
     };
 
     return (
@@ -189,7 +206,7 @@ const NewRecipeModal = ({ openModal, closeModal }) => {
                         name="cookHrs"
                         type="number"
                         value={cookHrs}
-                        className="border border-border bg-fields text-content px-2 py-1 w-12 hover:w-15 focus:w-15 rounded-md focus:border-2"
+                        className="border border-border bg-fields text-content px-2 py-1 w-14 rounded-md focus:border-2"
                         onChange={(e) => setCookHrs(e.target.value)}
                     />
                     <p>Hours</p>
@@ -199,7 +216,7 @@ const NewRecipeModal = ({ openModal, closeModal }) => {
                         name="cookMins"
                         type="number"
                         value={cookMins}
-                        className="border border-border bg-fields text-content px-2 py-1 w-12 hover:w-15 focus:w-15 rounded-md focus:border-2"
+                        className="border border-border bg-fields text-content px-2 py-1 w-14 rounded-md focus:border-2"
                         onChange={(e) => setCookMins(e.target.value)}
                     />
                     <p>Minutes</p>
@@ -207,7 +224,7 @@ const NewRecipeModal = ({ openModal, closeModal }) => {
                 <p className="text-xl text-content">Ingredients</p>
                 {ingredients.map((ingredient, index) => {
                     return (
-                        <div key={index} className="flex gap-2 items-top pb-1">
+                        <div key={index} className="flex gap-2 items-center pb-1">
                             <input
                                 type="number"
                                 id={"qty" + index}
@@ -232,6 +249,9 @@ const NewRecipeModal = ({ openModal, closeModal }) => {
                                 fieldValue={ingredients[index].ingName}
                                 existingIdsList={ingredients.map((ing) => (ing.nameID))}
                             />
+                            <svg onClick={() => handleRemoveIngredient(index)} xmlns="http://www.w3.org/2000/svg" width="25" height="25" className="bi bi-x fill-fields hover:fill-red-700 cursor-pointer" viewBox="3 0 16 16">
+                                <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708" />
+                            </svg>
                         </div>
                     )
                 })}
@@ -254,20 +274,29 @@ const NewRecipeModal = ({ openModal, closeModal }) => {
                     onChange={(e) => setNotes(e.target.value)}
                 />
                 <p className="text-xl text-content">Tags</p>
-                <TagDisplay
-                    id="tagDisplay"
-                    className="mb-2"
-                    tags={tags.map((val) => (val.name))}
-                    textSize={"text-sm"}
-                />
-                <SearchableDropdown
-                    ingredientPart="Tag"
-                    apiPath="tags"
-                    index="0"
-                    onChangeEvent={(val, id) => handleAddTag(val, id)}
-                    fieldValue={""}
-                    existingIdsList={tags.map((tag) => (tag.id))}
-                />
+                <div className="flex flex-wrap gap-2 items-center mb-2">
+                    {tags.map((tag, index) => (
+                        <div key={tag.name} className="flex items-center bg-fields rounded-full">
+                            <span className="text-content px-1.5 pb-0.5 text-sm">
+                                {tag.name}
+                            </span>
+                            <svg onClick={() => handleRemoveTag(index)} xmlns="http://www.w3.org/2000/svg" width="16" height="16" className="bi bi-x fill-content hover:fill-red-700 cursor-pointer" viewBox="3 0 16 16">
+                                <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708" />
+                            </svg>
+                        </div>
+                    ))}
+                </div>
+                <div className="max-w-40">
+                    <SearchableDropdown
+                        ingredientPart="Tag"
+                        apiPath="tags"
+                        index="0"
+                        onChangeEvent={(val, id) => handleAddTag(val, id)}
+                        fieldValue={""}
+                        existingIdsList={tags.map((tag) => (tag.id))}
+                    />
+                </div>
+
                 <button
                     type="button"
                     disabled={!isValid}

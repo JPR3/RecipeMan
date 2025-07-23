@@ -72,7 +72,7 @@ const SearchableDropdown = ({ ingredientPart, apiPath, onChangeEvent, index, fie
                 id={ingredientPart + "_" + index}
                 name={ingredientPart + "_" + index}
                 ref={ref}
-                className={(isOpen && localValue != "" ? "rounded-t-md border-t-2 border-r-2 border-l-2 border-primary " : "rounded-md border border-border focus:border-2 ") + " px-1 bg-fields text-content w-40 h-6.5"}
+                className={(isOpen && localValue != "" ? "rounded-t-md border-t-2 border-r-2 border-l-2 border-primary " : "rounded-md border border-border focus:border-2 ") + " px-1 bg-fields text-content w-full h-6.5"}
                 onChange={(e) => { setLocalValue(e.target.value); }}
                 value={isOpen ? localValue : fieldValue}
                 placeholder={ingredientPart + " (Search...)"}
@@ -90,7 +90,7 @@ const SearchableDropdown = ({ ingredientPart, apiPath, onChangeEvent, index, fie
                                     onClick={(e) => { setIsOpen(false); onChangeEvent(ingredient.name, ingredient.id) }}
                                     key={ingredient.name}
                                     tabIndex="0"
-                                    className="border-r-2 border-l-2 border-primary bg-fields text-content w-40 h-6.5 px-1 hover:bg-button"
+                                    className="border-r-2 border-l-2 border-primary bg-fields text-content w-full h-6.5 px-1 hover:bg-button"
                                 >
                                     {capitalizeEachWord(ingredient.name)}
                                 </p>
@@ -102,7 +102,7 @@ const SearchableDropdown = ({ ingredientPart, apiPath, onChangeEvent, index, fie
                         onKeyDownCapture={(e) => { if (e.key === "Enter") { setIsOpen(false); onChangeEvent(localValue, "0") } }}
                         onClick={(e) => { setIsOpen(false); onChangeEvent(localValue, "0") }}
                         tabIndex="0"
-                        className="border-r-2 border-l-2 border-b-2 border-primary bg-fields text-content w-40 rounded-b-md px-1 hover:bg-button"
+                        className="border-r-2 border-l-2 border-b-2 border-primary bg-fields text-content w-full rounded-b-md px-1 hover:bg-button"
                     >
                         {displayAdd && ("Add " + localValue)}
                     </p>
