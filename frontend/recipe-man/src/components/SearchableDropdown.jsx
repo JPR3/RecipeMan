@@ -74,6 +74,19 @@ const SearchableDropdown = ({ ingredientPart, apiPath, onChangeEvent, index, fie
                 ref={ref}
                 className={(isOpen && localValue != "" ? "rounded-t-md border-t-2 border-r-2 border-l-2 border-primary " : "rounded-md border border-border focus:border-2 ") + " px-1 bg-fields text-content w-full h-6.5"}
                 onChange={(e) => { setLocalValue(e.target.value); }}
+                onKeyDownCapture={(e) => {
+                    if (e.key === "Enter") {
+                        if (ingredients.length > 0) {
+                            onChangeEvent(ingredients[0].name, ingredients[0].id);
+                            setIngredients(ingredients.filter(item => item.id !== ingredients[0].id));
+                            if (ingredientPart !== "Tag") { setIsOpen(false) }
+                        } else if (displayAdd && localValue.trim() !== "") {
+                            onChangeEvent(localValue, "0");
+                            setLocalValue("");
+                            if (ingredientPart !== "Tag") { setIsOpen(false) }
+                        }
+                    }
+                }}
                 value={isOpen ? localValue : fieldValue}
                 placeholder={ingredientPart + " (Search...)"}
                 onFocus={() => { setIsOpen(true); setLocalValue(fieldValue) }}
