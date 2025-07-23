@@ -113,7 +113,7 @@ const NewRecipeModal = ({ openModal, closeModal }) => {
 
             body: JSON.stringify({
                 title: title,
-                cook_time: `${cookHrs}:${cookMins}:00`,
+                cook_time: `${cookHrs > 9 ? cookHrs : `0${cookHrs}`}:${cookMins > 9 ? cookMins : `0${cookMins}`}:00`,
                 instructions: instructions,
                 notes: (notes !== "" ? notes : null)
             })
