@@ -136,8 +136,8 @@ const NewRecipeModal = ({ openModal, closeModal }) => {
             })
         }).then(response => response.json()).then(data => {
             const recipe_id = data.recipe.id
-            ingredients.map((ing, index) => {
-                fetch(`http://localhost:3000/api/users/${uid}/recipes/${recipe_id}/recipe_ingredients`, {
+            const ingPromiseArr = ingredients.map((ing, index) => {
+                return fetch(`http://localhost:3000/api/users/${uid}/recipes/${recipe_id}/recipe_ingredients`, {
                     method: 'POST',
                     headers: {
                         Accept: 'application/json',
@@ -152,8 +152,9 @@ const NewRecipeModal = ({ openModal, closeModal }) => {
                     })
                 })
             })
-            tags.map((tag, index) => {
-                fetch(`http://localhost:3000/api/users/${uid}/recipes/${recipe_id}/tags`, {
+            const ingPromise = Promise.all(ingPromiseArr)
+            const tagPromiseArr = tags.map((tag, index) => {
+                return fetch(`http://localhost:3000/api/users/${uid}/recipes/${recipe_id}/tags`, {
                     method: 'POST',
                     headers: {
                         Accept: 'application/json',
@@ -166,9 +167,12 @@ const NewRecipeModal = ({ openModal, closeModal }) => {
                     })
                 })
             })
+            const tagPromise = Promise.all(tagPromiseArr)
+            Promise.all([ingPromise, tagPromise]).then(() => {
+                closeRecipeModal();
+            })
         });
     }
-
     const isValid = (title !== "") && (cookHrs >= 0) && (cookMins >= 0) && (instructions !== "") && isIngValid
     const closeRecipeModal = () => {
         ref.current?.reset();
@@ -205,6 +209,7 @@ const NewRecipeModal = ({ openModal, closeModal }) => {
                         id="cookHrs"
                         name="cookHrs"
                         type="number"
+                        min="0"
                         value={cookHrs}
                         className="border border-border bg-fields text-content px-2 py-1 w-14 rounded-md focus:border-2"
                         onChange={(e) => setCookHrs(e.target.value)}
@@ -215,6 +220,7 @@ const NewRecipeModal = ({ openModal, closeModal }) => {
                         id="cookMins"
                         name="cookMins"
                         type="number"
+                        min="0"
                         value={cookMins}
                         className="border border-border bg-fields text-content px-2 py-1 w-14 rounded-md focus:border-2"
                         onChange={(e) => setCookMins(e.target.value)}
@@ -227,6 +233,7 @@ const NewRecipeModal = ({ openModal, closeModal }) => {
                         <div key={index} className="flex gap-2 items-center pb-1">
                             <input
                                 type="number"
+                                min="0"
                                 id={"qty" + index}
                                 name={"qty" + index}
                                 placeholder="0"
@@ -262,6 +269,7 @@ const NewRecipeModal = ({ openModal, closeModal }) => {
                     id="instructions"
                     name="instructions"
                     placeholder="Instructions"
+                    value={instructions}
                     className="border border-border bg-fields text-content p-2 w-full rounded-md mb-2 focus:border-2"
                     onChange={(e) => setInstructions(e.target.value)}
                 />
@@ -269,6 +277,7 @@ const NewRecipeModal = ({ openModal, closeModal }) => {
                 <textarea
                     id="notes"
                     name="notes"
+                    value={notes}
                     placeholder="(Optional)"
                     className="border border-border bg-fields text-content p-2 w-full rounded-md mb-2 focus:border-2"
                     onChange={(e) => setNotes(e.target.value)}
@@ -305,7 +314,7 @@ const NewRecipeModal = ({ openModal, closeModal }) => {
                         : 'bg-button text-content cursor-not-allowed'
                         }`}
                     onClick={(e) => {
-                        createRecipe(); closeRecipeModal()
+                        createRecipe();
                     }}
                 >
                     Create
