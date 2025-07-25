@@ -120,6 +120,7 @@ const NewRecipeModal = ({ openModal, closeModal }) => {
         setTags(localTags)
     }
     const createRecipe = () => {
+        setIsIngValid(false)
         fetch(`http://localhost:3000/api/users/${uid}/recipes`, {
             method: 'POST',
             headers: {
