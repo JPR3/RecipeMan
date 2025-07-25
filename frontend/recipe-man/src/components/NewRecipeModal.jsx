@@ -269,7 +269,7 @@ const NewRecipeModal = ({ openModal, closeModal }) => {
                 <textarea
                     id="instructions"
                     name="instructions"
-                    placeholder="Instructions"
+                    placeholder={"Seperate each step with a new line\nSurround numbers with {{ }} to enable scaling"}
                     value={instructions}
                     className="border border-border bg-fields text-content p-2 w-full rounded-md mb-2 focus:border-2"
                     onChange={(e) => setInstructions(e.target.value)}

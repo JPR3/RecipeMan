@@ -5,6 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 
 const RecipeDropdown = ({ recipeName, recipeTags, recipeId, openDeleteModal }) => {
     const [isOpen, setIsOpen] = useState(false);
+    const [scale, setScale] = useState(1);
     const toggleDropdown = () => {
         setIsOpen(!isOpen);
     };
@@ -48,6 +49,11 @@ const RecipeDropdown = ({ recipeName, recipeTags, recipeId, openDeleteModal }) =
             {closedDiv}
         </div>)
     }
+    const processInstructions = (instructions) => {
+        return instructions.replace(/\{\{([0-9]*.?[0-9]+)\}\}/g, (match, num) => {
+            return num * scale
+        }).split(/\r?\n/)
+    }
     return (
         <div className="w-full max-w-4xl">
             {closedDiv}
@@ -67,12 +73,24 @@ const RecipeDropdown = ({ recipeName, recipeTags, recipeId, openDeleteModal }) =
                         <p className="text-content">|</p>
                         <p className="text-content hover:text-red-700 underline cursor-pointer" onClick={openDeleteModal}>Delete</p>
                     </div>
+                    <div className="flex gap-2 items-center pb-2">
+                        <label htmlFor={recipeId + "_scale"} className="text-content font-semibold text-xl">Scale</label>
+                        <input
+                            type="number"
+                            min="0"
+                            id={recipeId + "_scale"}
+                            placeholder="0"
+                            value={scale}
+                            className="border border-border bg-fields text-content pl-1 w-15 rounded-md h-6.5 focus:border-2"
+                            onChange={(e) => setScale(e.target.value)}
+                        />
+                    </div>
                     <div>
                         <h1 className="text-content font-semibold text-xl">Ingredients</h1>
                         <div>
                             {data.ingredients.map((ingredient) => (
                                 <div key={ingredient.ingredient_id} className="text-content">
-                                    <label className="pl-2 flex items-center gap-2"><input id={ingredient.name} className="accent-primary" type="checkbox" />{ingredient.measurement_qty} {ingredient.unit} {ingredient.name}</label>
+                                    <label className="pl-2 flex items-center gap-2"><input id={ingredient.name} className="accent-primary" type="checkbox" />{ingredient.measurement_qty * scale} {ingredient.unit} {ingredient.name}</label>
                                 </div>
                             ))}
                         </div>
@@ -81,7 +99,7 @@ const RecipeDropdown = ({ recipeName, recipeTags, recipeId, openDeleteModal }) =
                     <div>
                         <h1 className="text-content font-semibold text-xl">Instructions</h1>
                         <div>
-                            {data.instructions.split(/\r?\n/).map((instruction, index) => (
+                            {processInstructions(data.instructions).map((instruction, index) => (
                                 <div key={index} className="text-content">
                                     <label className="pl-2 flex items-center gap-2"><input id={instruction} className="accent-primary" type="checkbox" />{instruction}</label>
                                 </div>
