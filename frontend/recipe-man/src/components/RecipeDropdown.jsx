@@ -3,7 +3,7 @@ import { useAuth } from '../AuthProvider';
 import TagDisplay from './TagDisplay';
 import { useQuery } from '@tanstack/react-query';
 
-const RecipeDropdown = ({ recipeName, recipeTags, recipeId }) => {
+const RecipeDropdown = ({ recipeName, recipeTags, recipeId, openDeleteModal }) => {
     const [isOpen, setIsOpen] = useState(false);
     const toggleDropdown = () => {
         setIsOpen(!isOpen);
@@ -65,7 +65,7 @@ const RecipeDropdown = ({ recipeName, recipeTags, recipeId }) => {
                         <p className="text-content">|</p>
                         <p className="text-content">Edit</p>
                         <p className="text-content">|</p>
-                        <p className="text-content">Delete</p>
+                        <p className="text-content hover:text-red-700 underline cursor-pointer" onClick={openDeleteModal}>Delete</p>
                     </div>
                     <div>
                         <h1 className="text-content font-semibold text-xl">Ingredients</h1>
