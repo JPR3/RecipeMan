@@ -2,9 +2,9 @@ import React, { useState } from 'react';
 import { useAuth } from '../AuthProvider';
 import { useRef } from 'react';
 
-const SearchableDropdown = ({ ingredientPart, apiPath, onChangeEvent, index, fieldValue, existingIdsList }) => {
+const SearchableDropdown = ({ ingredientPart, apiPath, onChangeEvent, index, fieldValue, existingIdsList, disableAdd }) => {
     const [localValue, setLocalValue] = useState("")
-    const [displayAdd, setDisplayAdd] = useState(true)
+    const [displayAdd, setDisplayAdd] = useState(true && !disableAdd)
     const [isOpen, setIsOpen] = useState(false);
     const [ingredients, setIngredients] = useState([])
     const ref = useRef(null);
@@ -32,7 +32,7 @@ const SearchableDropdown = ({ ingredientPart, apiPath, onChangeEvent, index, fie
             });
         } else {
             setIngredients([])
-            setDisplayAdd(true)
+            setDisplayAdd(true && !disableAdd)
         }
 
 
@@ -50,7 +50,7 @@ const SearchableDropdown = ({ ingredientPart, apiPath, onChangeEvent, index, fie
                 localDisplay = false;
             }
         })
-        setDisplayAdd(localDisplay)
+        setDisplayAdd(localDisplay && !disableAdd)
     }
     const capitalizeEachWord = (str) => {
         // Convert the entire string to lowercase to handle cases where input might have mixed casing
