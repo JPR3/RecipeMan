@@ -20,16 +20,16 @@ router.get('/users/:uid/recipes', async (req, res) => {
 router.get('/users/:uid/recipes/:id', async (req, res) => {
     try {
         const recipe_result = await pool.query('SELECT title, cook_time, instructions, notes, created_at, recipes.id FROM recipes LEFT JOIN recipe_tags ON recipes.id = recipe_tags.recipe_id WHERE recipes.id = $1 AND recipes.user_id = $2', [req.params.id, req.params.uid]);
-        const ing_sql = `SELECT ingredients.name, measurement_qty, measurement_units.name AS unit, ingredients.id AS ingredient_id, array_agg(DISTINCT tags.description) AS tags
+        const ing_sql = `SELECT ingredients.name, measurement_qty, measurement_units.name AS unit, ingredients.id AS ingredient_id, measurement_units.id AS unit_id, array_agg(DISTINCT tags.description) AS tags
                         FROM recipe_ingredients 
                         LEFT JOIN ingredients ON ingredients.id = recipe_ingredients.ingredient_id 
                         LEFT JOIN measurement_units ON recipe_ingredients.measurement_unit_id = measurement_units.id
                         LEFT JOIN ingredient_tags ON recipe_ingredients.ingredient_id = ingredient_tags.ingredient_id AND ingredient_tags.user_id = $2
                         LEFT JOIN tags ON ingredient_tags.tag_id = tags.id
                         WHERE recipe_id = $1 AND (ingredient_tags.user_id = $2 OR ingredient_tags.user_id IS NULL)
-                        GROUP BY ingredients.name, measurement_qty, ingredients.id, unit;`
+                        GROUP BY ingredients.name, measurement_qty, ingredients.id, unit, unit_id;`
         const ingredients_result = await pool.query(ing_sql, [req.params.id, req.params.uid]);
-        const tag_result = await pool.query('SELECT description FROM tags LEFT JOIN recipe_tags ON tags.id = recipe_tags.tag_id WHERE recipe_tags.recipe_id = $1', [req.params.id]);
+        const tag_result = await pool.query('SELECT description, id FROM tags LEFT JOIN recipe_tags ON tags.id = recipe_tags.tag_id WHERE recipe_tags.recipe_id = $1', [req.params.id]);
         recipe_result.rows[0].ingredients = ingredients_result.rows;
         recipe_result.rows[0].tags = tag_result.rows;
         res.json(recipe_result.rows[0]);
@@ -103,14 +103,17 @@ router.post('/users/:uid/recipes/:id/tags', async (req, res) => {
 // PATCH /api/users/:uid/recipes/:id
 router.patch('/users/:uid/recipes/:id', async (req, res) => {
     try {
-        const { title, cook_time, instructions, notes } = req.body;
-        if (!title && !cook_time && !instructions && !notes) {
-            return res.status(400).json({ error: 'At least one field is required' });
+        const title = req.body.title;
+        const cook_time = req.body.cook_time;
+        const instructions = req.body.instructions;
+        const notes = req.body.notes || '';
+        if (!title || !cook_time || !instructions) {
+            return res.status(400).json({ error: 'All fields are required' });
         }
         if (!await owns_recipe(req.params.uid, req.params.id)) {
             return res.status(403).json({ error: 'Forbidden - user must own the recipe' });
         }
-        const result = await pool.query('UPDATE recipes SET title = COALESCE($1, title), cook_time = COALESCE($2, cook_time), instructions = COALESCE($3, instructions), notes = COALESCE($4, notes) WHERE id = $5 RETURNING *', [title, cook_time, instructions, notes, req.params.id]);
+        const result = await pool.query('UPDATE recipes SET title = $1, cook_time = $2, instructions = $3, notes = $4 WHERE id = $5 RETURNING *', [title, cook_time, instructions, notes, req.params.id]);
         res.json({ message: 'Recipe updated successfully', recipe: result.rows[0] });
     } catch (err) {
         console.error('Error updating recipe:', err);
@@ -155,6 +158,19 @@ router.delete('/users/:uid/recipes/:id', async (req, res) => {
         res.status(500).json({ error: 'Failed to delete recipe' });
     }
 });
+//DELETE /api/users/:uid/recipes/:id/recipe_ingredients
+router.delete('/users/:uid/recipes/:id/recipe_ingredients', async (req, res) => {
+    try {
+        if (!await owns_recipe(req.params.uid, req.params.id)) {
+            return res.status(403).json({ error: 'Forbidden - user must own the recipe' });
+        }
+        await pool.query('DELETE FROM recipe_ingredients WHERE recipe_id = $1', [req.params.id]);
+        res.json({ message: 'Recipe ingredients deleted successfully' });
+    } catch (err) {
+        console.error('Error deleting recipe ingredients:', err);
+        res.status(500).json({ error: 'Failed to delete recipe ingredients' });
+    }
+});
 // DELETE /api/users/:uid/recipes/:id/recipe_ingredients/:ri_id
 router.delete('/users/:uid/recipes/:id/recipe_ingredients/:ri_id', async (req, res) => {
     try {
@@ -171,14 +187,10 @@ router.delete('/users/:uid/recipes/:id/recipe_ingredients/:ri_id', async (req, r
 // DELETE /api/users/:uid/recipes/:id/tags
 router.delete('/users/:uid/recipes/:id/tags', async (req, res) => {
     try {
-        const tag_id = req.body.tag_id;
-        if (!tag_id) {
-            return res.status(400).json({ error: 'Tag ID is required' });
-        }
         if (!await owns_recipe(req.params.uid, req.params.id)) {
             return res.status(403).json({ error: 'Forbidden - user must own the recipe' });
         }
-        await pool.query('DELETE FROM recipe_tags WHERE recipe_id = $1 AND tag_id = $2', [req.params.id, tag_id]);
+        await pool.query('DELETE FROM recipe_tags WHERE recipe_id = $1', [req.params.id]);
         res.json({ message: 'Recipe tags deleted successfully' });
     } catch (err) {
         console.error('Error deleting recipe tags:', err);

@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import NewRecipeModal from "../components/NewRecipeModal"
 import DeleteConfirmationModal from "../components/DeleteConfirmationModal";
 import SearchableDropdown from "../components/SearchableDropdown";
+import EditRecipeModal from "../components/EditRecipeModal";
 
 const Recipes = () => {
     const queryClient = new QueryClient();
@@ -16,6 +17,8 @@ const Recipes = () => {
     const [recipeModal, setRecipeModal] = useState(false);
     const [deleteModal, setDeleteModal] = useState(false);
     const [deleteModalId, setDeleteModalId] = useState(null);
+    const [editModal, setEditModal] = useState(false);
+    const [editModalData, setEditModalData] = useState(null);
 
     if (loading) return <div>Loading...</div>;
 
@@ -38,11 +41,15 @@ const Recipes = () => {
             console.log(data)
             setRecipes(data);
         });
-    }, [accessToken, recipeModal, deleteModal]);
+    }, [accessToken, recipeModal, deleteModal, editModal]);
 
     const handleOpenDeleteModal = (recipeId) => {
         setDeleteModalId(recipeId);
         setDeleteModal(true);
+    }
+    const handleOpenEditModal = (recipeData) => {
+        setEditModalData(recipeData);
+        setEditModal(true);
     }
     const processRecipes = (recipes) => {
         return recipes.filter(recipe =>
@@ -100,11 +107,20 @@ const Recipes = () => {
                 New+
             </button>
             <NewRecipeModal openModal={recipeModal} closeModal={() => setRecipeModal(false)}></NewRecipeModal>
+            <EditRecipeModal openModal={editModal} closeModal={() => setEditModal(false)} recipeData={editModalData} />
             <DeleteConfirmationModal openModal={deleteModal} closeModal={() => setDeleteModal(false)} recipeId={deleteModalId} recipeName={recipes.find(recipe => recipe.id === deleteModalId)?.title} />
             <QueryClientProvider client={queryClient}>
                 <div className="w-full flex flex-col gap-4 items-center mb-4">
                     {processRecipes(recipes).map((vals) => (
-                        <RecipeDropdown key={vals.id} recipeName={vals.title} recipeTags={vals.tags} recipeId={vals.id} openDeleteModal={() => handleOpenDeleteModal(vals.id)} />
+                        <RecipeDropdown
+                            key={vals.id}
+                            recipeName={vals.title}
+                            recipeTags={vals.tags}
+                            recipeId={vals.id}
+                            openDeleteModal={() => handleOpenDeleteModal(vals.id)}
+                            openEditModal={(data) => handleOpenEditModal(data)}
+                            refreshTrigger={editModal && editModalData?.id === vals.id}
+                        />
                     ))}
                 </div>
             </QueryClientProvider>

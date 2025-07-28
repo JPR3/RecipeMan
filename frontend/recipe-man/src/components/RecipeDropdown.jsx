@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useAuth } from '../AuthProvider';
 import TagDisplay from './TagDisplay';
 import { useQuery } from '@tanstack/react-query';
 
-const RecipeDropdown = ({ recipeName, recipeTags, recipeId, openDeleteModal }) => {
+const RecipeDropdown = ({ recipeName, recipeTags, recipeId, openDeleteModal, openEditModal, refreshTrigger }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [scale, setScale] = useState(1);
     const toggleDropdown = () => {
@@ -15,7 +15,7 @@ const RecipeDropdown = ({ recipeName, recipeTags, recipeId, openDeleteModal }) =
     const accessToken = session?.access_token;
     const uid = user?.id;
 
-    const { data, isLoading } = useQuery({
+    const { data, isLoading, refetch } = useQuery({
         queryKey: ['recipeData', recipeId],
         queryFn: () => fetch(`http://localhost:3000/api/users/${uid}/recipes/${recipeId}`, {
             headers: {
@@ -26,6 +26,11 @@ const RecipeDropdown = ({ recipeName, recipeTags, recipeId, openDeleteModal }) =
         staleTime: Infinity,
         cacheTime: Infinity,
     });
+
+    useEffect(() => {
+        refetch();
+    }, [refreshTrigger]);
+
     const closedDiv = (<div onClick={toggleDropdown} className={(isOpen ? "border-t border-r border-l rounded-t-2xl " : "border rounded-2xl ") + "cursor-pointer w-full bg-surface border-border text-content shadow-lg p-4 pl-2 flex"}>
         <p className={"text-content min-w-1/8 " + (isOpen ? "font-bold text-xl absolute left-1/2 transform -translate-y-1/4 -translate-x-1/2 pointer-events-none" : "relative ml-2 text-lg")}>
             {recipeName}
@@ -69,7 +74,7 @@ const RecipeDropdown = ({ recipeName, recipeTags, recipeId, openDeleteModal }) =
                             Cook Time: {(data.cook_time.hours > 0 ? data.cook_time.hours + (data.cook_time.hours > 1 ? " hours" : " hour") + (data.cook_time.minutes > 0 ? ", " : " ") : "") + (data.cook_time.minutes > 0 ? + data.cook_time.minutes + (data.cook_time.minutes > 1 ? " minutes " : " minute ") : "")}
                         </p>
                         <p className="text-content">|</p>
-                        <p className="text-content">Edit</p>
+                        <p className="text-content hover:text-primary underline cursor-pointer" onClick={() => openEditModal(data)}>Edit</p>
                         <p className="text-content">|</p>
                         <p className="text-content hover:text-red-700 underline cursor-pointer" onClick={openDeleteModal}>Delete</p>
                     </div>

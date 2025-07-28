@@ -1,20 +1,18 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import Modal from "../components/Modal";
 import SearchableDropdown from "./SearchableDropdown";
 import { useAuth } from "../AuthProvider";
 
-const NewRecipeModal = ({ openModal, closeModal }) => {
+const EditRecipeModal = ({ openModal, closeModal, recipeData }) => {
     const ref = useRef()
     const [title, setTitle] = useState("")
     const [cookHrs, setCookHrs] = useState(0)
     const [cookMins, setCookMins] = useState(0)
     const [instructions, setInstructions] = useState("")
-    const [ingredients, setIngredients] = useState([{
-        ingQty: 0, ingUnit: "", unitID: "-1", ingName: "", nameID: "-1"
-    }])
+    const [ingredients, setIngredients] = useState([{ ingQty: 0, ingUnit: "", unitID: "-1", ingName: "", nameID: "-1" }])
     const [notes, setNotes] = useState("")
     const [tags, setTags] = useState([])
-    const [isIngValid, setIsIngValid] = useState(false)
+    const [isIngValid, setIsIngValid] = useState(true)
     const { session, user, loading } = useAuth();
     if (loading) return <div>Loading...</div>;
     const accessToken = session?.access_token;
@@ -118,10 +116,10 @@ const NewRecipeModal = ({ openModal, closeModal }) => {
         localTags.splice(index, 1)
         setTags(localTags)
     }
-    const createRecipe = () => {
+    const updateRecipe = async () => {
         setIsIngValid(false)
-        fetch(`http://localhost:3000/api/users/${uid}/recipes`, {
-            method: 'POST',
+        await fetch(`http://localhost:3000/api/users/${uid}/recipes/${recipeData.id}`, {
+            method: 'PATCH',
             headers: {
                 Accept: 'application/json',
                 'Content-Type': 'application/json',
@@ -134,44 +132,59 @@ const NewRecipeModal = ({ openModal, closeModal }) => {
                 instructions: instructions,
                 notes: (notes !== "" ? notes : null)
             })
-        }).then(response => response.json()).then(data => {
-            const recipe_id = data.recipe.id
-            const ingPromiseArr = ingredients.map((ing, index) => {
-                return fetch(`http://localhost:3000/api/users/${uid}/recipes/${recipe_id}/recipe_ingredients`, {
-                    method: 'POST',
-                    headers: {
-                        Accept: 'application/json',
-                        'Content-Type': 'application/json',
-                        Authorization: `Bearer ${accessToken}`
-                    },
+        })
+        await Promise.all([
+            fetch(`http://localhost:3000/api/users/${uid}/recipes/${recipeData.id}/recipe_ingredients`, {
+                method: 'DELETE',
+                headers: {
+                    Accept: 'application/json',
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${accessToken}`
+                }
+            }),
+            fetch(`http://localhost:3000/api/users/${uid}/recipes/${recipeData.id}/tags`, {
+                method: 'DELETE',
+                headers: {
+                    Accept: 'application/json',
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${accessToken}`
+                }
+            })
+        ])
+        //Recipe ingredients
+        const ingPromiseArr = ingredients.map((ing, index) => {
+            return fetch(`http://localhost:3000/api/users/${uid}/recipes/${recipeData.id}/recipe_ingredients`, {
+                method: 'POST',
+                headers: {
+                    Accept: 'application/json',
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${accessToken}`
+                },
 
-                    body: JSON.stringify({
-                        ingredient_id: ing.nameID,
-                        qty: ing.ingQty,
-                        unit_id: ing.unitID
-                    })
+                body: JSON.stringify({
+                    ingredient_id: ing.nameID,
+                    qty: ing.ingQty,
+                    unit_id: ing.unitID
                 })
             })
-            const ingPromise = Promise.all(ingPromiseArr)
-            const tagPromiseArr = tags.map((tag, index) => {
-                return fetch(`http://localhost:3000/api/users/${uid}/recipes/${recipe_id}/tags`, {
-                    method: 'POST',
-                    headers: {
-                        Accept: 'application/json',
-                        'Content-Type': 'application/json',
-                        Authorization: `Bearer ${accessToken}`
-                    },
+        })
+        //Tags
+        const tagPromiseArr = tags.map((tag, index) => {
+            return fetch(`http://localhost:3000/api/users/${uid}/recipes/${recipeData.id}/tags`, {
+                method: 'POST',
+                headers: {
+                    Accept: 'application/json',
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${accessToken}`
+                },
 
-                    body: JSON.stringify({
-                        tag_id: tag.id
-                    })
+                body: JSON.stringify({
+                    tag_id: tag.id
                 })
             })
-            const tagPromise = Promise.all(tagPromiseArr)
-            Promise.all([ingPromise, tagPromise]).then(() => {
-                closeRecipeModal();
-            })
-        });
+        })
+        await Promise.all([...ingPromiseArr, ...tagPromiseArr]);
+        closeRecipeModal();
     }
     const isValid = (title !== "") && (cookHrs >= 0) && (cookMins >= 0) && (instructions !== "") && isIngValid
     const closeRecipeModal = () => {
@@ -188,10 +201,41 @@ const NewRecipeModal = ({ openModal, closeModal }) => {
         setTags([]);
         closeModal();
     };
-
+    const setValues = () => {
+        setTitle(recipeData.title);
+        setCookHrs(recipeData.cook_time.hours ? recipeData.cook_time.hours : 0);
+        setCookMins(recipeData.cook_time.minutes ? recipeData.cook_time.minutes : 0);
+        setInstructions(recipeData.instructions);
+        setNotes(recipeData.notes);
+        setIngredients(
+            recipeData.ingredients.map((ing) => {
+                return {
+                    ingQty: ing.measurement_qty,
+                    ingUnit: ing.unit,
+                    unitID: ing.unit_id,
+                    ingName: ing.name,
+                    nameID: ing.ingredient_id
+                }
+            })
+        );
+        setTags(
+            recipeData.tags.map((tag) => {
+                return {
+                    name: tag.description,
+                    id: tag.id
+                }
+            })
+        );
+        setIsIngValid(true);
+    }
+    useEffect(() => {
+        if (recipeData) {
+            setValues();
+        }
+    }, [openModal]);
     return (
         <Modal openModal={openModal} closeModal={() => closeRecipeModal()}>
-            <h1 className="flex justify-center text-2xl font-semibold">Create New Recipe</h1>
+            <h1 className="flex justify-center text-2xl font-semibold">Edit {recipeData?.title || ""}</h1>
             <form ref={ref}>
                 <label className="text-xl text-content" htmlFor="title">Name</label>
                 <input
@@ -201,6 +245,7 @@ const NewRecipeModal = ({ openModal, closeModal }) => {
                     type="text"
                     className="border border-border bg-fields text-content p-2 w-full rounded-md mb-2 focus:border-2"
                     onChange={(e) => setTitle(e.target.value)}
+                    value={title}
                 />
                 <p className="text-xl text-content">Cook Time</p>
                 <div id="cookTime" className="w-full flex gap-2 items-center mb-2">
@@ -314,10 +359,10 @@ const NewRecipeModal = ({ openModal, closeModal }) => {
                         : 'bg-button text-content cursor-not-allowed'
                         }`}
                     onClick={(e) => {
-                        createRecipe();
+                        updateRecipe();
                     }}
                 >
-                    Create
+                    Update
                 </button>
 
             </form>
@@ -327,4 +372,4 @@ const NewRecipeModal = ({ openModal, closeModal }) => {
 }
 
 
-export default NewRecipeModal;
+export default EditRecipeModal;
