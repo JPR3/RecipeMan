@@ -31,7 +31,7 @@ export default function App() {
   return (
     <Router>
       <Navbar />
-      <div className="pt-20 w-full flex justify-center">
+      <div className="pt-15 w-full flex justify-center">
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/signin" element={<GuestRoute session={session}><SignIn /></GuestRoute>} />

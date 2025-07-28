@@ -315,7 +315,7 @@ const EditRecipeModal = ({ openModal, closeModal, recipeData }) => {
                     name="instructions"
                     placeholder={"Seperate each step with a new line\nSurround numbers with {{ }} to enable scaling"}
                     value={instructions}
-                    className="border border-border bg-fields text-content p-2 w-full rounded-md mb-2 focus:border-2"
+                    className="border border-border bg-fields text-content p-2 w-full rounded-md mb-2 focus:border-2 min-h-36"
                     onChange={(e) => setInstructions(e.target.value)}
                 />
                 <label className="text-xl text-content" htmlFor="notes">Notes</label>

@@ -9,7 +9,6 @@ import EditRecipeModal from "../components/EditRecipeModal";
 
 const Recipes = () => {
     const queryClient = new QueryClient();
-    const [username, setUsername] = useState('');
     const [recipes, setRecipes] = useState([]);
     const { session, user, loading } = useAuth();
     const [searchValue, setSearchValue] = useState('');
@@ -26,13 +25,6 @@ const Recipes = () => {
     const uid = user?.id;
 
     React.useEffect(() => {
-        fetch(`http://localhost:3000/api/users/${uid}`, {
-            headers: {
-                Authorization: `Bearer ${accessToken}`
-            }
-        }).then(response => response.json()).then(data => {
-            setUsername(data.username);
-        });
         fetch(`http://localhost:3000/api/users/${uid}/recipes`, {
             headers: {
                 Authorization: `Bearer ${accessToken}`
@@ -69,8 +61,7 @@ const Recipes = () => {
     };
     return (
         <div className="flex flex-col justify-start items-center w-full px-16 gap-2">
-            <h1>Recipes Page</h1>
-            <h2>Welcome, {username}</h2>
+            <h1 className="text-5xl font-semibold text-content pb-4">Recipes</h1>
             <div className="flex gap-2 items-top justify-center">
                 <div className="flex flex-col gap-1 max-w-3/8">
                     <SearchableDropdown
