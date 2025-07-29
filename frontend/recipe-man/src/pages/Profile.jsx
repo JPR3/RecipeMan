@@ -29,36 +29,32 @@ const Profile = () => {
             }).then(response => response.json()).then(data => {
                 setUsername(data.username);
             });
-            if (tab === "tags") {
-                fetch(`http://localhost:3000/api/users/${uid}/tags/custom`, {
-                    headers: {
-                        Authorization: `Bearer ${accessToken}`
-                    }
-                }).then(response => response.json()).then(data => {
-                    setTags(data);
-                });
-            }
-            if (tab === "ingredients") {
-                fetch(`http://localhost:3000/api/users/${uid}/ingredients/custom`, {
-                    headers: {
-                        Authorization: `Bearer ${accessToken}`
-                    }
-                }).then(response => response.json()).then(data => {
-                    setIngredients(data);
-                });
-            }
-            if (tab === "units") {
-                fetch(`http://localhost:3000/api/users/${uid}/units/custom`, {
-                    headers: {
-                        Authorization: `Bearer ${accessToken}`
-                    }
-                }).then(response => response.json()).then(data => {
-                    setUnits(data);
-                });
-            }
+            fetch(`http://localhost:3000/api/users/${uid}/tags/custom`, {
+                headers: {
+                    Authorization: `Bearer ${accessToken}`
+                }
+            }).then(response => response.json()).then(data => {
+                setTags(data);
+            });
+
+            fetch(`http://localhost:3000/api/users/${uid}/ingredients/custom`, {
+                headers: {
+                    Authorization: `Bearer ${accessToken}`
+                }
+            }).then(response => response.json()).then(data => {
+                setIngredients(data);
+            });
+
+            fetch(`http://localhost:3000/api/users/${uid}/units/custom`, {
+                headers: {
+                    Authorization: `Bearer ${accessToken}`
+                }
+            }).then(response => response.json()).then(data => {
+                setUnits(data);
+            });
         }
 
-    }, [accessToken, deleteModal]);
+    }, [accessToken, deleteModal, tab]);
 
     const handleSignOut = async () => {
         const { error } = await supabase.auth.signOut();
@@ -100,6 +96,14 @@ const Profile = () => {
                 elementType={tab}
             />
             <div className="w-full max-h-dvh overflow-auto bg-surface max-w-1/2 border-b-2 border-r-2 border-l-2 border-border rounded-b-md">
+                <div className={"flex px-2 py-1 w-full justify-center items-center " +
+                    (tab === "tags" && tags.length > 0 ? "border-b-2 border-border" :
+                        (tab === "ingredients" && ingredients.length > 0 ? "border-b-2 border-border" :
+                            (tab === "units" && units.length > 0 ? "border-b-2 border-border" : "")))}>
+                    <button className="cursor-pointer border border-border rounded-2xl bg-primary hover:bg-primary-hv px-2">
+                        New+
+                    </button>
+                </div>
                 {tab === "tags" && tags.map((tag, ind) => {
                     return (
                         <UserElementDisplay
@@ -136,6 +140,7 @@ const Profile = () => {
                         />
                     )
                 })}
+
             </div>
             <button className="text-content bg-red-700 hover:bg-red-800 font-semibold py-2 px-4 rounded-md mt-4" onClick={() => {
                 handleSignOut()
