@@ -11,6 +11,16 @@ router.get('/users/:uid/tags', async (req, res) => {
         res.status(500).json({ error: 'Failed to fetch tags' });
     }
 });
+// GET /api/users/:uid/tags/custom
+router.get('/users/:uid/tags/custom', async (req, res) => {
+    try {
+        const result = await pool.query('SELECT description AS name, id FROM tags WHERE user_id = $1 AND description LIKE $2', [req.params.uid, `${req.query.name || ''}%`]);
+        res.json(result.rows);
+    } catch (err) {
+        console.error('Error fetching tags:', err);
+        res.status(500).json({ error: 'Failed to fetch tags' });
+    }
+});
 // POST /api/users/:uid/tags
 router.post('/users/:uid/tags', async (req, res) => {
     try {

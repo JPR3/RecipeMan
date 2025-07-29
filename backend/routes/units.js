@@ -11,6 +11,16 @@ router.get('/users/:uid/units', async (req, res) => {
         res.status(500).json({ error: 'Failed to fetch units' });
     }
 });
+// GET /api/users/:uid/units/custom
+router.get('/users/:uid/units/custom', async (req, res) => {
+    try {
+        const result = await pool.query('SELECT name, id FROM measurement_units WHERE user_id = $1 AND name LIKE $2', [req.params.uid, `${req.query.name || ''}%`]);
+        res.json(result.rows);
+    } catch (err) {
+        console.error('Error fetching units:', err);
+        res.status(500).json({ error: 'Failed to fetch units' });
+    }
+});
 // POST /api/users/:uid/units
 router.post('/users/:uid/units', async (req, res) => {
     try {

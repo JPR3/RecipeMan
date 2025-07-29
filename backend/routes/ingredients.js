@@ -11,6 +11,16 @@ router.get('/users/:uid/ingredients', async (req, res) => {
         res.status(500).json({ error: 'Failed to fetch ingredients' });
     }
 });
+// GET /api/users/:uid/ingredients/custom
+router.get('/users/:uid/ingredients/custom', async (req, res) => {
+    try {
+        const result = await pool.query('SELECT name, id FROM ingredients WHERE user_id = $1 AND name LIKE $2', [req.params.uid, `${req.query.name || ''}%`]);
+        res.json(result.rows);
+    } catch (err) {
+        console.error('Error fetching ingredients:', err);
+        res.status(500).json({ error: 'Failed to fetch ingredients' });
+    }
+});
 // GET /api/users/:uid/ingredients/:id/tags
 router.get('/users/:uid/ingredients/:id/tags', async (req, res) => {
     try {
