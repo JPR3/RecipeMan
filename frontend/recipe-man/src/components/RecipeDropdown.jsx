@@ -28,7 +28,10 @@ const RecipeDropdown = ({ recipeName, recipeTags, recipeId, openDeleteModal, ope
     });
 
     useEffect(() => {
-        refetch();
+        if (!refreshTrigger) {
+            refetch();
+        }
+
     }, [refreshTrigger]);
 
     const closedDiv = (<div onClick={toggleDropdown} className={(isOpen ? "border-t border-r border-l rounded-t-2xl " : "border rounded-2xl ") + "cursor-pointer w-full bg-surface border-border text-content shadow-lg p-4 pl-2 flex"}>

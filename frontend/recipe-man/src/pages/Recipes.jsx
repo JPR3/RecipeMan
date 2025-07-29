@@ -25,14 +25,16 @@ const Recipes = () => {
     const uid = user?.id;
 
     React.useEffect(() => {
-        fetch(`http://localhost:3000/api/users/${uid}/recipes`, {
-            headers: {
-                Authorization: `Bearer ${accessToken}`
-            }
-        }).then(response => response.json()).then(data => {
-            console.log(data)
-            setRecipes(data);
-        });
+        if (!recipeModal && !deleteModal && !editModal) {
+            fetch(`http://localhost:3000/api/users/${uid}/recipes`, {
+                headers: {
+                    Authorization: `Bearer ${accessToken}`
+                }
+            }).then(response => response.json()).then(data => {
+                console.log(data)
+                setRecipes(data);
+            });
+        }
     }, [accessToken, recipeModal, deleteModal, editModal]);
 
     const handleOpenDeleteModal = (recipeId) => {

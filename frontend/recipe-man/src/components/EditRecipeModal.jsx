@@ -229,7 +229,7 @@ const EditRecipeModal = ({ openModal, closeModal, recipeData }) => {
         setIsIngValid(true);
     }
     useEffect(() => {
-        if (recipeData) {
+        if (recipeData && openModal) {
             setValues();
         }
     }, [openModal]);

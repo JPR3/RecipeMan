@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import supabase from "../components/SupabaseClient.jsx";
 import { useNavigate, Link } from 'react-router-dom';
 const SignUp = () => {

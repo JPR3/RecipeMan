@@ -21,35 +21,43 @@ const Profile = () => {
     const uid = user?.id;
 
     React.useEffect(() => {
-        fetch(`http://localhost:3000/api/users/${uid}`, {
-            headers: {
-                Authorization: `Bearer ${accessToken}`
+        if (!deleteModal) {
+            fetch(`http://localhost:3000/api/users/${uid}`, {
+                headers: {
+                    Authorization: `Bearer ${accessToken}`
+                }
+            }).then(response => response.json()).then(data => {
+                setUsername(data.username);
+            });
+            if (tab === "tags") {
+                fetch(`http://localhost:3000/api/users/${uid}/tags/custom`, {
+                    headers: {
+                        Authorization: `Bearer ${accessToken}`
+                    }
+                }).then(response => response.json()).then(data => {
+                    setTags(data);
+                });
             }
-        }).then(response => response.json()).then(data => {
-            setUsername(data.username);
-        });
-        fetch(`http://localhost:3000/api/users/${uid}/tags/custom`, {
-            headers: {
-                Authorization: `Bearer ${accessToken}`
+            if (tab === "ingredients") {
+                fetch(`http://localhost:3000/api/users/${uid}/ingredients/custom`, {
+                    headers: {
+                        Authorization: `Bearer ${accessToken}`
+                    }
+                }).then(response => response.json()).then(data => {
+                    setIngredients(data);
+                });
             }
-        }).then(response => response.json()).then(data => {
-            console.log(data)
-            setTags(data);
-        });
-        fetch(`http://localhost:3000/api/users/${uid}/ingredients/custom`, {
-            headers: {
-                Authorization: `Bearer ${accessToken}`
+            if (tab === "units") {
+                fetch(`http://localhost:3000/api/users/${uid}/units/custom`, {
+                    headers: {
+                        Authorization: `Bearer ${accessToken}`
+                    }
+                }).then(response => response.json()).then(data => {
+                    setUnits(data);
+                });
             }
-        }).then(response => response.json()).then(data => {
-            setIngredients(data);
-        });
-        fetch(`http://localhost:3000/api/users/${uid}/units/custom`, {
-            headers: {
-                Authorization: `Bearer ${accessToken}`
-            }
-        }).then(response => response.json()).then(data => {
-            setUnits(data);
-        });
+        }
+
     }, [accessToken, deleteModal]);
 
     const handleSignOut = async () => {
