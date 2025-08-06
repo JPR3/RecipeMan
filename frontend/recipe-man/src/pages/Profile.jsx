@@ -4,6 +4,7 @@ import supabase from '../components/SupabaseClient';
 import UserElementDisplay from '../components/UserElementDisplay';
 import DeleteElementModal from '../components/DeleteElementModal';
 import NewElementModal from '../components/NewElementModal';
+import EditElementModal from '../components/EditElementModal';
 const Profile = () => {
     const [username, setUsername] = useState('');
     const [tab, setTab] = useState("tags");
@@ -12,6 +13,8 @@ const Profile = () => {
     const [units, setUnits] = useState([]);
     const [deleteModal, setDeleteModal] = useState(false);
     const [newModal, setNewModal] = useState(false);
+    const [editModal, setEditModal] = useState(false);
+    const [editElement, setEditElement] = useState(null);
     const [deleteElement, setDeleteElement] = useState(null);
     const { session, user, loading } = useAuth();
     if (loading) {
@@ -55,7 +58,7 @@ const Profile = () => {
             });
         }
 
-    }, [accessToken, deleteModal, newModal, tab]);
+    }, [accessToken, deleteModal, newModal, editModal, tab]);
 
     const handleSignOut = async () => {
         const { error } = await supabase.auth.signOut();
@@ -101,6 +104,13 @@ const Profile = () => {
                 closeModal={() => setNewModal(false)}
                 elementType={tab}
             />
+            <EditElementModal
+                openModal={editModal}
+                closeModal={() => setEditModal(false)}
+                elementType={tab}
+                elementName={editElement?.name}
+                elementId={editElement?.id}
+            />
             <div className="w-full max-h-dvh overflow-auto bg-surface max-w-1/2 border-b-2 border-r-2 border-l-2 border-border rounded-b-md">
                 <div className={"flex px-2 py-1 w-full justify-center items-center " +
                     (tab === "tags" && tags.length > 0 ? "border-b-2 border-border" :
@@ -119,7 +129,7 @@ const Profile = () => {
                             element={tag}
                             borderStyle={ind < tags.length - 1 ? "border-b-2 border-border" : ""}
                             elementType="tags"
-                            onEdit={(element) => console.log("Edit tag:", element)}
+                            onEdit={(element) => { setEditElement(element); setEditModal(true); }}
                             onDelete={(element) => { setDeleteElement(element); setDeleteModal(true); }}
                         />
                     )
@@ -131,7 +141,7 @@ const Profile = () => {
                             element={ingredient}
                             borderStyle={ind < ingredients.length - 1 ? "border-b-2 border-border" : ""}
                             elementType="ingredients"
-                            onEdit={(element) => console.log("Edit ingredient:", element)}
+                            onEdit={(element) => { setEditElement(element); setEditModal(true); }}
                             onDelete={(element) => { setDeleteElement(element); setDeleteModal(true); }}
                         />
                     )
@@ -143,7 +153,7 @@ const Profile = () => {
                             element={unit}
                             borderStyle={ind < units.length - 1 ? "border-b-2 border-border" : ""}
                             elementType="units"
-                            onEdit={(element) => console.log("Edit unit:", element)}
+                            onEdit={(element) => { setEditElement(element); setEditModal(true); }}
                             onDelete={(element) => { setDeleteElement(element); setDeleteModal(true); }}
                         />
                     )
