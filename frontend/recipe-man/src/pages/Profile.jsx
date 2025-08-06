@@ -3,7 +3,7 @@ import { useAuth } from '../AuthProvider';
 import supabase from '../components/SupabaseClient';
 import UserElementDisplay from '../components/UserElementDisplay';
 import DeleteElementModal from '../components/DeleteElementModal';
-
+import NewElementModal from '../components/NewElementModal';
 const Profile = () => {
     const [username, setUsername] = useState('');
     const [tab, setTab] = useState("tags");
@@ -11,6 +11,7 @@ const Profile = () => {
     const [ingredients, setIngredients] = useState([]);
     const [units, setUnits] = useState([]);
     const [deleteModal, setDeleteModal] = useState(false);
+    const [newModal, setNewModal] = useState(false);
     const [deleteElement, setDeleteElement] = useState(null);
     const { session, user, loading } = useAuth();
     if (loading) {
@@ -54,7 +55,7 @@ const Profile = () => {
             });
         }
 
-    }, [accessToken, deleteModal, tab]);
+    }, [accessToken, deleteModal, newModal, tab]);
 
     const handleSignOut = async () => {
         const { error } = await supabase.auth.signOut();
@@ -69,7 +70,7 @@ const Profile = () => {
             <div className="w-full flex justify-center items-end max-w-1/2">
                 <div className="border-b-2 border-border w-full"></div>
                 <h2
-                    className={"text-xl text-content mt-4 border-border border-t-2 border-r-2 border-l-2 px-2 cursor-pointer" + (tab === "tags" ? " pb-0.5 bg-surface font-semibold text-primary" : " border-b-2 text-content")}
+                    className={"text-xl text-content mt-4 border-border border-t-2 border-r-2 border-l-2 rounded-tl-md px-2 cursor-pointer" + (tab === "tags" ? " pb-0.5 bg-surface font-semibold text-primary" : " border-b-2 text-content")}
                     onClick={() => setTab("tags")}
                 >
                     Tags
@@ -81,12 +82,12 @@ const Profile = () => {
                     Ingredients
                 </h2>
                 <h2
-                    className={"text-xl text-content mt-4 border-border border-t-2 border-r-2 border-l-2 px-2 cursor-pointer" + (tab === "units" ? " pb-0.5 bg-surface font-semibold text-primary" : " border-b-2 text-content")}
+                    className={"text-xl text-content mt-4 border-border border-t-2 border-r-2 border-l-2 rounded-tr-md px-2 cursor-pointer" + (tab === "units" ? " pb-0.5 bg-surface font-semibold text-primary" : " border-b-2 text-content")}
                     onClick={() => setTab("units")}
                 >
                     Units
                 </h2>
-                <div className="border-b-2 border-border w-full"></div>
+                <div className="border-b-2 border-border w-full rotate-180 rounded-b-md"></div>
             </div>
             <DeleteElementModal
                 openModal={deleteModal}
@@ -95,12 +96,19 @@ const Profile = () => {
                 elementName={deleteElement?.name}
                 elementType={tab}
             />
+            <NewElementModal
+                openModal={newModal}
+                closeModal={() => setNewModal(false)}
+                elementType={tab}
+            />
             <div className="w-full max-h-dvh overflow-auto bg-surface max-w-1/2 border-b-2 border-r-2 border-l-2 border-border rounded-b-md">
                 <div className={"flex px-2 py-1 w-full justify-center items-center " +
                     (tab === "tags" && tags.length > 0 ? "border-b-2 border-border" :
                         (tab === "ingredients" && ingredients.length > 0 ? "border-b-2 border-border" :
                             (tab === "units" && units.length > 0 ? "border-b-2 border-border" : "")))}>
-                    <button className="cursor-pointer border border-border rounded-2xl bg-primary hover:bg-primary-hv px-2">
+                    <button
+                        className="cursor-pointer border border-border rounded-2xl bg-primary hover:bg-primary-hv px-2"
+                        onClick={() => setNewModal(true)}>
                         New+
                     </button>
                 </div>
