@@ -9,6 +9,9 @@ const Navbar = () => {
             <Link to="/" className="text-lg font-semibold hover:underline">
                 Home
             </Link>
+            <Link to="/lists" className="text-lg font-semibold hover:underline">
+                Lists
+            </Link>
             <Link to="/recipes" className="text-lg font-semibold hover:underline">
                 Recipes
             </Link>

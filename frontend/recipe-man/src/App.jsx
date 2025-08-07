@@ -1,8 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { useState, useEffect } from 'react'
 import supabase from "./components/SupabaseClient.jsx";
-import { Auth } from "@supabase/auth-ui-react";
-import { ThemeSupa } from "@supabase/auth-ui-shared";
 import ProtectedRoute from './components/ProtectedRoute';
 import GuestRoute from './components/GuestRoute';
 import Navbar from './components/Navbar';
@@ -11,7 +9,7 @@ import SignIn from './pages/SignIn';
 import SignUp from './pages/SignUp';
 import Recipes from './pages/Recipes';
 import Profile from './pages/Profile.jsx';
-
+import Lists from './pages/Lists.jsx';
 
 
 export default function App() {
@@ -38,6 +36,7 @@ export default function App() {
           <Route path="/signup" element={<GuestRoute session={session}><SignUp /></GuestRoute>} />
           <Route path="/recipes" element={<ProtectedRoute session={session}><Recipes /></ProtectedRoute>} />
           <Route path="/profile" element={<ProtectedRoute session={session}><Profile /></ProtectedRoute>} />
+          <Route path="/lists" element={<ProtectedRoute session={session}><Lists /></ProtectedRoute>} />
         </Routes>
 
       </div>
