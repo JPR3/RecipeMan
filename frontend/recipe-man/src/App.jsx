@@ -10,7 +10,7 @@ import SignUp from './pages/SignUp';
 import Recipes from './pages/Recipes';
 import Profile from './pages/Profile.jsx';
 import Lists from './pages/Lists.jsx';
-
+import ListDisplay from './pages/ListDisplay.jsx';
 
 export default function App() {
   const [session, setSession] = useState(null)
@@ -37,6 +37,7 @@ export default function App() {
           <Route path="/recipes" element={<ProtectedRoute session={session}><Recipes /></ProtectedRoute>} />
           <Route path="/profile" element={<ProtectedRoute session={session}><Profile /></ProtectedRoute>} />
           <Route path="/lists" element={<ProtectedRoute session={session}><Lists /></ProtectedRoute>} />
+          <Route path="/lists/:listId" element={<ProtectedRoute session={session}><ListDisplay /></ProtectedRoute>} />
         </Routes>
 
       </div>
