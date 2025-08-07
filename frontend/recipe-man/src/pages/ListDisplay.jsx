@@ -45,6 +45,19 @@ const ListDisplay = () => {
             <div className="text-content p-4">Loading...</div>
         );
     }
+    const capitalizeEachWord = (str) => {
+        // Convert the entire string to lowercase to handle cases where input might have mixed casing
+        const words = str.toLowerCase().split(' ');
+
+        for (let i = 0; i < words.length; i++) {
+            // Check if the word is not empty to avoid errors with multiple spaces
+            if (words[i].length > 0) {
+                words[i] = words[i].charAt(0).toUpperCase() + words[i].slice(1);
+            }
+        }
+
+        return words.join(' ');
+    }
     const handleCheckChange = (ingredientId, ingredientIndex) => {
         fetch(`http://localhost:3000/api/users/${uid}/lists/${params.listId}/list_ingredients/${ingredientId}`, {
             method: 'PATCH',
@@ -66,15 +79,19 @@ const ListDisplay = () => {
         }))
     }
     return (
-        <div className="flex flex-col justify-start items-center w-full gap-2">
+        <div className="flex flex-col justify-start items-center w-full px-16">
             <h2 className="text-content p-4 text-4xl font-semibold">{list.title}</h2>
+            <button
+                className="cursor-pointer border border-border rounded-2xl bg-primary hover:bg-primary-hv px-2 mb-2"
+                onClick={() => console.log("foo")}>
+                Add+
+            </button>
             {
                 list.ingredients.map((ingredient, index) => (
-                    <div key={index} className="flex gap-2 items-center w-full p-2 border-b border-border">
+                    <div key={index} className={"flex gap-2 px-2 items-center w-full pb-2 border-b-2 border-l-2 border-r-2 border-border bg-surface max-w-3/4 pt-2" + (index === 0 ? " border-t-2 rounded-t-md" : (index === list.ingredients.length - 1 ? " rounded-b-md" : ""))}>
                         <input className="accent-primary cursor-pointer" type="checkbox" checked={ingredient.checked} onChange={() => handleCheckChange(ingredient.id, index)} />
-                        <span className="text-content">{ingredient.name}</span>
-                        <span className="text-content">{ingredient.measurement_qty} {ingredient.unit}</span>
-                        <span className="text-content">{ingredient.tags.join(', ')}</span>
+                        <span className="text-content">{capitalizeEachWord(ingredient.name) + ":"}</span>
+                        <span className="text-content">{ingredient.measurement_qty} {capitalizeEachWord(ingredient.unit)}</span>
                     </div>
                 ))
             }

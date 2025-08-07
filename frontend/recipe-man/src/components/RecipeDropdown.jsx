@@ -98,7 +98,7 @@ const RecipeDropdown = ({ recipeName, recipeTags, recipeId, openDeleteModal, ope
                         <div>
                             {data.ingredients.map((ingredient) => (
                                 <div key={ingredient.ingredient_id} className="text-content">
-                                    <label className="pl-2 flex items-center gap-2"><input id={ingredient.name} className="accent-primary" type="checkbox" />{ingredient.measurement_qty * scale} {ingredient.unit} {ingredient.name}</label>
+                                    <label className="pl-2 flex items-center gap-2"><input id={ingredient.name} className="accent-primary cursor-pointer" type="checkbox" />{ingredient.measurement_qty * scale} {ingredient.unit} {ingredient.name}</label>
                                 </div>
                             ))}
                         </div>
@@ -109,7 +109,7 @@ const RecipeDropdown = ({ recipeName, recipeTags, recipeId, openDeleteModal, ope
                         <div>
                             {processInstructions(data.instructions).map((instruction, index) => (
                                 <div key={index} className="text-content">
-                                    <label className="pl-2 flex items-center gap-2"><input id={instruction} className="accent-primary" type="checkbox" />{instruction}</label>
+                                    <label className="pl-2 flex items-center gap-2"><input id={instruction} className="accent-primary cursor-pointer" type="checkbox" />{instruction}</label>
                                 </div>
                             ))}
                         </div>

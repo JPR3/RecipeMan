@@ -176,7 +176,7 @@ const Profile = () => {
                 })}
 
             </div>
-            <button className="text-content bg-red-700 hover:bg-red-800 font-semibold py-2 px-4 rounded-md mt-4" onClick={() => {
+            <button className="text-content bg-red-700 hover:bg-red-800 font-semibold py-2 px-4 rounded-md mt-4 mb-4" onClick={() => {
                 handleSignOut()
             }}>
                 Sign Out
