@@ -1,12 +1,14 @@
 import { useParams } from "react-router-dom";
 import { useState, useEffect } from 'react';
 import { useAuth } from '../AuthProvider';
+import ListItemDisplay from "../components/ListItemDisplay";
 
 const ListDisplay = () => {
     const { session, user, loading } = useAuth();
     const [dataLoaded, setDataLoaded] = useState(false);
     const [error, setError] = useState(null);
     const [list, setList] = useState(null);
+    const [enableEdits, setEnableEdits] = useState(true)
     if (loading) {
         return <div className="text-content p-4">Loading...</div>;
     }
@@ -15,6 +17,10 @@ const ListDisplay = () => {
     let params = useParams();
 
     useEffect(() => {
+        updateList()
+    }, [params.listId]);
+
+    const updateList = () => {
         setDataLoaded(false);
         setError(null);
         fetch(`http://localhost:3000/api/users/${uid}/lists/${params.listId}`, {
@@ -28,12 +34,13 @@ const ListDisplay = () => {
             return response.json();
         }).then(data => {
             setList(data);
+            console.log(data)
             setDataLoaded(true);
             setError(null);
         }).catch(err => {
             setError(err);
         });
-    }, [params.listId]);
+    }
 
     if (error) {
         return (
@@ -45,19 +52,7 @@ const ListDisplay = () => {
             <div className="text-content p-4">Loading...</div>
         );
     }
-    const capitalizeEachWord = (str) => {
-        // Convert the entire string to lowercase to handle cases where input might have mixed casing
-        const words = str.toLowerCase().split(' ');
 
-        for (let i = 0; i < words.length; i++) {
-            // Check if the word is not empty to avoid errors with multiple spaces
-            if (words[i].length > 0) {
-                words[i] = words[i].charAt(0).toUpperCase() + words[i].slice(1);
-            }
-        }
-
-        return words.join(' ');
-    }
     const handleCheckChange = (ingredientId, ingredientIndex) => {
         fetch(`http://localhost:3000/api/users/${uid}/lists/${params.listId}/list_ingredients/${ingredientId}`, {
             method: 'PATCH',
@@ -88,11 +83,17 @@ const ListDisplay = () => {
             </button>
             {
                 list.ingredients.map((ingredient, index) => (
-                    <div key={index} className={"flex gap-2 px-2 items-center w-full pb-2 border-b-2 border-l-2 border-r-2 border-border bg-surface max-w-3/4 pt-2" + (index === 0 ? " border-t-2 rounded-t-md" : (index === list.ingredients.length - 1 ? " rounded-b-md" : ""))}>
-                        <input className="accent-primary cursor-pointer" type="checkbox" checked={ingredient.checked} onChange={() => handleCheckChange(ingredient.id, index)} />
-                        <span className="text-content">{capitalizeEachWord(ingredient.name) + ":"}</span>
-                        <span className="text-content">{ingredient.measurement_qty} {capitalizeEachWord(ingredient.unit)}</span>
-                    </div>
+                    <ListItemDisplay
+                        key={index}
+                        ingredient={ingredient}
+                        index={index}
+                        lastInd={list.ingredients.length - 1}
+                        handleCheckChange={handleCheckChange}
+                        listId={params.listId}
+                        updateList={() => updateList()}
+                        enableEdits={enableEdits}
+                        setEnableEdits={setEnableEdits}
+                    />
                 ))
             }
         </div>

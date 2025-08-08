@@ -1,0 +1,171 @@
+import { useState } from "react"
+import SearchableDropdown from "./SearchableDropdown";
+import { useAuth } from "../AuthProvider"
+
+const ListItemDisplay = ({ ingredient, index, lastInd, handleCheckChange, listId, updateList, enableEdits, setEnableEdits }) => {
+    const [editMode, setEditMode] = useState(false);
+    const [newIng, setNewIng] = useState({ ...ingredient })
+    const [isValid, setIsValid] = useState(false)
+    const { session, user, loading } = useAuth();
+    if (loading) return <div>Loading...</div>;
+    const accessToken = session?.access_token;
+    const uid = user?.id;
+    const capitalizeEachWord = (str) => {
+        // Convert the entire string to lowercase to handle cases where input might have mixed casing
+        const words = str.toLowerCase().split(' ');
+
+        for (let i = 0; i < words.length; i++) {
+            // Check if the word is not empty to avoid errors with multiple spaces
+            if (words[i].length > 0) {
+                words[i] = words[i].charAt(0).toUpperCase() + words[i].slice(1);
+            }
+        }
+
+        return words.join(' ');
+    }
+
+    const validateIng = (data) => {
+        setIsValid(data.measurement_qty > 0 && data.unit !== "" && data.name != "" && data.name_id != "-1" && data.unit_id != "-1")
+    }
+
+    const handleEdit = (e, type, id) => {
+        let localIng = { ...newIng }
+        localIng.measurement_qty = (type === "Q" ? e : newIng.measurement_qty)
+        localIng.unit = (type === "U" ? e : newIng.unit)
+        localIng.name = (type === "N" ? e : newIng.name)
+        if (type === "U") {
+            localIng.name_id = newIng.name_id
+            if (id === "0") {
+                //Create a new unit here
+                fetch(`http://localhost:3000/api/users/${uid}/units`, {
+                    method: 'POST',
+                    headers: {
+                        Accept: 'application/json',
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${accessToken}`
+                    },
+
+                    body: JSON.stringify({
+                        unit: localIng.unit.trim().toLowerCase()
+                    })
+                }).then(response => response.json()).then(data => {
+                    localIng.unit_id = data.unit.id
+                })
+            } else {
+                localIng.unit_id = id
+            }
+        } else if (type === "N") {
+            localIng.unit_id = newIng.unit_id
+            if (id === "0") {
+                //Create a new raw ingredient here
+                fetch(`http://localhost:3000/api/users/${uid}/ingredients`, {
+                    method: 'POST',
+                    headers: {
+                        Accept: 'application/json',
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${accessToken}`
+                    },
+
+                    body: JSON.stringify({
+                        name: localIng.name.trim().toLowerCase()
+                    })
+                }).then(response => response.json()).then(data => {
+                    localIng.name_id = data.ingredient.id
+                })
+            } else {
+                localIng.name_id = id
+            }
+        }
+        validateIng(localIng)
+        setNewIng(localIng)
+    }
+
+    const handleSubmit = () => {
+        console.log(JSON.stringify({
+            qty: newIng.measurement_qty,
+            unit_id: newIng.unit_id,
+            ingredient_id: newIng.name_id
+        }))
+        fetch(`http://localhost:3000/api/users/${uid}/lists/${listId}/list_ingredients/${ingredient.id}`, {
+            method: 'PATCH',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${accessToken}`
+            },
+
+            body: JSON.stringify({
+                qty: newIng.measurement_qty,
+                unit_id: newIng.unit_id,
+                ingredient_id: newIng.name_id
+            })
+        }).then(res => {
+            if (!res.ok) {
+                console.error("Error creating element:", res.statusText);
+                return;
+            }
+            setEditMode(false);
+            setEnableEdits(true);
+            updateList();
+        })
+    }
+    return (
+        editMode ? (
+            <div key={index} className={"flex gap-2 px-2 items-center w-full pb-2 border-b-2 border-l-2 border-r-2 border-border bg-surface max-w-3/4 pt-2" + (index === 0 ? " border-t-2 rounded-t-md" : (index === lastInd ? " rounded-b-md" : ""))} >
+                <div key={index} className="flex gap-2 items-center w-full">
+                    <input
+                        type="number"
+                        min="0"
+                        id={"qty" + index}
+                        name={"qty" + index}
+                        placeholder="0"
+                        value={newIng.measurement_qty}
+                        className="border border-border bg-fields text-content pl-1 w-10 rounded-md h-6.5 focus:border-2"
+                        onChange={(e) => handleEdit(e.target.value, "Q")}
+                    />
+                    <SearchableDropdown
+                        ingredientPart="Unit"
+                        apiPath="units"
+                        index={index}
+                        onChangeEvent={(val, id) => handleEdit(val, "U", id)}
+                        fieldValue={newIng.unit}
+                    />
+                    <SearchableDropdown
+                        ingredientPart="Name"
+                        apiPath="ingredients"
+                        index={index}
+                        onChangeEvent={(val, id) => handleEdit(val, "N", id)}
+                        fieldValue={newIng.name}
+                    // existingIdsList={ingredients.map((ing) => (ing.nameID))}
+                    />
+                    {isValid &&
+                        <div className="flex flex-1 justify-end">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" className="bi bi-check2 fill-primary cursor-pointer" viewBox="0 0 16 16" onClick={() => handleSubmit()}>
+                                <path d="M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0" />
+                            </svg>
+                        </div>
+                    }
+                </div>
+            </div >
+        ) : (
+            <div key={index} className={"flex gap-2 px-2 items-center w-full pb-2 border-b-2 border-l-2 border-r-2 border-border bg-surface max-w-3/4 pt-2" + (index === 0 ? " border-t-2 rounded-t-md" : (index === lastInd ? " rounded-b-md" : ""))}>
+                <input className="accent-primary cursor-pointer" type="checkbox" checked={ingredient.checked} onChange={() => handleCheckChange(ingredient.id, index)} />
+                <span className="text-content">{capitalizeEachWord(ingredient.name) + ":"}</span>
+                <span className="text-content">{ingredient.measurement_qty} {capitalizeEachWord(ingredient.unit)}</span>
+                {enableEdits &&
+                    <div className="flex flex-1 justify-end">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-pencil-square hover:fill-primary cursor-pointer" viewBox="0 0 16 16" onClick={() => { validateIng(ingredient); setEditMode(true); setEnableEdits(false) }}>
+                            <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z" />
+                            <path fillRule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5z" />
+                        </svg>
+                    </div>
+                }
+            </div>
+        )
+
+
+
+    )
+}
+
+export default ListItemDisplay;
