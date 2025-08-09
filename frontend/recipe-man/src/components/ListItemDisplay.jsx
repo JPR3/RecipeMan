@@ -139,11 +139,22 @@ const ListItemDisplay = ({ ingredient, index, lastInd, handleCheckChange, listId
         }
 
     }
+    const handleRemove = () => {
+        fetch(`http://localhost:3000/api/users/${uid}/lists/${listId}/list_ingredients/${ingredient.id}`, {
+            method: 'DELETE',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${accessToken}`
+            }
+        }).then(res => {
+            updateList();
+        })
+    }
     return (
         (editMode) ? (
             <div key={index} className={"flex gap-2 px-2 items-center w-full pb-2 border-b-2 border-l-2 border-r-2 border-border bg-surface max-w-3/4 pt-2" + (index === 0 ? " border-t-2 rounded-t-md" : (index === lastInd ? " rounded-b-md" : ""))} >
                 <div key={index} className="flex gap-2 items-center w-full">
-                    <p>{"INDEX: " + index}</p>
                     <input
                         type="number"
                         min="0"
@@ -167,7 +178,6 @@ const ListItemDisplay = ({ ingredient, index, lastInd, handleCheckChange, listId
                         index={index}
                         onChangeEvent={(val, id) => handleEdit(val, "N", id)}
                         fieldValue={newIng.name}
-                    // existingIdsList={ingredients.map((ing) => (ing.nameID))}
                     />
                     {isValid &&
                         <div className="flex flex-1 justify-end">
@@ -180,15 +190,17 @@ const ListItemDisplay = ({ ingredient, index, lastInd, handleCheckChange, listId
             </div >
         ) : (
             <div key={index} className={"flex gap-2 px-2 items-center w-full pb-2 border-b-2 border-l-2 border-r-2 border-border bg-surface max-w-3/4 pt-2" + (index === 0 ? " border-t-2 rounded-t-md" : (index === lastInd ? " rounded-b-md" : ""))}>
-                <p>{"INDEX: " + index}</p>
                 <input className="accent-primary cursor-pointer" type="checkbox" checked={ingredient.checked} onChange={() => handleCheckChange(ingredient.id, index)} />
                 <span className="text-content">{capitalizeEachWord(ingredient.name) + ":"}</span>
                 <span className="text-content">{ingredient.measurement_qty} {capitalizeEachWord(ingredient.unit)}</span>
                 {enableEdits &&
-                    <div className="flex flex-1 justify-end">
+                    <div className="flex flex-1 justify-end gap-2">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-pencil-square hover:fill-primary cursor-pointer" viewBox="0 0 16 16" onClick={() => { validateIng(ingredient); setEditMode(true); setEnableEdits(false) }}>
                             <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z" />
                             <path fillRule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5z" />
+                        </svg>
+                        <svg onClick={() => handleRemove()} xmlns="http://www.w3.org/2000/svg" width="16" height="16" className="bi bi-x fill-content hover:fill-red-700 cursor-pointer" viewBox="0 0 14 14">
+                            <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708" />
                         </svg>
                     </div>
                 }
