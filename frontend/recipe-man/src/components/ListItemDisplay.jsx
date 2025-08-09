@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import SearchableDropdown from "./SearchableDropdown";
 import { useAuth } from "../AuthProvider"
 
@@ -10,6 +10,12 @@ const ListItemDisplay = ({ ingredient, index, lastInd, handleCheckChange, listId
     if (loading) return <div>Loading...</div>;
     const accessToken = session?.access_token;
     const uid = user?.id;
+
+    useEffect(() => {
+        setNewIng({ ...ingredient })
+        validateIng(ingredient)
+    }, [ingredient])
+
     const capitalizeEachWord = (str) => {
         // Convert the entire string to lowercase to handle cases where input might have mixed casing
         const words = str.toLowerCase().split(' ');
@@ -25,7 +31,12 @@ const ListItemDisplay = ({ ingredient, index, lastInd, handleCheckChange, listId
     }
 
     const validateIng = (data) => {
-        setIsValid(data.measurement_qty > 0 && data.unit !== "" && data.name != "" && data.name_id != "-1" && data.unit_id != "-1")
+        const localValid = (data.measurement_qty > 0 && data.unit !== "" && data.name != "" && data.name_id != "-1" && data.unit_id != "-1")
+        setIsValid(localValid)
+        if (!localValid) {
+            setEditMode(true)
+            setEnableEdits(false)
+        }
     }
 
     const handleEdit = (e, type, id) => {
@@ -81,38 +92,58 @@ const ListItemDisplay = ({ ingredient, index, lastInd, handleCheckChange, listId
     }
 
     const handleSubmit = () => {
-        console.log(JSON.stringify({
-            qty: newIng.measurement_qty,
-            unit_id: newIng.unit_id,
-            ingredient_id: newIng.name_id
-        }))
-        fetch(`http://localhost:3000/api/users/${uid}/lists/${listId}/list_ingredients/${ingredient.id}`, {
-            method: 'PATCH',
-            headers: {
-                Accept: 'application/json',
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${accessToken}`
-            },
+        if (!isValid) { return }
+        if (ingredient.id !== "-1") {
+            fetch(`http://localhost:3000/api/users/${uid}/lists/${listId}/list_ingredients/${ingredient.id}`, {
+                method: 'PATCH',
+                headers: {
+                    Accept: 'application/json',
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${accessToken}`
+                },
 
-            body: JSON.stringify({
-                qty: newIng.measurement_qty,
-                unit_id: newIng.unit_id,
-                ingredient_id: newIng.name_id
+                body: JSON.stringify({
+                    qty: newIng.measurement_qty,
+                    unit_id: newIng.unit_id,
+                    ingredient_id: newIng.name_id
+                })
+            }).then(res => {
+                if (!res.ok) {
+                    console.error("Error creating element:", res.statusText);
+                    return;
+                }
+                setEditMode(false);
+                setEnableEdits(true);
+                updateList();
             })
-        }).then(res => {
-            if (!res.ok) {
-                console.error("Error creating element:", res.statusText);
-                return;
-            }
-            setEditMode(false);
-            setEnableEdits(true);
-            updateList();
-        })
+        } else {
+            fetch(`http://localhost:3000/api/users/${uid}/lists/${listId}/list_ingredients`, {
+                method: 'POST',
+                headers: {
+                    Accept: 'application/json',
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${accessToken}`
+                },
+
+                body: JSON.stringify({
+                    qty: newIng.measurement_qty,
+                    unit_id: newIng.unit_id,
+                    ingredient_id: newIng.name_id
+                })
+            }).then(res => res.json()).then(data => {
+                console.log(data)
+                setEditMode(false)
+                setEnableEdits(true)
+                updateList();
+            })
+        }
+
     }
     return (
-        editMode ? (
+        (editMode) ? (
             <div key={index} className={"flex gap-2 px-2 items-center w-full pb-2 border-b-2 border-l-2 border-r-2 border-border bg-surface max-w-3/4 pt-2" + (index === 0 ? " border-t-2 rounded-t-md" : (index === lastInd ? " rounded-b-md" : ""))} >
                 <div key={index} className="flex gap-2 items-center w-full">
+                    <p>{"INDEX: " + index}</p>
                     <input
                         type="number"
                         min="0"
@@ -149,6 +180,7 @@ const ListItemDisplay = ({ ingredient, index, lastInd, handleCheckChange, listId
             </div >
         ) : (
             <div key={index} className={"flex gap-2 px-2 items-center w-full pb-2 border-b-2 border-l-2 border-r-2 border-border bg-surface max-w-3/4 pt-2" + (index === 0 ? " border-t-2 rounded-t-md" : (index === lastInd ? " rounded-b-md" : ""))}>
+                <p>{"INDEX: " + index}</p>
                 <input className="accent-primary cursor-pointer" type="checkbox" checked={ingredient.checked} onChange={() => handleCheckChange(ingredient.id, index)} />
                 <span className="text-content">{capitalizeEachWord(ingredient.name) + ":"}</span>
                 <span className="text-content">{ingredient.measurement_qty} {capitalizeEachWord(ingredient.unit)}</span>

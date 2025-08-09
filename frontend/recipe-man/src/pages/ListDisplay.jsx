@@ -73,14 +73,22 @@ const ListDisplay = () => {
             })
         }))
     }
+    const handleAddItem = () => {
+        setList({ ...list, ingredients: [{ checked: false, id: "-1", measurement_qty: 0, name: "", name_id: "-1", unit: "", unit_id: "" }, ...list.ingredients] })
+    }
     return (
         <div className="flex flex-col justify-start items-center w-full px-16">
             <h2 className="text-content p-4 text-4xl font-semibold">{list.title}</h2>
-            <button
+            {enableEdits ? (<button
                 className="cursor-pointer border border-border rounded-2xl bg-primary hover:bg-primary-hv px-2 mb-2"
-                onClick={() => console.log("foo")}>
+                onClick={() => handleAddItem()}>
                 Add+
-            </button>
+            </button>) : (<button
+                className="cursor-pointer border border-border rounded-2xl bg-red-600 hover:bg-red-700 px-2 mb-2"
+                onClick={() => { setEnableEdits(true); updateList() }}>
+                Cancel
+            </button>)}
+
             {
                 list.ingredients.map((ingredient, index) => (
                     <ListItemDisplay
