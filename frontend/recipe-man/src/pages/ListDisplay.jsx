@@ -97,21 +97,75 @@ const ListDisplay = () => {
         })
         Promise.all(promises).then(res => {
             updateList();
-            console.log("donezo")
         })
+    }
+    const handleToggleAll = () => {
+        if (checkedIds.length > 0) {
+            //Deselect all
+            const promises = checkedIds.map((id) => {
+                fetch(`http://localhost:3000/api/users/${uid}/lists/${params.listId}/list_ingredients/${id}`, {
+                    method: 'PATCH',
+                    headers: {
+                        Accept: 'application/json',
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${accessToken}`
+                    },
+                    body: JSON.stringify({ checked: false })
+                })
+            })
+            Promise.all(promises).then(() => {
+                setList({
+                    ...list, ingredients: list.ingredients.map((ing) => {
+                        return { ...ing, checked: false }
+                    })
+                });
+                setCheckedIds([])
+            }
+            )
+        } else {
+            //Select all
+            const promises = list.ingredients.map((ing) => {
+                fetch(`http://localhost:3000/api/users/${uid}/lists/${params.listId}/list_ingredients/${ing.id}`, {
+                    method: 'PATCH',
+                    headers: {
+                        Accept: 'application/json',
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${accessToken}`
+                    },
+                    body: JSON.stringify({ checked: true })
+                })
+            })
+            Promise.all(promises).then(() => {
+                setList({
+                    ...list, ingredients: list.ingredients.map((ing) => {
+                        return { ...ing, checked: true }
+                    })
+                });
+                setCheckedIds(list.ingredients.map((ing) => ing.id))
+            })
+        }
     }
     return (
         <div className="flex flex-col justify-start items-center w-full px-16">
             <h2 className="text-content p-4 text-4xl font-semibold">{list.title}</h2>
-            {enableEdits ? (<button
-                className="cursor-pointer border border-border rounded-2xl bg-primary hover:bg-primary-hv px-2 mb-2"
-                onClick={() => handleAddItem()}>
-                Add+
-            </button>) : (<button
-                className="cursor-pointer border border-border rounded-2xl bg-red-600 hover:bg-red-700 px-2 mb-2"
-                onClick={() => { setEnableEdits(true); updateList() }}>
-                Cancel
-            </button>)}
+            <div className="flex w-full max-w-3/4 items-center justify-between">
+                <div className="flex ml-2.5 gap-1 items-center">
+                    <input id="toggleAll" className="accent-primary cursor-pointer" type="checkbox" checked={checkedIds.length > 0} onChange={() => handleToggleAll()} />
+                    <label htmlFor="toggleAll">{checkedIds.length > 0 ? "Deselect All" : "Select All"}</label>
+                </div>
+
+                {enableEdits ? (<button
+                    className="cursor-pointer border border-border rounded-2xl bg-primary hover:bg-primary-hv px-2 mb-2"
+                    onClick={() => handleAddItem()}>
+                    Add+
+                </button>) : (<button
+                    className="cursor-pointer border border-border rounded-2xl bg-red-600 hover:bg-red-700 px-2 mb-2"
+                    onClick={() => { setEnableEdits(true); updateList() }}>
+                    Cancel
+                </button>)}
+                <div className="">test</div>
+            </div>
+
 
             {
                 list.ingredients.map((ingredient, index) => (
@@ -132,7 +186,7 @@ const ListDisplay = () => {
                 className={(enableEdits ? "bg-primary hover:bg-primary-hv cursor-pointer" : "bg-button cursor-not-allowed") + " text-content border border-border rounded-2xl px-2 mb-2 mt-3"}
                 disabled={!enableEdits}
                 onClick={() => { console.log("Checked: " + checkedIds); handleRemoveChecked() }}>
-                Remove Checked Items
+                Remove Selected Items
             </button>
         </div>
 
