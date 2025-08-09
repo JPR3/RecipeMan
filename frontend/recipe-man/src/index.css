@@ -2,9 +2,9 @@
 /* @custom-variant dark (&:where(.dark, .dark *)); */
 
 @theme {
-  --color-primary: #10b981;
+  --color-primary: #10cf81;
   /* Green text for links */
-  --color-primary-hv: #059669;
+  --color-primary-hv: #05af69;
   /* Darker green for hovering links */
   --color-border: #6b7280;
   /* Light grey for content borders */
