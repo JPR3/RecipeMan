@@ -9,6 +9,7 @@ const ListDisplay = () => {
     const [error, setError] = useState(null);
     const [list, setList] = useState(null);
     const [enableEdits, setEnableEdits] = useState(true)
+    const [checkedIds, setCheckedIds] = useState([])
     if (loading) {
         return <div className="text-content p-4">Loading...</div>;
     }
@@ -34,7 +35,9 @@ const ListDisplay = () => {
             return response.json();
         }).then(data => {
             setList(data);
+            setCheckedIds(data.ingredients.filter((ing) => ing.checked).map((ing) => ing.id))
             console.log(data)
+            console.log(data.ingredients.filter((ing) => ing.checked).map((ing) => ing.id))
             setDataLoaded(true);
             setError(null);
         }).catch(err => {
@@ -68,6 +71,11 @@ const ListDisplay = () => {
                     if (index !== ingredientIndex) {
                         return elem
                     }
+                    if (elem.checked) {
+                        setCheckedIds(checkedIds.filter((id) => id !== elem.id))
+                    } else {
+                        setCheckedIds([...checkedIds, elem.id])
+                    }
                     return { ...elem, checked: !elem.checked }
                 })
             })
@@ -75,6 +83,22 @@ const ListDisplay = () => {
     }
     const handleAddItem = () => {
         setList({ ...list, ingredients: [{ checked: false, id: "-1", measurement_qty: 0, name: "", name_id: "-1", unit: "", unit_id: "" }, ...list.ingredients] })
+    }
+    const handleRemoveChecked = () => {
+        const promises = checkedIds.map((id) => {
+            return fetch(`http://localhost:3000/api/users/${uid}/lists/${params.listId}/list_ingredients/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    Accept: 'application/json',
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${accessToken}`
+                }
+            })
+        })
+        Promise.all(promises).then(res => {
+            updateList();
+            console.log("donezo")
+        })
     }
     return (
         <div className="flex flex-col justify-start items-center w-full px-16">
@@ -104,6 +128,12 @@ const ListDisplay = () => {
                     />
                 ))
             }
+            <button
+                className={(enableEdits ? "bg-primary hover:bg-primary-hv cursor-pointer" : "bg-button cursor-not-allowed") + " text-content border border-border rounded-2xl px-2 mb-2 mt-3"}
+                disabled={!enableEdits}
+                onClick={() => { console.log("Checked: " + checkedIds); handleRemoveChecked() }}>
+                Remove Checked Items
+            </button>
         </div>
 
     )
