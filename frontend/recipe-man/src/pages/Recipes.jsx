@@ -6,6 +6,7 @@ import NewRecipeModal from "../components/NewRecipeModal"
 import DeleteConfirmationModal from "../components/DeleteConfirmationModal";
 import SearchableDropdown from "../components/SearchableDropdown";
 import EditRecipeModal from "../components/EditRecipeModal";
+import ListSelectionModal from "../components/ListSelectionModal";
 
 const Recipes = () => {
     const queryClient = new QueryClient();
@@ -18,12 +19,24 @@ const Recipes = () => {
     const [deleteModalId, setDeleteModalId] = useState(null);
     const [editModal, setEditModal] = useState(false);
     const [editModalData, setEditModalData] = useState(null);
+    const [listSelectionModal, setListSelectionModal] = useState(false);
+    const [listSelectionData, setListSelectionData] = useState(null);
+    const [lists, setLists] = useState([]);
 
     if (loading) return <div>Loading...</div>;
 
     const accessToken = session?.access_token;
     const uid = user?.id;
 
+    React.useEffect(() => {
+        fetch(`http://localhost:3000/api/users/${uid}/lists`, {
+            headers: {
+                Authorization: `Bearer ${accessToken}`
+            }
+        }).then(response => response.json()).then(data => {
+            setLists(data);
+        });
+    }, [accessToken])
     React.useEffect(() => {
         if (!recipeModal && !deleteModal && !editModal) {
             fetch(`http://localhost:3000/api/users/${uid}/recipes`, {
@@ -44,6 +57,10 @@ const Recipes = () => {
     const handleOpenEditModal = (recipeData) => {
         setEditModalData(recipeData);
         setEditModal(true);
+    }
+    const handleOpenListModal = (recipeData) => {
+        setListSelectionData(recipeData);
+        setListSelectionModal(true);
     }
     const processRecipes = (recipes) => {
         return recipes.filter(recipe =>
@@ -109,6 +126,7 @@ const Recipes = () => {
             <NewRecipeModal openModal={recipeModal} closeModal={() => setRecipeModal(false)}></NewRecipeModal>
             <EditRecipeModal openModal={editModal} closeModal={() => setEditModal(false)} recipeData={editModalData} />
             <DeleteConfirmationModal openModal={deleteModal} closeModal={() => setDeleteModal(false)} recipeId={deleteModalId} recipeName={recipes.find(recipe => recipe.id === deleteModalId)?.title} />
+            <ListSelectionModal openModal={listSelectionModal} closeModal={() => setListSelectionModal(false)} recipeData={listSelectionData} lists={lists} />
             <QueryClientProvider client={queryClient}>
                 <div className="w-full flex flex-col gap-4 items-center mb-4">
                     {processRecipes(recipes).map((vals) => (
@@ -119,6 +137,7 @@ const Recipes = () => {
                             recipeId={vals.id}
                             openDeleteModal={() => handleOpenDeleteModal(vals.id)}
                             openEditModal={(data) => handleOpenEditModal(data)}
+                            openListModal={(data) => handleOpenListModal(data)}
                             refreshTrigger={editModal && editModalData?.id === vals.id}
                         />
                     ))}

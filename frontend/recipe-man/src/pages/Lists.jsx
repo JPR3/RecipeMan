@@ -4,7 +4,6 @@ import { Link } from 'react-router-dom';
 
 const Lists = () => {
     const [lists, setLists] = useState([]);
-    const [tab, setTab] = useState(0)
     const { session, user, loading } = useAuth();
     if (loading) {
         return <div className="text-content p-4">Loading...</div>;

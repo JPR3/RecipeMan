@@ -3,7 +3,7 @@ import { useAuth } from '../AuthProvider';
 import TagDisplay from './TagDisplay';
 import { useQuery } from '@tanstack/react-query';
 
-const RecipeDropdown = ({ recipeName, recipeTags, recipeId, openDeleteModal, openEditModal, refreshTrigger }) => {
+const RecipeDropdown = ({ recipeName, recipeTags, recipeId, openDeleteModal, openEditModal, openListModal, refreshTrigger }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [scale, setScale] = useState(1);
     const toggleDropdown = () => {
@@ -94,7 +94,13 @@ const RecipeDropdown = ({ recipeName, recipeTags, recipeId, openDeleteModal, ope
                         />
                     </div>
                     <div>
-                        <h1 className="text-content font-semibold text-xl">Ingredients</h1>
+                        <div className="flex gap-4">
+                            <h1 className="text-content font-semibold text-xl">Ingredients</h1>
+                            <button className="cursor-pointer border border-border rounded-2xl bg-primary hover:bg-primary-hv px-2 text-sm" onClick={() => openListModal(data)}>
+                                + Add to List
+                            </button>
+                        </div>
+
                         <div>
                             {data.ingredients.map((ingredient) => (
                                 <div key={ingredient.ingredient_id} className="text-content">
