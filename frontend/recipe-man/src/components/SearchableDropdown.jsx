@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../AuthProvider';
 import { useRef } from 'react';
+import { capitalizeEachWord } from '../helpers';
 
 const SearchableDropdown = ({ ingredientPart, apiPath, onChangeEvent, index, fieldValue, existingIdsList, disableAdd }) => {
     const [localValue, setLocalValue] = useState("")
@@ -51,19 +52,6 @@ const SearchableDropdown = ({ ingredientPart, apiPath, onChangeEvent, index, fie
             }
         })
         setDisplayAdd(localDisplay && !disableAdd)
-    }
-    const capitalizeEachWord = (str) => {
-        // Convert the entire string to lowercase to handle cases where input might have mixed casing
-        const words = str.toLowerCase().split(' ');
-
-        for (let i = 0; i < words.length; i++) {
-            // Check if the word is not empty to avoid errors with multiple spaces
-            if (words[i].length > 0) {
-                words[i] = words[i].charAt(0).toUpperCase() + words[i].slice(1);
-            }
-        }
-
-        return words.join(' ');
     }
     return (
         <div className='grid'>

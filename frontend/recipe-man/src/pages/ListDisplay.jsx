@@ -2,6 +2,7 @@ import { useParams } from "react-router-dom";
 import { useState, useEffect } from 'react';
 import { useAuth } from '../AuthProvider';
 import ListItemDisplay from "../components/ListItemDisplay";
+import { editIngredient, createIngredient } from "../helpers";
 
 const ListDisplay = () => {
     const { session, user, loading } = useAuth();
@@ -144,94 +145,6 @@ const ListDisplay = () => {
             })
         }
     }
-    const checkMerge = (newIngredient) => {
-        for (var i = 0; i < list.ingredients.length; i++) {
-            const ing = list.ingredients[i]
-            if (ing.id !== newIngredient.id && ing.name_id === newIngredient.name_id) {
-                //Handle merging different units here
-                if (ing.unit_id === newIngredient.unit_id) {
-                    return { ...ing, measurement_qty: (Number(ing.measurement_qty) + Number(newIngredient.measurement_qty)) }
-                }
-            }
-        }
-        return null;
-    }
-    const editIngredient = (newVals) => {
-        const mergedVals = checkMerge(newVals);
-        if (mergedVals) {
-            return Promise.all([
-                fetch(`http://localhost:3000/api/users/${uid}/lists/${params.listId}/list_ingredients/${mergedVals.id}`, {
-                    method: 'PATCH',
-                    headers: {
-                        Accept: 'application/json',
-                        'Content-Type': 'application/json',
-                        Authorization: `Bearer ${accessToken}`
-                    },
-
-                    body: JSON.stringify({
-                        qty: mergedVals.measurement_qty,
-                        unit_id: mergedVals.unit_id,
-                        ingredient_id: mergedVals.name_id
-                    })
-                }),
-                fetch(`http://localhost:3000/api/users/${uid}/lists/${params.listId}/list_ingredients/${newVals.id}`, {
-                    method: 'DELETE',
-                    headers: {
-                        Accept: 'application/json',
-                        'Content-Type': 'application/json',
-                        Authorization: `Bearer ${accessToken}`
-                    }
-                })
-            ])
-        }
-        return fetch(`http://localhost:3000/api/users/${uid}/lists/${params.listId}/list_ingredients/${newVals.id}`, {
-            method: 'PATCH',
-            headers: {
-                Accept: 'application/json',
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${accessToken}`
-            },
-
-            body: JSON.stringify({
-                qty: newVals.measurement_qty,
-                unit_id: newVals.unit_id,
-                ingredient_id: newVals.name_id
-            })
-        })
-    }
-    const createIngredient = (newVals) => {
-        const mergedVals = checkMerge(newVals);
-        if (mergedVals) {
-            return fetch(`http://localhost:3000/api/users/${uid}/lists/${params.listId}/list_ingredients/${mergedVals.id}`, {
-                method: 'PATCH',
-                headers: {
-                    Accept: 'application/json',
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${accessToken}`
-                },
-
-                body: JSON.stringify({
-                    qty: mergedVals.measurement_qty,
-                    unit_id: mergedVals.unit_id,
-                    ingredient_id: mergedVals.name_id
-                })
-            })
-        }
-        return fetch(`http://localhost:3000/api/users/${uid}/lists/${params.listId}/list_ingredients`, {
-            method: 'POST',
-            headers: {
-                Accept: 'application/json',
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${accessToken}`
-            },
-
-            body: JSON.stringify({
-                qty: newVals.measurement_qty,
-                unit_id: newVals.unit_id,
-                ingredient_id: newVals.name_id
-            })
-        })
-    }
     return (
         <div className="flex flex-col justify-start items-center w-full px-16">
             <h2 className="text-content p-4 text-4xl font-semibold">{list.title}</h2>
@@ -266,8 +179,8 @@ const ListDisplay = () => {
                         updateList={() => updateList()}
                         enableEdits={enableEdits}
                         setEnableEdits={setEnableEdits}
-                        editIngredient={editIngredient}
-                        createIngredient={createIngredient}
+                        editIngredient={(newVals) => editIngredient(newVals, list, params.listId, uid, accessToken)}
+                        createIngredient={(newVals) => createIngredient(newVals, list, params.listId, uid, accessToken)}
                     />
                 ))
             }
