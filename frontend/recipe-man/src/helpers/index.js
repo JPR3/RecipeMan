@@ -1,4 +1,4 @@
 import { capitalizeEachWord } from "./stringFormatHelper";
-import { editIngredient, createIngredient } from "./shoppingListHelper";
+import { editListIngredient, createListIngredient } from "./shoppingListHelper";
 
-export { capitalizeEachWord, editIngredient, createIngredient }
+export { capitalizeEachWord, editListIngredient, createListIngredient }

@@ -2,7 +2,7 @@ import { useParams } from "react-router-dom";
 import { useState, useEffect } from 'react';
 import { useAuth } from '../AuthProvider';
 import ListItemDisplay from "../components/ListItemDisplay";
-import { editIngredient, createIngredient } from "../helpers";
+import { editListIngredient, createListIngredient } from "../helpers";
 
 const ListDisplay = () => {
     const { session, user, loading } = useAuth();
@@ -179,8 +179,8 @@ const ListDisplay = () => {
                         updateList={() => updateList()}
                         enableEdits={enableEdits}
                         setEnableEdits={setEnableEdits}
-                        editIngredient={(newVals) => editIngredient(newVals, list, params.listId, uid, accessToken)}
-                        createIngredient={(newVals) => createIngredient(newVals, list, params.listId, uid, accessToken)}
+                        editListIngredient={(newVals) => editListIngredient(newVals, list, params.listId, uid, accessToken)}
+                        createListIngredient={(newVals) => createListIngredient(newVals, list, params.listId, uid, accessToken)}
                     />
                 ))
             }

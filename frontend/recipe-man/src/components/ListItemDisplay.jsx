@@ -3,7 +3,7 @@ import SearchableDropdown from "./SearchableDropdown";
 import { useAuth } from "../AuthProvider"
 import { capitalizeEachWord } from "../helpers";
 
-const ListItemDisplay = ({ ingredient, index, lastInd, handleCheckChange, listId, updateList, enableEdits, setEnableEdits, editIngredient, createIngredient }) => {
+const ListItemDisplay = ({ ingredient, index, lastInd, handleCheckChange, listId, updateList, enableEdits, setEnableEdits, editListIngredient, createListIngredient }) => {
     const [editMode, setEditMode] = useState(false);
     const [newIng, setNewIng] = useState({ ...ingredient })
     const [isValid, setIsValid] = useState(false)
@@ -83,14 +83,14 @@ const ListItemDisplay = ({ ingredient, index, lastInd, handleCheckChange, listId
         if (!isValid) { return }
         if (ingredient.id !== "-1") {
             //Edit an existing item
-            editIngredient(newIng).then(res => {
+            editListIngredient(newIng).then(res => {
                 setEditMode(false);
                 setEnableEdits(true);
                 updateList();
             })
         } else {
             //Create a new item
-            createIngredient(newIng).then(res => res.json()).then(data => {
+            createListIngredient(newIng).then(res => res.json()).then(data => {
                 console.log(data)
                 setEditMode(false)
                 setEnableEdits(true)

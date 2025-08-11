@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useAuth } from "../AuthProvider"
 import Modal from "./Modal";
-import { createIngredient } from "../helpers";
+import { createListIngredient } from "../helpers";
 
 const ListSelectionModal = ({ openModal, closeModal, recipeData, lists }) => {
     const { session, user } = useAuth();
@@ -22,7 +22,7 @@ const ListSelectionModal = ({ openModal, closeModal, recipeData, lists }) => {
             return response.json();
         }).then(data => {
             Promise.all(recipeData.ingredients.map((ing) => {
-                return createIngredient({ ...ing, name_id: ing.ingredient_id }, data, selectedList.id, uid, accessToken)
+                return createListIngredient({ ...ing, name_id: ing.ingredient_id }, data, selectedList.id, uid, accessToken)
             })).then(res => {
                 closeListModal()
             })

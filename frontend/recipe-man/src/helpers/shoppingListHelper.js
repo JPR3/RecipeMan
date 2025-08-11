@@ -14,7 +14,7 @@ const checkMerge = (newIngredient, list) => {
 
 
 
-export const editIngredient = (newVals, list, listId, uid, accessToken) => {
+export const editListIngredient = (newVals, list, listId, uid, accessToken) => {
     const mergedVals = checkMerge(newVals, list);
     if (mergedVals) {
         return Promise.all([
@@ -61,7 +61,7 @@ export const editIngredient = (newVals, list, listId, uid, accessToken) => {
 
 
 
-export const createIngredient = (newVals, list, listId, uid, accessToken) => {
+export const createListIngredient = (newVals, list, listId, uid, accessToken) => {
     const mergedVals = checkMerge(newVals, list);
     if (mergedVals) {
         return fetch(`http://localhost:3000/api/users/${uid}/lists/${listId}/list_ingredients/${mergedVals.id}`, {
