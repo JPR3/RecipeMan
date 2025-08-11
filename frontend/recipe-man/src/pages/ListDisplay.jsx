@@ -37,7 +37,6 @@ const ListDisplay = () => {
             setList(data);
             setCheckedIds(data.ingredients.filter((ing) => ing.checked).map((ing) => ing.id))
             console.log(data)
-            console.log(data.ingredients.filter((ing) => ing.checked).map((ing) => ing.id))
             setDataLoaded(true);
             setError(null);
         }).catch(err => {
@@ -145,6 +144,94 @@ const ListDisplay = () => {
             })
         }
     }
+    const checkMerge = (newIngredient) => {
+        for (var i = 0; i < list.ingredients.length; i++) {
+            const ing = list.ingredients[i]
+            if (ing.id !== newIngredient.id && ing.name_id === newIngredient.name_id) {
+                //Handle merging different units here
+                if (ing.unit_id === newIngredient.unit_id) {
+                    return { ...ing, measurement_qty: (Number(ing.measurement_qty) + Number(newIngredient.measurement_qty)) }
+                }
+            }
+        }
+        return null;
+    }
+    const editIngredient = (newVals) => {
+        const mergedVals = checkMerge(newVals);
+        if (mergedVals) {
+            return Promise.all([
+                fetch(`http://localhost:3000/api/users/${uid}/lists/${params.listId}/list_ingredients/${mergedVals.id}`, {
+                    method: 'PATCH',
+                    headers: {
+                        Accept: 'application/json',
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${accessToken}`
+                    },
+
+                    body: JSON.stringify({
+                        qty: mergedVals.measurement_qty,
+                        unit_id: mergedVals.unit_id,
+                        ingredient_id: mergedVals.name_id
+                    })
+                }),
+                fetch(`http://localhost:3000/api/users/${uid}/lists/${params.listId}/list_ingredients/${newVals.id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        Accept: 'application/json',
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${accessToken}`
+                    }
+                })
+            ])
+        }
+        return fetch(`http://localhost:3000/api/users/${uid}/lists/${params.listId}/list_ingredients/${newVals.id}`, {
+            method: 'PATCH',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${accessToken}`
+            },
+
+            body: JSON.stringify({
+                qty: newVals.measurement_qty,
+                unit_id: newVals.unit_id,
+                ingredient_id: newVals.name_id
+            })
+        })
+    }
+    const createIngredient = (newVals) => {
+        const mergedVals = checkMerge(newVals);
+        if (mergedVals) {
+            return fetch(`http://localhost:3000/api/users/${uid}/lists/${params.listId}/list_ingredients/${mergedVals.id}`, {
+                method: 'PATCH',
+                headers: {
+                    Accept: 'application/json',
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${accessToken}`
+                },
+
+                body: JSON.stringify({
+                    qty: mergedVals.measurement_qty,
+                    unit_id: mergedVals.unit_id,
+                    ingredient_id: mergedVals.name_id
+                })
+            })
+        }
+        return fetch(`http://localhost:3000/api/users/${uid}/lists/${params.listId}/list_ingredients`, {
+            method: 'POST',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${accessToken}`
+            },
+
+            body: JSON.stringify({
+                qty: newVals.measurement_qty,
+                unit_id: newVals.unit_id,
+                ingredient_id: newVals.name_id
+            })
+        })
+    }
     return (
         <div className="flex flex-col justify-start items-center w-full px-16">
             <h2 className="text-content p-4 text-4xl font-semibold">{list.title}</h2>
@@ -179,13 +266,15 @@ const ListDisplay = () => {
                         updateList={() => updateList()}
                         enableEdits={enableEdits}
                         setEnableEdits={setEnableEdits}
+                        editIngredient={editIngredient}
+                        createIngredient={createIngredient}
                     />
                 ))
             }
             <button
                 className={(enableEdits ? "bg-primary hover:bg-primary-hv cursor-pointer" : "bg-button cursor-not-allowed") + " text-content border border-border rounded-2xl px-2 mb-2 mt-3"}
                 disabled={!enableEdits}
-                onClick={() => { console.log("Checked: " + checkedIds); handleRemoveChecked() }}>
+                onClick={() => handleRemoveChecked()}>
                 Remove Selected Items
             </button>
         </div>

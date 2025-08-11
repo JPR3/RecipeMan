@@ -2,7 +2,7 @@ import { useState, useEffect } from "react"
 import SearchableDropdown from "./SearchableDropdown";
 import { useAuth } from "../AuthProvider"
 
-const ListItemDisplay = ({ ingredient, index, lastInd, handleCheckChange, listId, updateList, enableEdits, setEnableEdits }) => {
+const ListItemDisplay = ({ ingredient, index, lastInd, handleCheckChange, listId, updateList, enableEdits, setEnableEdits, editIngredient, createIngredient }) => {
     const [editMode, setEditMode] = useState(false);
     const [newIng, setNewIng] = useState({ ...ingredient })
     const [isValid, setIsValid] = useState(false)
@@ -94,43 +94,15 @@ const ListItemDisplay = ({ ingredient, index, lastInd, handleCheckChange, listId
     const handleSubmit = () => {
         if (!isValid) { return }
         if (ingredient.id !== "-1") {
-            fetch(`http://localhost:3000/api/users/${uid}/lists/${listId}/list_ingredients/${ingredient.id}`, {
-                method: 'PATCH',
-                headers: {
-                    Accept: 'application/json',
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${accessToken}`
-                },
-
-                body: JSON.stringify({
-                    qty: newIng.measurement_qty,
-                    unit_id: newIng.unit_id,
-                    ingredient_id: newIng.name_id
-                })
-            }).then(res => {
-                if (!res.ok) {
-                    console.error("Error creating element:", res.statusText);
-                    return;
-                }
+            //Edit an existing item
+            editIngredient(newIng).then(res => {
                 setEditMode(false);
                 setEnableEdits(true);
                 updateList();
             })
         } else {
-            fetch(`http://localhost:3000/api/users/${uid}/lists/${listId}/list_ingredients`, {
-                method: 'POST',
-                headers: {
-                    Accept: 'application/json',
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${accessToken}`
-                },
-
-                body: JSON.stringify({
-                    qty: newIng.measurement_qty,
-                    unit_id: newIng.unit_id,
-                    ingredient_id: newIng.name_id
-                })
-            }).then(res => res.json()).then(data => {
+            //Create a new item
+            createIngredient(newIng).then(res => res.json()).then(data => {
                 console.log(data)
                 setEditMode(false)
                 setEnableEdits(true)
