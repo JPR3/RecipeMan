@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useAuth } from '../AuthProvider';
 import TagDisplay from './TagDisplay';
 import { useQuery } from '@tanstack/react-query';

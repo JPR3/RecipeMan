@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../AuthProvider';
 import ListItemDisplay from "../components/ListItemDisplay";
 import { editListIngredient, createListIngredient } from "../helpers";
+import RecipeSelectionModal from "../components/RecipeSelectionModal"
 
 const ListDisplay = () => {
     const { session, user, loading } = useAuth();
@@ -11,6 +12,8 @@ const ListDisplay = () => {
     const [list, setList] = useState(null);
     const [enableEdits, setEnableEdits] = useState(true)
     const [checkedIds, setCheckedIds] = useState([])
+    const [recipeSelectionModal, setRecipeSelectionModal] = useState(false)
+    const [recipes, setRecipes] = useState([])
     if (loading) {
         return <div className="text-content p-4">Loading...</div>;
     }
@@ -19,7 +22,14 @@ const ListDisplay = () => {
     let params = useParams();
 
     useEffect(() => {
-        updateList()
+        updateList();
+        fetch(`http://localhost:3000/api/users/${uid}/recipes`, {
+            headers: {
+                Authorization: `Bearer ${accessToken}`
+            }
+        }).then(response => response.json()).then(data => {
+            setRecipes(data);
+        });
     }, [params.listId]);
 
     const updateList = () => {
@@ -147,6 +157,13 @@ const ListDisplay = () => {
     }
     return (
         <div className="flex flex-col justify-start items-center w-full px-16">
+            <RecipeSelectionModal
+                openModal={recipeSelectionModal}
+                closeModal={() => { setRecipeSelectionModal(false); }}
+                recipes={recipes}
+                createListIngredient={(newVals) => createListIngredient(newVals, list, params.listId, uid, accessToken)}
+                updateList={updateList}
+            />
             <h2 className="text-content p-4 text-4xl font-semibold">{list.title}</h2>
             <div className="flex w-full max-w-3/4 items-center justify-between">
                 <div className="flex ml-2.5 gap-1 items-center">
@@ -157,11 +174,16 @@ const ListDisplay = () => {
                 {enableEdits ? (<button
                     className="cursor-pointer border border-border rounded-2xl bg-primary hover:bg-primary-hv px-2 mb-2"
                     onClick={() => handleAddItem()}>
-                    Add+
+                    Add New+
                 </button>) : (<button
                     className="cursor-pointer border border-border rounded-2xl bg-red-600 hover:bg-red-700 px-2 mb-2"
                     onClick={() => { setEnableEdits(true); updateList() }}>
                     Cancel
+                </button>)}
+                {enableEdits && (<button
+                    className="cursor-pointer border border-border rounded-2xl bg-primary hover:bg-primary-hv px-2 mb-2"
+                    onClick={() => { setRecipeSelectionModal(true) }}>
+                    Select from Recipe
                 </button>)}
                 <div className="">test</div>
             </div>
