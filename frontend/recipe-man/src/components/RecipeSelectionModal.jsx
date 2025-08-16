@@ -22,8 +22,8 @@ const RecipeSelectionModal = ({ openModal, closeModal, recipes, createListIngred
         updateList()
         closeModal()
     }
-    const addToIncoming = (newIng) => {
-        setIncomingIngredients([...incomingIngredients, newIng])
+    const addToIncoming = (newIngs) => {
+        setIncomingIngredients([...incomingIngredients, ...newIngs])
     }
     const removeFromIncoming = (targetIngs) => {
         setIncomingIngredients(incomingIngredients.filter(item => !targetIngs.includes(item)))
@@ -53,7 +53,7 @@ const RecipeSelectionModal = ({ openModal, closeModal, recipes, createListIngred
                     className={(incomingIngredients.length > 0 ? "bg-primary hover:bg-primary-hv cursor-pointer" : "bg-button cursor-not-allowed") + " text-content border border-border rounded-2xl px-2 mb-2 mt-3"}
                     disabled={incomingIngredients.length === 0}
                     onClick={handleSubmit}>
-                    {incomingIngredients.length > 0 ? "Add Ingredients to list" : "Select Ingredients"}
+                    {incomingIngredients.length > 0 ? `Add ${incomingIngredients.length} Ingredients to List` : "Select Ingredients"}
                 </button>
             </div>
         </Modal>

@@ -47,7 +47,6 @@ const ListDisplay = () => {
         }).then(data => {
             setList(data);
             setCheckedIds(data.ingredients.filter((ing) => ing.checked).map((ing) => ing.id))
-            console.log(data)
             setDataLoaded(true);
             setError(null);
         }).catch(err => {
