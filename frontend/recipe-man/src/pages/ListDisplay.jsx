@@ -14,6 +14,8 @@ const ListDisplay = () => {
     const [checkedIds, setCheckedIds] = useState([])
     const [recipeSelectionModal, setRecipeSelectionModal] = useState(false)
     const [recipes, setRecipes] = useState([])
+    const [sortMenu, setSortMenu] = useState(false)
+    const [sortValue, setSortValue] = useState(0)
     if (loading) {
         return <div className="text-content p-4">Loading...</div>;
     }
@@ -32,6 +34,34 @@ const ListDisplay = () => {
         });
     }, [params.listId]);
 
+    const setSortedList = (data, sortVal) => {
+        let compareFunc
+        console.log(sortVal)
+        switch (sortVal) {
+            case 0:
+                compareFunc = (a, b) => { return (a.name < b.name) ? -1 : 1 }
+                break;
+            case 1:
+                compareFunc = (a, b) => { return (a.name > b.name) ? -1 : 1 }
+                break;
+            case 2:
+                compareFunc = (a, b) => { return Date.parse(b.created_at) - Date.parse(a.created_at) }
+                break;
+            case 3:
+                compareFunc = (a, b) => { return Date.parse(a.created_at) - Date.parse(b.created_at) }
+                break;
+            //TODO: Implement sorting by tags!
+            case 4:
+                compareFunc = (a, b) => { a.name < b.name }
+                break;
+            case 5:
+                compareFunc = (a, b) => { a.name > b.name }
+                break;
+
+        }
+        setList({ ...data, ingredients: data.ingredients.toSorted(compareFunc) })
+        console.log(data.ingredients.toSorted(compareFunc))
+    }
     const updateList = () => {
         setDataLoaded(false);
         setError(null);
@@ -45,7 +75,7 @@ const ListDisplay = () => {
             }
             return response.json();
         }).then(data => {
-            setList(data);
+            setSortedList(data, sortValue);
             setCheckedIds(data.ingredients.filter((ing) => ing.checked).map((ing) => ing.id))
             setDataLoaded(true);
             setError(null);
@@ -154,6 +184,41 @@ const ListDisplay = () => {
             })
         }
     }
+    const handleSortBlur = (event) => {
+        if (!(event.relatedTarget && event.relatedTarget.id.startsWith("sort"))) {
+            setSortMenu(false)
+        }
+    }
+    const getSortText = (num) => {
+        let text;
+        switch (num) {
+            case 0: case 1:
+                text = "Alphabetical"
+                break;
+            case 2: case 3:
+                text = "Date Added"
+                break;
+            case 4: case 5:
+                text = "Tags"
+                break;
+
+        }
+        return (
+            <div className="flex items-center">
+                <p>{text}</p>
+                {
+                    num % 2 == 0 ?
+                        (<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-arrow-up-short" viewBox="0 0 16 16">
+                            <path fillRule="evenodd" d="M8 12a.5.5 0 0 0 .5-.5V5.707l2.146 2.147a.5.5 0 0 0 .708-.708l-3-3a.5.5 0 0 0-.708 0l-3 3a.5.5 0 1 0 .708.708L7.5 5.707V11.5a.5.5 0 0 0 .5.5" />
+                        </svg>) :
+                        (<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-arrow-down-short" viewBox="0 -1 16 16">
+                            <path fillRule="evenodd" d="M8 4a.5.5 0 0 1 .5.5v5.793l2.146-2.147a.5.5 0 0 1 .708.708l-3 3a.5.5 0 0 1-.708 0l-3-3a.5.5 0 1 1 .708-.708L7.5 10.293V4.5A.5.5 0 0 1 8 4" />
+                        </svg>)
+                }
+
+            </div>
+        )
+    }
     return (
         <div className="flex flex-col justify-start items-center w-full px-16">
             <RecipeSelectionModal
@@ -184,7 +249,53 @@ const ListDisplay = () => {
                     onClick={() => { setRecipeSelectionModal(true) }}>
                     Select from Recipe
                 </button>)}
-                <div className="">test</div>
+
+                <div className="mb-2 relative w-1/4">
+                    <div className={"cursor-pointer flex gap-2 border-border pr-1 pl-2 bg-surface items-center justify-between border-2 " + (sortMenu ? "rounded-t-xl" : " rounded-full")}
+                        onClick={() => setSortMenu(!sortMenu)}
+                        onBlur={handleSortBlur}
+                        tabIndex="0"
+                    >
+                        {getSortText(sortValue)}
+                        {
+                            sortMenu ? (<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-chevron-up" viewBox="0 0 16 16">
+                                <path fillRule="evenodd" d="M7.646 4.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1-.708.708L8 5.707l-5.646 5.647a.5.5 0 0 1-.708-.708z" />
+                            </svg>) : (
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-chevron-down" viewBox="0 -2 16 16">
+                                    <path fillRule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708" />
+                                </svg>)
+                        }
+
+                    </div>
+                    {sortMenu && (
+                        <div
+                            className="z-10 absolute w-full"
+                        >
+                            {
+                                [...Array(6).keys()].map((ind) => {
+                                    if (ind !== sortValue) {
+                                        return (
+                                            <div
+                                                id={`sort-${ind}`}
+                                                key={`sort-${ind}`}
+                                                onKeyDownCapture={(e) => { if (e.key === "Enter") { setSortMenu(false); setSortValue(ind) } }}
+                                                onClick={(e) => { setSortMenu(false); setSortValue(ind); setSortedList(list, ind) }}
+                                                tabIndex="0"
+                                                className={"w-full cursor-pointer border-r-2 border-l-2 border-border bg-surface text-content h-6.5 px-1 hover:bg-fields" + ((ind === 5 || (sortValue === 5 && ind === 4)) ? " border-b-2 rounded-b-xl" : "")}
+                                            >
+                                                {getSortText(ind)}
+                                            </div>
+                                        )
+                                    }
+
+                                })
+                            }
+
+                        </div>
+
+
+                    )}
+                </div>
             </div>
 
 
@@ -211,7 +322,7 @@ const ListDisplay = () => {
                 onClick={() => handleRemoveChecked()}>
                 Remove Selected Items
             </button>
-        </div>
+        </div >
 
     )
 }
