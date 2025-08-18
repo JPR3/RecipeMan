@@ -19,68 +19,12 @@ router.get('/users/:uid/lists/:id', async (req, res) => {
         if (list_result.rows.length === 0) {
             return res.status(404).json({ error: 'Shopping list not found' });
         }
-        // const ing_sql = `WITH ing_table AS (SELECT li.created_at, li.checked AS checked, li.id AS ingredient_id, i.id AS base_ingredient_id, i.name, li.measurement_qty, mu.name AS unit, mu.id AS unit_id FROM list_ingredients li INNER JOIN ingredients i ON i.id = li.ingredient_id INNER JOIN measurement_units mu ON li.measurement_unit_id = mu.id WHERE li.list_id = $1),
-        //             list_item_tags AS (SELECT lt.list_id AS ingredient_id, t.description FROM list_tags lt JOIN tags t ON t.id = lt.tag_id),
-        //             ingredient_level_tags AS (SELECT it.ingredient_id AS base_ingredient_id, t.description FROM ingredient_tags it JOIN tags t ON t.id = it.tag_id WHERE it.user_id = $2)
-        //             SELECT created_at, unit_id, ing_table.base_ingredient_id AS name_id, ing_table.ingredient_id AS id, checked, ing_table.name, ing_table.measurement_qty, ing_table.unit, array_agg(DISTINCT COALESCE(lit.description, ilt.description)) AS tags
-        //             FROM ing_table LEFT JOIN list_item_tags lit ON lit.ingredient_id = ing_table.ingredient_id LEFT JOIN ingredient_level_tags ilt ON ilt.base_ingredient_id = ing_table.base_ingredient_id
-        //             GROUP BY created_at, unit_id, name_id, id, checked, ing_table.name, ing_table.measurement_qty, ing_table.unit;`
-        const ing_sql = `WITH ing_table AS (
-    SELECT li.created_at,
-           li.checked AS checked,
-           li.id AS ingredient_id,
-           i.id AS base_ingredient_id,
-           i.name,
-           li.measurement_qty,
-           mu.name AS unit,
-           mu.id AS unit_id
-    FROM list_ingredients li
-    INNER JOIN ingredients i ON i.id = li.ingredient_id
-    INNER JOIN measurement_units mu ON li.measurement_unit_id = mu.id
-    WHERE li.list_id = $1
-),
-list_item_tags AS (
-    SELECT lt.list_id AS ingredient_id, t.description
-    FROM list_tags lt
-    JOIN tags t ON t.id = lt.tag_id
-),
-ingredient_level_tags AS (
-    SELECT it.ingredient_id AS base_ingredient_id, t.description
-    FROM ingredient_tags it
-    JOIN tags t ON t.id = it.tag_id
-    WHERE it.user_id = $2
-),
-all_tags AS (
-    SELECT ing_table.ingredient_id, ing_table.base_ingredient_id, lit.description AS tag
-    FROM ing_table
-    LEFT JOIN list_item_tags lit ON lit.ingredient_id = ing_table.ingredient_id
-    UNION
-    SELECT ing_table.ingredient_id, ing_table.base_ingredient_id, ilt.description AS tag
-    FROM ing_table
-    LEFT JOIN ingredient_level_tags ilt ON ilt.base_ingredient_id = ing_table.base_ingredient_id
-)
-SELECT ing_table.created_at,
-       ing_table.unit_id,
-       ing_table.base_ingredient_id AS name_id,
-       ing_table.ingredient_id AS id,
-       ing_table.checked,
-       ing_table.name,
-       ing_table.measurement_qty,
-       ing_table.unit,
-       array_agg(DISTINCT all_tags.tag) AS tags
-FROM ing_table
-LEFT JOIN all_tags
-       ON ing_table.ingredient_id = all_tags.ingredient_id
-      AND ing_table.base_ingredient_id = all_tags.base_ingredient_id
-GROUP BY ing_table.created_at,
-         ing_table.unit_id,
-         name_id,
-         id,
-         checked,
-         ing_table.name,
-         ing_table.measurement_qty,
-         ing_table.unit;`
-
+        const ing_sql = `WITH ing_table AS (SELECT li.created_at, li.checked AS checked, li.id AS ingredient_id, i.id AS base_ingredient_id, i.name, li.measurement_qty, mu.name AS unit, mu.id AS unit_id FROM list_ingredients li INNER JOIN ingredients i ON i.id = li.ingredient_id INNER JOIN measurement_units mu ON li.measurement_unit_id = mu.id WHERE li.list_id = $1),
+                    list_item_tags AS (SELECT lt.list_id AS ingredient_id, t.description FROM list_tags lt JOIN tags t ON t.id = lt.tag_id),
+                    ingredient_level_tags AS (SELECT it.ingredient_id AS base_ingredient_id, t.description FROM ingredient_tags it JOIN tags t ON t.id = it.tag_id WHERE it.user_id = $2)
+                    SELECT created_at, unit_id, ing_table.base_ingredient_id AS name_id, ing_table.ingredient_id AS id, checked, ing_table.name, ing_table.measurement_qty, ing_table.unit, array_agg(lit.description) AS list_item_tags, array_agg(ilt.description) AS global_tags
+                    FROM ing_table LEFT JOIN list_item_tags lit ON lit.ingredient_id = ing_table.ingredient_id LEFT JOIN ingredient_level_tags ilt ON ilt.base_ingredient_id = ing_table.base_ingredient_id
+                    GROUP BY created_at, unit_id, name_id, id, checked, ing_table.name, ing_table.measurement_qty, ing_table.unit;`
         const ingredients_result = await pool.query(ing_sql, [req.params.id, req.params.uid]);
         list_result.rows[0].ingredients = ingredients_result.rows;
 

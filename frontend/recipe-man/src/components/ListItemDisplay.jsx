@@ -16,7 +16,6 @@ const ListItemDisplay = ({ ingredient, index, lastInd, handleCheckChange, listId
     useEffect(() => {
         setNewIng({ ...ingredient })
         validateIng(ingredient)
-        console.log(ingredient)
     }, [ingredient])
 
 
@@ -115,7 +114,7 @@ const ListItemDisplay = ({ ingredient, index, lastInd, handleCheckChange, listId
     }
     return (
         (editMode) ? (
-            <div key={index} className={"flex gap-2 px-2 items-center w-full pb-2 border-b-2 border-l-2 border-r-2 border-border bg-surface max-w-3/4 pt-2" + (index === 0 ? " border-t-2 rounded-t-md" : (index === lastInd ? " rounded-b-md" : ""))} >
+            <div key={index} className={"flex-col gap-2 px-2 items-center w-full pb-2 border-b-2 border-l-2 border-r-2 border-border bg-surface max-w-3/4 pt-2" + (index === 0 ? " border-t-2 rounded-t-md" : (index === lastInd ? " rounded-b-md" : ""))} >
                 <div key={index} className="flex gap-2 items-center w-full">
                     <input
                         type="number"
@@ -149,13 +148,14 @@ const ListItemDisplay = ({ ingredient, index, lastInd, handleCheckChange, listId
                         </div>
                     }
                 </div>
+                <p>test</p>
             </div >
         ) : (
             <div key={index} className={"flex gap-2 px-2 items-center w-full pb-2 border-b-2 border-l-2 border-r-2 border-border bg-surface max-w-3/4 pt-2" + (index === 0 ? " border-t-2 rounded-t-md" : (index === lastInd ? " rounded-b-md" : ""))}>
                 <input className="accent-primary cursor-pointer" type="checkbox" checked={ingredient.checked} onChange={() => handleCheckChange(ingredient.id, index)} />
                 <span className="text-content">{capitalizeEachWord(ingredient.name) + ":"}</span>
                 <span className="text-content">{ingredient.measurement_qty} {capitalizeEachWord(ingredient.unit)}</span>
-                <TagDisplay tags={ingredient.tags}></TagDisplay>
+                <TagDisplay tags={[...new Set([...ingredient.global_tags, ...ingredient.list_item_tags])]}></TagDisplay>
                 {enableEdits &&
                     <div className="flex flex-1 justify-end gap-2">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-pencil-square hover:fill-primary cursor-pointer" viewBox="0 0 16 16" onClick={() => { validateIng(ingredient); setEditMode(true); setEnableEdits(false) }}>
