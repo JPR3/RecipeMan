@@ -2,6 +2,7 @@ import { useState, useEffect } from "react"
 import SearchableDropdown from "./SearchableDropdown";
 import { useAuth } from "../AuthProvider"
 import { capitalizeEachWord } from "../helpers";
+import TagDisplay from "./TagDisplay";
 
 const ListItemDisplay = ({ ingredient, index, lastInd, handleCheckChange, listId, updateList, enableEdits, setEnableEdits, editListIngredient, createListIngredient }) => {
     const [editMode, setEditMode] = useState(false);
@@ -15,6 +16,7 @@ const ListItemDisplay = ({ ingredient, index, lastInd, handleCheckChange, listId
     useEffect(() => {
         setNewIng({ ...ingredient })
         validateIng(ingredient)
+        console.log(ingredient)
     }, [ingredient])
 
 
@@ -153,6 +155,7 @@ const ListItemDisplay = ({ ingredient, index, lastInd, handleCheckChange, listId
                 <input className="accent-primary cursor-pointer" type="checkbox" checked={ingredient.checked} onChange={() => handleCheckChange(ingredient.id, index)} />
                 <span className="text-content">{capitalizeEachWord(ingredient.name) + ":"}</span>
                 <span className="text-content">{ingredient.measurement_qty} {capitalizeEachWord(ingredient.unit)}</span>
+                <TagDisplay tags={ingredient.tags}></TagDisplay>
                 {enableEdits &&
                     <div className="flex flex-1 justify-end gap-2">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-pencil-square hover:fill-primary cursor-pointer" viewBox="0 0 16 16" onClick={() => { validateIng(ingredient); setEditMode(true); setEnableEdits(false) }}>
