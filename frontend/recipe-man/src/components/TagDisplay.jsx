@@ -1,7 +1,8 @@
 const TagDisplay = ({ tags, textSize, className }) => {
+    const alphaTags = tags.sort((a, b) => { return a.localeCompare(b) })
     return (
         <div className={"flex flex-wrap gap-2 content-center " + (className ?? "")}>
-            {tags.map((tag) => (
+            {alphaTags.map((tag) => (
                 <span key={tag} className={"bg-fields text-content rounded-full px-1.5 " + (textSize ?? "text-xs")}>
                     {tag}
                 </span>

@@ -35,6 +35,23 @@ const ListDisplay = () => {
     }, [params.listId]);
 
     const setSortedList = (data, sortVal) => {
+        const getFirstTags = (combinedTagsA, combinedTagsB) => {
+            const firstA = combinedTagsA.reduce((minString, currentString) => {
+                if (currentString.localeCompare(minString) < 0) {
+                    return currentString;
+                } else {
+                    return minString;
+                }
+            });
+            const firstB = combinedTagsB.reduce((minString, currentString) => {
+                if (currentString.localeCompare(minString) < 0) {
+                    return currentString;
+                } else {
+                    return minString;
+                }
+            });
+            return [firstA, firstB]
+        }
         let compareFunc
         switch (sortVal) {
             case 0:
@@ -51,10 +68,26 @@ const ListDisplay = () => {
                 break;
             //TODO: Implement sorting by tags!
             case 4:
-                compareFunc = (a, b) => { a.name < b.name }
+                compareFunc = (a, b) => {
+                    const combinedTagsA = [...a.list_item_tags.map((t) => t.description), ...a.global_tags.map((t) => t.description)]
+                    const combinedTagsB = [...b.list_item_tags.map((t) => t.description), ...b.global_tags.map((t) => t.description)]
+                    if (combinedTagsA.length === 0 || combinedTagsB.length === 0) {
+                        return combinedTagsB.length - combinedTagsA.length
+                    }
+                    const [firstA, firstB] = getFirstTags(combinedTagsA, combinedTagsB)
+                    return (firstA < firstB) ? -1 : 1
+                }
                 break;
             case 5:
-                compareFunc = (a, b) => { a.name > b.name }
+                compareFunc = (a, b) => {
+                    const combinedTagsA = [...a.list_item_tags.map((t) => t.description), ...a.global_tags.map((t) => t.description)]
+                    const combinedTagsB = [...b.list_item_tags.map((t) => t.description), ...b.global_tags.map((t) => t.description)]
+                    if (combinedTagsA.length === 0 || combinedTagsB.length === 0) {
+                        return combinedTagsB.length - combinedTagsA.length
+                    }
+                    const [firstA, firstB] = getFirstTags(combinedTagsA, combinedTagsB)
+                    return (firstA > firstB) ? -1 : 1
+                }
                 break;
 
         }
