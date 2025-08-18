@@ -81,7 +81,6 @@ const ListItemDisplay = ({ ingredient, index, lastInd, handleCheckChange, listId
     }
 
     const handleSubmit = () => {
-        console.log(newIng)
         if (!isValid) { return }
         if (ingredient.id !== "-1") {
             //Edit an existing item
@@ -92,8 +91,7 @@ const ListItemDisplay = ({ ingredient, index, lastInd, handleCheckChange, listId
             })
         } else {
             //Create a new item
-            createListIngredient(newIng).then(res => res.json()).then(data => {
-                console.log(data)
+            createListIngredient(newIng).then(res => {
                 setEditMode(false)
                 setEnableEdits(true)
                 updateList();

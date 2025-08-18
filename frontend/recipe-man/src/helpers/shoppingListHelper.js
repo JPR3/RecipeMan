@@ -54,7 +54,7 @@ const checkMerge = (newIngredient, list) => {
         const ing = list.ingredients[i]
         if (ing.id !== newIngredient.id && ing.name_id === newIngredient.name_id) {
             if (ing.unit_id === newIngredient.unit_id) {
-                return { ...ing, measurement_qty: (Number(ing.measurement_qty) + Number(newIngredient.measurement_qty)) }
+                return { ...ing, measurement_qty: (Number(ing.measurement_qty) + Number(newIngredient.measurement_qty)), list_item_tags: [...new Set([...ing.list_item_tags, ...newIngredient.list_item_tags])] }
             } else if (checkFamily(ing.unit_id, newIngredient.unit_id)) {
                 //Handle merging different units
                 const ingFactor = reductionFactorDict[ing.unit_id]
@@ -182,10 +182,32 @@ export const editListIngredient = async (newVals, list, listId, uid, accessToken
 
 
 
-export const createListIngredient = (newVals, list, listId, uid, accessToken) => {
+export const createListIngredient = async (newVals, list, listId, uid, accessToken) => {
     const mergedVals = checkMerge(newVals, list);
     if (mergedVals) {
-        return fetch(`http://localhost:3000/api/users/${uid}/lists/${listId}/list_ingredients/${mergedVals.id}`, {
+        await fetch(`http://localhost:3000/api/users/${uid}/lists/${listId}/list_ingredients/${mergedVals.id}/tags`, {
+            method: 'DELETE',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${accessToken}`
+            }
+        })
+        const tagPromiseArr = mergedVals.list_item_tags.map((tag, index) => {
+            return fetch(`http://localhost:3000/api/users/${uid}/lists/${listId}/list_ingredients/${mergedVals.id}/tags`, {
+                method: 'POST',
+                headers: {
+                    Accept: 'application/json',
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${accessToken}`
+                },
+
+                body: JSON.stringify({
+                    tag_id: tag.id
+                })
+            })
+        })
+        return Promise.all([fetch(`http://localhost:3000/api/users/${uid}/lists/${listId}/list_ingredients/${mergedVals.id}`, {
             method: 'PATCH',
             headers: {
                 Accept: 'application/json',
@@ -198,9 +220,10 @@ export const createListIngredient = (newVals, list, listId, uid, accessToken) =>
                 unit_id: mergedVals.unit_id,
                 ingredient_id: mergedVals.name_id
             })
-        })
+        }),
+        ...tagPromiseArr])
     }
-    return fetch(`http://localhost:3000/api/users/${uid}/lists/${listId}/list_ingredients`, {
+    const res = await fetch(`http://localhost:3000/api/users/${uid}/lists/${listId}/list_ingredients`, {
         method: 'POST',
         headers: {
             Accept: 'application/json',
@@ -214,4 +237,20 @@ export const createListIngredient = (newVals, list, listId, uid, accessToken) =>
             ingredient_id: newVals.name_id
         })
     })
+    const data = await res.json()
+    const tagPromiseArr = newVals.list_item_tags.map((tag, index) => {
+        return fetch(`http://localhost:3000/api/users/${uid}/lists/${listId}/list_ingredients/${data.item.id}/tags`, {
+            method: 'POST',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${accessToken}`
+            },
+
+            body: JSON.stringify({
+                tag_id: tag.id
+            })
+        })
+    })
+    return Promise.all(tagPromiseArr)
 }

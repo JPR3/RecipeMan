@@ -36,7 +36,6 @@ const ListDisplay = () => {
 
     const setSortedList = (data, sortVal) => {
         let compareFunc
-        console.log(sortVal)
         switch (sortVal) {
             case 0:
                 compareFunc = (a, b) => { return (a.name < b.name) ? -1 : 1 }
@@ -60,7 +59,6 @@ const ListDisplay = () => {
 
         }
         setList({ ...data, ingredients: data.ingredients.toSorted(compareFunc) })
-        console.log(data.ingredients.toSorted(compareFunc))
     }
     const updateList = () => {
         setDataLoaded(false);
@@ -121,7 +119,7 @@ const ListDisplay = () => {
         }))
     }
     const handleAddItem = () => {
-        setList({ ...list, ingredients: [{ checked: false, id: "-1", measurement_qty: 0, name: "", name_id: "-1", unit: "", unit_id: "" }, ...list.ingredients] })
+        setList({ ...list, ingredients: [{ checked: false, id: "-1", measurement_qty: 0, name: "", name_id: "-1", unit: "", unit_id: "", list_item_tags: [], global_tags: [] }, ...list.ingredients] })
     }
     const handleRemoveChecked = () => {
         const promises = checkedIds.map((id) => {
