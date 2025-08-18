@@ -81,6 +81,7 @@ const ListItemDisplay = ({ ingredient, index, lastInd, handleCheckChange, listId
     }
 
     const handleSubmit = () => {
+        console.log(newIng)
         if (!isValid) { return }
         if (ingredient.id !== "-1") {
             //Edit an existing item
@@ -111,6 +112,33 @@ const ListItemDisplay = ({ ingredient, index, lastInd, handleCheckChange, listId
         }).then(res => {
             updateList();
         })
+    }
+    const handleRemoveTag = (index) => {
+        const localTags = [...newIng.list_item_tags]
+        localTags.splice(index, 1)
+        setNewIng({ ...newIng, list_item_tags: localTags })
+    }
+    const handleAddTag = (val, id) => {
+        if (id === "0") {
+            fetch(`http://localhost:3000/api/users/${uid}/tags`, {
+                method: 'POST',
+                headers: {
+                    Accept: 'application/json',
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${accessToken}`
+                },
+
+                body: JSON.stringify({
+                    description: val.trim().toLowerCase()
+                })
+            }).then(response => response.json()).then(data => {
+                const newTags = [...newIng.list_item_tags, { description: val, id: data.tag.id }]
+                setNewIng({ ...newIng, list_item_tags: newTags })
+            })
+        } else {
+            const newTags = [...newIng.list_item_tags, { description: val, id: id }]
+            setNewIng({ ...newIng, list_item_tags: newTags })
+        }
     }
     return (
         (editMode) ? (
@@ -148,14 +176,36 @@ const ListItemDisplay = ({ ingredient, index, lastInd, handleCheckChange, listId
                         </div>
                     }
                 </div>
-                <p>test</p>
+                <p className="text-md text-content">Tags:</p>
+                <div className="flex flex-wrap gap-2 items-center mb-2">
+                    {newIng.list_item_tags.map((tag, index) => (
+                        <div key={tag.description} className="flex items-center bg-fields rounded-full">
+                            <span className="text-content px-1.5 pb-0.5 text-sm">
+                                {tag.description}
+                            </span>
+                            <svg onClick={() => handleRemoveTag(index)} xmlns="http://www.w3.org/2000/svg" width="16" height="16" className="bi bi-x fill-content hover:fill-red-700 cursor-pointer" viewBox="3 0 16 16">
+                                <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708" />
+                            </svg>
+                        </div>
+                    ))}
+                </div>
+                <div className="max-w-40">
+                    <SearchableDropdown
+                        ingredientPart="Tag"
+                        apiPath="tags"
+                        index="0"
+                        onChangeEvent={(val, id) => handleAddTag(val, id)}
+                        fieldValue={""}
+                        existingIdsList={newIng.list_item_tags.map((tag) => (tag.id))}
+                    />
+                </div>
             </div >
         ) : (
             <div key={index} className={"flex gap-2 px-2 items-center w-full pb-2 border-b-2 border-l-2 border-r-2 border-border bg-surface max-w-3/4 pt-2" + (index === 0 ? " border-t-2 rounded-t-md" : (index === lastInd ? " rounded-b-md" : ""))}>
                 <input className="accent-primary cursor-pointer" type="checkbox" checked={ingredient.checked} onChange={() => handleCheckChange(ingredient.id, index)} />
                 <span className="text-content">{capitalizeEachWord(ingredient.name) + ":"}</span>
                 <span className="text-content">{ingredient.measurement_qty} {capitalizeEachWord(ingredient.unit)}</span>
-                <TagDisplay tags={[...new Set([...ingredient.global_tags, ...ingredient.list_item_tags])]}></TagDisplay>
+                <TagDisplay tags={[...new Set([...ingredient.global_tags, ...ingredient.list_item_tags])].map((t) => t.description)}></TagDisplay>
                 {enableEdits &&
                     <div className="flex flex-1 justify-end gap-2">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-pencil-square hover:fill-primary cursor-pointer" viewBox="0 0 16 16" onClick={() => { validateIng(ingredient); setEditMode(true); setEnableEdits(false) }}>

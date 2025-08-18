@@ -19,15 +19,59 @@ router.get('/users/:uid/lists/:id', async (req, res) => {
         if (list_result.rows.length === 0) {
             return res.status(404).json({ error: 'Shopping list not found' });
         }
-        const ing_sql = `WITH ing_table AS (SELECT li.created_at, li.checked AS checked, li.id AS ingredient_id, i.id AS base_ingredient_id, i.name, li.measurement_qty, mu.name AS unit, mu.id AS unit_id FROM list_ingredients li INNER JOIN ingredients i ON i.id = li.ingredient_id INNER JOIN measurement_units mu ON li.measurement_unit_id = mu.id WHERE li.list_id = $1),
-                    list_item_tags AS (SELECT lt.list_id AS ingredient_id, t.description FROM list_tags lt JOIN tags t ON t.id = lt.tag_id),
-                    ingredient_level_tags AS (SELECT it.ingredient_id AS base_ingredient_id, t.description FROM ingredient_tags it JOIN tags t ON t.id = it.tag_id WHERE it.user_id = $2)
-                    SELECT created_at, unit_id, ing_table.base_ingredient_id AS name_id, ing_table.ingredient_id AS id, checked, ing_table.name, ing_table.measurement_qty, ing_table.unit, array_agg(lit.description) AS list_item_tags, array_agg(ilt.description) AS global_tags
-                    FROM ing_table LEFT JOIN list_item_tags lit ON lit.ingredient_id = ing_table.ingredient_id LEFT JOIN ingredient_level_tags ilt ON ilt.base_ingredient_id = ing_table.base_ingredient_id
-                    GROUP BY created_at, unit_id, name_id, id, checked, ing_table.name, ing_table.measurement_qty, ing_table.unit;`
+        const ing_sql = `WITH ing_table AS (
+    SELECT li.created_at,
+           li.checked AS checked,
+           li.id AS ingredient_id,
+           i.id AS base_ingredient_id,
+           i.name,
+           li.measurement_qty,
+           mu.name AS unit,
+           mu.id AS unit_id
+    FROM list_ingredients li
+    INNER JOIN ingredients i ON i.id = li.ingredient_id
+    INNER JOIN measurement_units mu ON li.measurement_unit_id = mu.id
+    WHERE li.list_id = $1
+),
+list_item_tags AS (
+    SELECT lt.list_id AS ingredient_id,
+           t.id AS tag_id,
+           t.description
+    FROM list_tags lt
+    JOIN tags t ON t.id = lt.tag_id
+),
+ingredient_level_tags AS (
+    SELECT it.ingredient_id AS base_ingredient_id,
+           t.id AS tag_id,
+           t.description
+    FROM ingredient_tags it
+    JOIN tags t ON t.id = it.tag_id
+    WHERE it.user_id = $2
+)
+SELECT 
+    created_at,
+    unit_id,
+    ing_table.base_ingredient_id AS name_id,
+    ing_table.ingredient_id AS id,
+    checked,
+    ing_table.name,
+    ing_table.measurement_qty,
+    ing_table.unit,
+    COALESCE(array_agg(DISTINCT jsonb_build_object('id', lit.tag_id, 'description', lit.description)) FILTER (WHERE lit.tag_id IS NOT NULL), '{}') AS list_item_tags,
+    COALESCE(array_agg(DISTINCT jsonb_build_object('id', ilt.tag_id, 'description', ilt.description)) FILTER (WHERE ilt.tag_id IS NOT NULL), '{}') AS global_tags
+FROM ing_table
+LEFT JOIN list_item_tags lit ON lit.ingredient_id = ing_table.ingredient_id
+LEFT JOIN ingredient_level_tags ilt ON ilt.base_ingredient_id = ing_table.base_ingredient_id
+GROUP BY created_at, unit_id, name_id, id, checked, ing_table.name, ing_table.measurement_qty, ing_table.unit;
+`
+        // const ing_sql = `WITH ing_table AS (SELECT li.created_at, li.checked AS checked, li.id AS ingredient_id, i.id AS base_ingredient_id, i.name, li.measurement_qty, mu.name AS unit, mu.id AS unit_id FROM list_ingredients li INNER JOIN ingredients i ON i.id = li.ingredient_id INNER JOIN measurement_units mu ON li.measurement_unit_id = mu.id WHERE li.list_id = $1),
+        //             list_item_tags AS (SELECT lt.list_id AS ingredient_id, t.description FROM list_tags lt JOIN tags t ON t.id = lt.tag_id),
+        //             ingredient_level_tags AS (SELECT it.ingredient_id AS base_ingredient_id, t.description FROM ingredient_tags it JOIN tags t ON t.id = it.tag_id WHERE it.user_id = $2)
+        //             SELECT created_at, unit_id, ing_table.base_ingredient_id AS name_id, ing_table.ingredient_id AS id, checked, ing_table.name, ing_table.measurement_qty, ing_table.unit, array_agg(lit.description) AS list_item_tags, array_agg(ilt.description) AS global_tags
+        //             FROM ing_table LEFT JOIN list_item_tags lit ON lit.ingredient_id = ing_table.ingredient_id LEFT JOIN ingredient_level_tags ilt ON ilt.base_ingredient_id = ing_table.base_ingredient_id
+        //             GROUP BY created_at, unit_id, name_id, id, checked, ing_table.name, ing_table.measurement_qty, ing_table.unit;`
         const ingredients_result = await pool.query(ing_sql, [req.params.id, req.params.uid]);
         list_result.rows[0].ingredients = ingredients_result.rows;
-
         res.json(list_result.rows[0]);
     } catch (err) {
         console.error('Error fetching shopping list:', err);
@@ -179,21 +223,14 @@ router.delete('/users/:uid/lists/:list_id/list_ingredients/:li_id/tags', async (
             return res.status(403).json({ error: 'Forbidden - user must own the shopping list' });
         }
         const list_ingredient_id = req.params.li_id;
-        const tag_id = req.body.tag_id;
-        if (!tag_id) {
-            return res.status(400).json({ error: 'Tag ID is required' });
-        }
-        if (!await owns_tag(req.params.uid, tag_id)) {
-            return res.status(403).json({ error: 'Forbidden - user must own the tag' });
-        }
         if (!await list_owns_ingredient(req.params.list_id, list_ingredient_id)) {
             return res.status(403).json({ error: 'Forbidden - tag must be associated with an ingredient in the list' });
         }
-        await pool.query('DELETE FROM list_tags WHERE list_id = $1 AND tag_id = $2', [list_ingredient_id, tag_id]);
-        res.json({ message: 'Tag removed successfully' });
+        await pool.query('DELETE FROM list_tags WHERE list_id = $1', [list_ingredient_id]);
+        res.json({ message: 'Tags removed successfully' });
     } catch (err) {
-        console.error('Error deleting list tag:', err);
-        res.status(500).json({ error: 'Failed to delete list tag' });
+        console.error('Error deleting list tags:', err);
+        res.status(500).json({ error: 'Failed to delete list tags' });
     }
 });
 export default router;

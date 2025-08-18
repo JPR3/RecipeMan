@@ -63,7 +63,8 @@ const checkMerge = (newIngredient, list) => {
                     //Ing has the larger unit type, so keep that one
                     return {
                         ...ing,
-                        measurement_qty: ((Number(ing.measurement_qty) * ingFactor) + (Number(newIngredient.measurement_qty) * newIngredientFactor)) / ingFactor
+                        measurement_qty: ((Number(ing.measurement_qty) * ingFactor) + (Number(newIngredient.measurement_qty) * newIngredientFactor)) / ingFactor,
+                        list_item_tags: [...new Set([...ing.list_item_tags, ...newIngredient.list_item_tags])]
                     }
                 } else {
                     //newIngredient has the larger unit type, so keep that one
@@ -71,7 +72,8 @@ const checkMerge = (newIngredient, list) => {
                         ...ing,
                         unit_id: newIngredient.unit_id,
                         unit_name: newIngredient.unit_name,
-                        measurement_qty: ((Number(ing.measurement_qty) * ingFactor) + (Number(newIngredient.measurement_qty) * newIngredientFactor)) / newIngredientFactor
+                        measurement_qty: ((Number(ing.measurement_qty) * ingFactor) + (Number(newIngredient.measurement_qty) * newIngredientFactor)) / newIngredientFactor,
+                        list_item_tags: [...new Set([...ing.list_item_tags, ...newIngredient.list_item_tags])]
                     }
                 }
             }
@@ -83,9 +85,31 @@ const checkMerge = (newIngredient, list) => {
 
 
 
-export const editListIngredient = (newVals, list, listId, uid, accessToken) => {
+export const editListIngredient = async (newVals, list, listId, uid, accessToken) => {
     const mergedVals = checkMerge(newVals, list);
     if (mergedVals) {
+        await fetch(`http://localhost:3000/api/users/${uid}/lists/${listId}/list_ingredients/${mergedVals.id}/tags`, {
+            method: 'DELETE',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${accessToken}`
+            }
+        })
+        const tagPromiseArr = mergedVals.list_item_tags.map((tag, index) => {
+            return fetch(`http://localhost:3000/api/users/${uid}/lists/${listId}/list_ingredients/${mergedVals.id}/tags`, {
+                method: 'POST',
+                headers: {
+                    Accept: 'application/json',
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${accessToken}`
+                },
+
+                body: JSON.stringify({
+                    tag_id: tag.id
+                })
+            })
+        })
         return Promise.all([
             fetch(`http://localhost:3000/api/users/${uid}/lists/${listId}/list_ingredients/${mergedVals.id}`, {
                 method: 'PATCH',
@@ -108,23 +132,51 @@ export const editListIngredient = (newVals, list, listId, uid, accessToken) => {
                     'Content-Type': 'application/json',
                     Authorization: `Bearer ${accessToken}`
                 }
-            })
+            }),
+
+            ...tagPromiseArr
         ])
     }
-    return fetch(`http://localhost:3000/api/users/${uid}/lists/${listId}/list_ingredients/${newVals.id}`, {
-        method: 'PATCH',
+    await fetch(`http://localhost:3000/api/users/${uid}/lists/${listId}/list_ingredients/${newVals.id}/tags`, {
+        method: 'DELETE',
         headers: {
             Accept: 'application/json',
             'Content-Type': 'application/json',
             Authorization: `Bearer ${accessToken}`
-        },
+        }
+    })
+    const tagPromiseArr = newVals.list_item_tags.map((tag, index) => {
+        return fetch(`http://localhost:3000/api/users/${uid}/lists/${listId}/list_ingredients/${newVals.id}/tags`, {
+            method: 'POST',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${accessToken}`
+            },
 
-        body: JSON.stringify({
-            qty: newVals.measurement_qty,
-            unit_id: newVals.unit_id,
-            ingredient_id: newVals.name_id
+            body: JSON.stringify({
+                tag_id: tag.id
+            })
         })
     })
+    return Promise.all([
+        fetch(`http://localhost:3000/api/users/${uid}/lists/${listId}/list_ingredients/${newVals.id}`, {
+            method: 'PATCH',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${accessToken}`
+            },
+
+            body: JSON.stringify({
+                qty: newVals.measurement_qty,
+                unit_id: newVals.unit_id,
+                ingredient_id: newVals.name_id
+            })
+        }),
+
+        ...tagPromiseArr
+    ])
 }
 
 
