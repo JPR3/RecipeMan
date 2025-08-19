@@ -105,13 +105,10 @@ router.delete('/users/:uid/ingredients/:id', async (req, res) => {
 // DELETE /api/users/:uid/ingredients/:id/tags
 router.delete('/users/:uid/ingredients/:id/tags', async (req, res) => {
     try {
-        if (!await owns_tag(req.params.uid, tag_id)) {
-            return res.status(403).json({ error: 'Forbidden - user must own the tag' });
-        }
         if (!await owns_ingredient(req.params.uid, req.params.id)) {
             return res.status(403).json({ error: 'Forbidden - user must own the ingredient' });
         }
-        await pool.query('DELETE FROM ingredient_tags WHERE ingredient_id = $1 AND user_id = $3', [req.params.id, req.params.uid]);
+        await pool.query('DELETE FROM ingredient_tags WHERE ingredient_id = $1 AND user_id = $2', [req.params.id, req.params.uid]);
         res.json({ message: 'Tag removed successfully from ingredient' });
     } catch (err) {
         console.error('Error deleting ingredient tag:', err);

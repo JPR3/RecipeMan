@@ -3,7 +3,7 @@ import TagDisplay from "./TagDisplay";
 const UserElementDisplay = ({ element, onEdit, onDelete, borderStyle, tags }) => {
     return (
         <div className={borderStyle + " flex px-2 py-1 w-full"}>
-            <p className="pr-2">{capitalizeEachWord(element.name)}</p>
+            <p className={"pr-2 " + ((tags) ? "" : " flex-1")}>{capitalizeEachWord(element.name)}</p>
             {tags && (
                 <TagDisplay className="flex-1" tags={tags} />
             )}
