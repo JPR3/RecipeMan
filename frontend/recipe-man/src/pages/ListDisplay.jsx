@@ -259,73 +259,78 @@ const ListDisplay = () => {
                 updateList={updateList}
             />
             <h2 className="text-content p-4 text-4xl font-semibold">{list.title}</h2>
-            <div className="flex w-full max-w-3/4 items-center justify-between">
-                <div className="flex ml-2.5 gap-1 items-center">
-                    <input id="toggleAll" className="accent-primary cursor-pointer" type="checkbox" checked={checkedIds.length > 0} onChange={() => handleToggleAll()} />
-                    <label htmlFor="toggleAll">{checkedIds.length > 0 ? "Deselect All" : "Select All"}</label>
-                </div>
-
+            <div className={"flex w-full max-w-3/4 items-center " + (list.ingredients.length > 0 ? "justify-between" : "justify-center")}>
+                {list.ingredients.length > 0 && (
+                    <div className="flex ml-2.5 gap-1 items-center">
+                        <input id="toggleAll" className="accent-primary cursor-pointer" type="checkbox" checked={checkedIds.length > 0} onChange={() => { if (enableEdits) { handleToggleAll() } }} />
+                        <label htmlFor="toggleAll">{checkedIds.length > 0 ? "Deselect All" : "Select All"}</label>
+                    </div>
+                )}
                 {enableEdits ? (<button
                     className="cursor-pointer border border-border rounded-2xl bg-primary hover:bg-primary-hv px-2 mb-2"
                     onClick={() => handleAddItem()}>
-                    Add New+
+                    Add Item+
                 </button>) : (<button
                     className="cursor-pointer border border-border rounded-2xl bg-red-600 hover:bg-red-700 px-2 mb-2"
                     onClick={() => { setEnableEdits(true); updateList() }}>
                     Cancel
                 </button>)}
-                {enableEdits && (<button
-                    className="cursor-pointer border border-border rounded-2xl bg-primary hover:bg-primary-hv px-2 mb-2"
+                {list.ingredients.length > 0 && (<button
+                    className={"border border-border rounded-2xl px-2 mb-2 " + (enableEdits ? "bg-primary hover:bg-primary-hv cursor-pointer" : "bg-button cursor-not-allowed")}
+                    disabled={!enableEdits}
                     onClick={() => { setRecipeSelectionModal(true) }}>
                     Select from Recipe
                 </button>)}
 
-                <div className="mb-2 relative w-1/4">
-                    <div className={"cursor-pointer flex gap-2 border-border pr-1 pl-2 bg-surface items-center justify-between border-2 " + (sortMenu ? "rounded-t-xl" : " rounded-full")}
-                        onClick={() => setSortMenu(!sortMenu)}
-                        onBlur={handleSortBlur}
-                        tabIndex="0"
-                    >
-                        {getSortText(sortValue)}
-                        {
-                            sortMenu ? (<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-chevron-up" viewBox="0 0 16 16">
-                                <path fillRule="evenodd" d="M7.646 4.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1-.708.708L8 5.707l-5.646 5.647a.5.5 0 0 1-.708-.708z" />
-                            </svg>) : (
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-chevron-down" viewBox="0 -2 16 16">
-                                    <path fillRule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708" />
-                                </svg>)
-                        }
-
-                    </div>
-                    {sortMenu && (
-                        <div
-                            className="z-10 absolute w-full"
+                {list.ingredients.length > 0 && (
+                    <div className="mb-2 relative w-1/4">
+                        <div className={"cursor-pointer flex gap-2 border-border pr-1 pl-2 items-center justify-between border-2 " + (enableEdits ? " bg-surface" : "bg-button") + (sortMenu ? " rounded-t-xl" : " rounded-full")}
+                            onClick={() => { if (enableEdits) { setSortMenu(!sortMenu) } }}
+                            onBlur={handleSortBlur}
+                            tabIndex="0"
                         >
+                            {getSortText(sortValue)}
                             {
-                                [...Array(6).keys()].map((ind) => {
-                                    if (ind !== sortValue) {
-                                        return (
-                                            <div
-                                                id={`sort-${ind}`}
-                                                key={`sort-${ind}`}
-                                                onKeyDownCapture={(e) => { if (e.key === "Enter") { setSortMenu(false); setSortValue(ind) } }}
-                                                onClick={(e) => { setSortMenu(false); setSortValue(ind); setSortedList(list, ind) }}
-                                                tabIndex="0"
-                                                className={"w-full cursor-pointer border-r-2 border-l-2 border-border bg-surface text-content h-6.5 px-1 hover:bg-fields" + ((ind === 5 || (sortValue === 5 && ind === 4)) ? " border-b-2 rounded-b-xl" : "")}
-                                            >
-                                                {getSortText(ind)}
-                                            </div>
-                                        )
-                                    }
-
-                                })
+                                sortMenu ? (<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-chevron-up" viewBox="0 0 16 16">
+                                    <path fillRule="evenodd" d="M7.646 4.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1-.708.708L8 5.707l-5.646 5.647a.5.5 0 0 1-.708-.708z" />
+                                </svg>) : (
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-chevron-down" viewBox="0 -2 16 16">
+                                        <path fillRule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708" />
+                                    </svg>)
                             }
 
                         </div>
+                        {sortMenu && (
+                            <div
+                                className="z-10 absolute w-full"
+                            >
+                                {
+                                    [...Array(6).keys()].map((ind) => {
+                                        if (ind !== sortValue) {
+                                            return (
+                                                <div
+                                                    id={`sort-${ind}`}
+                                                    key={`sort-${ind}`}
+                                                    onKeyDownCapture={(e) => { if (e.key === "Enter") { setSortMenu(false); setSortValue(ind) } }}
+                                                    onClick={(e) => { setSortMenu(false); setSortValue(ind); setSortedList(list, ind) }}
+                                                    tabIndex="0"
+                                                    className={"w-full cursor-pointer border-r-2 border-l-2 border-border bg-surface text-content h-6.5 px-1 hover:bg-fields" + ((ind === 5 || (sortValue === 5 && ind === 4)) ? " border-b-2 rounded-b-xl" : "")}
+                                                >
+                                                    {getSortText(ind)}
+                                                </div>
+                                            )
+                                        }
+
+                                    })
+                                }
+
+                            </div>
 
 
-                    )}
-                </div>
+                        )}
+                    </div>
+                )}
+
             </div>
 
 
@@ -346,12 +351,17 @@ const ListDisplay = () => {
                     />
                 ))
             }
-            <button
-                className={(enableEdits ? "bg-primary hover:bg-primary-hv cursor-pointer" : "bg-button cursor-not-allowed") + " text-content border border-border rounded-2xl px-2 mb-2 mt-3"}
-                disabled={!enableEdits}
-                onClick={() => handleRemoveChecked()}>
-                Remove Selected Items
-            </button>
+            {
+                list.ingredients.length > 0 && (
+                    <button
+                        className={(enableEdits ? "bg-primary hover:bg-primary-hv cursor-pointer" : "bg-button cursor-not-allowed") + " text-content border border-border rounded-2xl px-2 mb-2 mt-3"}
+                        disabled={!enableEdits}
+                        onClick={() => handleRemoveChecked()}>
+                        Remove Selected Items
+                    </button>
+                )
+            }
+
         </div >
 
     )
