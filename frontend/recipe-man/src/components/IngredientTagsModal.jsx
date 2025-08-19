@@ -91,7 +91,7 @@ const IngredientTagsModal = ({ openModal, closeModal }) => {
     }
     return (
         <Modal openModal={openModal} closeModal={closeIngredientModal}>
-            <div className="flex flex-col justify-center items-center w-full">
+            <div className="flex flex-col justify-center items-center w-full gap-2">
                 <p className="text-2xl font-bold">Select Ingredient:</p>
                 <SearchableDropdown
                     ingredientPart="Name"
@@ -130,7 +130,7 @@ const IngredientTagsModal = ({ openModal, closeModal }) => {
                 {displayConfirmation && (
                     <p className="font-bold text-primary text-lg">Updated Successfully!</p>
                 )}
-                <div className="flex gap-4 pb-2">
+                <div className="flex gap-4 py-2">
                     <button
                         disabled={!changesMade}
                         className={`text-white px-4 py-2 rounded-full  ${changesMade
