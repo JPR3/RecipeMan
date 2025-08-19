@@ -176,6 +176,13 @@ const ListItemDisplay = ({ ingredient, index, lastInd, handleCheckChange, listId
                 </div>
                 <p className="text-md text-content">Tags:</p>
                 <div className="flex flex-wrap gap-2 items-center mb-2">
+                    {newIng.global_tags.map((tag, index) => (
+                        <div key={tag.description} className="flex items-center bg-primary-dim rounded-full">
+                            <span className="text-content px-1.5 pb-0.5 text-sm">
+                                {tag.description}
+                            </span>
+                        </div>
+                    ))}
                     {newIng.list_item_tags.map((tag, index) => (
                         <div key={tag.description} className="flex items-center bg-fields rounded-full">
                             <span className="text-content px-1.5 pb-0.5 text-sm">
@@ -194,7 +201,7 @@ const ListItemDisplay = ({ ingredient, index, lastInd, handleCheckChange, listId
                         index="0"
                         onChangeEvent={(val, id) => handleAddTag(val, id)}
                         fieldValue={""}
-                        existingIdsList={newIng.list_item_tags.map((tag) => (tag.id))}
+                        existingIdsList={[...new Set([...ingredient.global_tags, ...ingredient.list_item_tags])].map((tag) => (tag.id))}
                     />
                 </div>
             </div >

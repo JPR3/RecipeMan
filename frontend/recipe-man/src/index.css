@@ -6,6 +6,8 @@
   /* Green text for links */
   --color-primary-hv: #05af69;
   /* Darker green for hovering links */
+  --color-primary-dim: #7fd4b1;
+  /* Darkest green, for global tags*/
   --color-border: #6b7280;
   /* Light grey for content borders */
   --color-surface: #e5e7eb;
@@ -25,6 +27,8 @@
   /* Green text for links */
   --color-primary-hv: #16a34a;
   /* Darker green for hovering links */
+  --color-primary-dim: #0c5e2b;
+  /* Darkest green, for global tags*/
   --color-border: #4b5563;
   /* Light grey for content borders */
   --color-surface: #1f2937;
