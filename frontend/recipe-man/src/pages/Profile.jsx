@@ -47,7 +47,22 @@ const Profile = () => {
                     Authorization: `Bearer ${accessToken}`
                 }
             }).then(response => response.json()).then(data => {
-                setIngredients(data);
+                const taggedData = data.map(async (ing) => {
+                    const res = await fetch(`http://localhost:3000/api/users/${uid}/ingredients/${ing.id}/tags`, {
+                        headers: {
+                            Authorization: `Bearer ${accessToken}`
+                        }
+                    })
+                    const ingTags = await res.json().then(dat => {
+                        return { ...ing, tags: dat }
+                    })
+                    return ingTags
+
+                })
+                Promise.all(taggedData).then(res => {
+                    setIngredients(res);
+                })
+
             });
 
             fetch(`http://localhost:3000/api/users/${uid}/units/custom?` + new URLSearchParams({ name: searchValue.toLowerCase().trim() }).toString(), {
@@ -157,6 +172,7 @@ const Profile = () => {
                             element={ingredient}
                             borderStyle={ind < ingredients.length - 1 ? "border-b-2 border-border" : ""}
                             elementType="ingredients"
+                            tags={ingredient.tags.map(t => t.description)}
                             onEdit={(element) => { setEditElement(element); setEditModal(true); }}
                             onDelete={(element) => { setDeleteElement(element); setDeleteModal(true); }}
                         />
