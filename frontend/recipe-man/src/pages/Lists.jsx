@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from "../AuthProvider";
 import { Link } from 'react-router-dom';
+import NewListModal from '../components/NewListModal';
 
 const Lists = () => {
     const [lists, setLists] = useState([]);
+    const [newModal, setNewModal] = useState(false);
     const { session, user, loading } = useAuth();
     if (loading) {
         return <div className="text-content p-4">Loading...</div>;
@@ -24,7 +26,17 @@ const Lists = () => {
 
     return (
         <div className="flex flex-col justify-start items-center w-full px-16 gap-2">
-            <h1 className="text-5xl font-semibold text-content pb-4">Lists</h1>
+            <NewListModal
+                openModal={newModal}
+                closeModal={() => setNewModal(false)}
+                existingLists={lists.map(l => l.title)}
+            />
+            <h1 className="text-5xl font-semibold text-content mb-2">Lists</h1>
+            <button
+                className="cursor-pointer border border-border rounded-2xl bg-primary hover:bg-primary-hv px-2 mb-2"
+                onClick={() => setNewModal(true)}>
+                New+
+            </button>
             <div className="w-full flex justify-center items-end max-w-3/4">
                 <div className="flex flex-col w-full gap-2 overflow-auto max-h-dvh">
                     {

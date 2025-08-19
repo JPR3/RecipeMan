@@ -134,7 +134,7 @@ const EditElementModal = ({ openModal, closeModal, elementType, elementName, ele
     return (
         <Modal openModal={openModal} closeModal={() => closeElementModal()}>
             <div className="flex flex-col justify-center items-center gap-4">
-                <h2 className="text-lg font-semibold">Rename {elementType.slice(0, -1)} "{elementName}":</h2>
+                <h2 className="text-lg font-semibold">Edit {elementType.slice(0, -1)} "{elementName}":</h2>
                 <p className="text-content">This will change it across all lists and recipes</p>
                 <input
                     type="text"

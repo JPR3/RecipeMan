@@ -66,7 +66,6 @@ const ListDisplay = () => {
             case 3:
                 compareFunc = (a, b) => { return Date.parse(a.created_at) - Date.parse(b.created_at) }
                 break;
-            //TODO: Implement sorting by tags!
             case 4:
                 compareFunc = (a, b) => {
                     const combinedTagsA = [...a.list_item_tags.map((t) => t.description), ...a.global_tags.map((t) => t.description)]
