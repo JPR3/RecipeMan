@@ -5,6 +5,7 @@ import UserElementDisplay from '../components/UserElementDisplay';
 import DeleteElementModal from '../components/DeleteElementModal';
 import NewElementModal from '../components/NewElementModal';
 import EditElementModal from '../components/EditElementModal';
+import IngredientTagsModal from '../components/IngredientTagsModal';
 const Profile = () => {
     const [username, setUsername] = useState('');
     const [tab, setTab] = useState("tags");
@@ -16,6 +17,7 @@ const Profile = () => {
     const [editModal, setEditModal] = useState(false);
     const [editElement, setEditElement] = useState(null);
     const [deleteElement, setDeleteElement] = useState(null);
+    const [ingredientTagsModal, setIngredientTagsModal] = useState(false)
     const [searchValue, setSearchValue] = useState('');
     const { session, user, loading } = useAuth();
     if (loading) {
@@ -74,7 +76,7 @@ const Profile = () => {
             });
         }
 
-    }, [accessToken, deleteModal, newModal, editModal, searchValue, tab]);
+    }, [accessToken, deleteModal, newModal, editModal, searchValue, tab, ingredientTagsModal]);
 
     const handleSignOut = async () => {
         const { error } = await supabase.auth.signOut();
@@ -142,8 +144,12 @@ const Profile = () => {
                 elementName={editElement?.name}
                 elementId={editElement?.id}
             />
+            <IngredientTagsModal
+                openModal={ingredientTagsModal}
+                closeModal={() => setIngredientTagsModal(false)}
+            />
             <div className="w-full max-h-dvh overflow-auto bg-surface max-w-1/2 border-b-2 border-r-2 border-l-2 border-border rounded-b-md">
-                <div className={"flex px-2 py-1 w-full justify-center items-center " +
+                <div className={"flex flex-col gap-2 px-2 py-1 w-full justify-center items-center " +
                     (tab === "tags" && tags.length > 0 ? "border-b-2 border-border" :
                         (tab === "ingredients" && ingredients.length > 0 ? "border-b-2 border-border" :
                             (tab === "units" && units.length > 0 ? "border-b-2 border-border" : "")))}>
@@ -152,6 +158,14 @@ const Profile = () => {
                         onClick={() => setNewModal(true)}>
                         New+
                     </button>
+                    {
+                        tab === "ingredients" && (<button
+                            className="cursor-pointer border border-border rounded-2xl bg-primary hover:bg-primary-hv px-2"
+                            onClick={() => setIngredientTagsModal(true)}>
+                            Manage Tags
+                        </button>)
+                    }
+
                 </div>
                 {tab === "tags" && tags.map((tag, ind) => {
                     return (
