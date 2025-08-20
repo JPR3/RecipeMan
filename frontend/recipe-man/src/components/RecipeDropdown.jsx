@@ -3,7 +3,7 @@ import { useAuth } from '../AuthProvider';
 import TagDisplay from './TagDisplay';
 import { useQuery } from '@tanstack/react-query';
 
-const RecipeDropdown = ({ recipeName, recipeTags, recipeId, openDeleteModal, openEditModal, openListModal, refreshTrigger }) => {
+const RecipeDropdown = ({ recipeName, recipeTags, recipeId, openDeleteModal, openEditModal, openListModal, refreshTrigger, width }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [scale, setScale] = useState(1);
     const toggleDropdown = () => {
@@ -34,8 +34,8 @@ const RecipeDropdown = ({ recipeName, recipeTags, recipeId, openDeleteModal, ope
 
     }, [refreshTrigger]);
 
-    const closedDiv = (<div onClick={toggleDropdown} className={(isOpen ? "border-t border-r border-l rounded-t-2xl " : "border rounded-2xl ") + "cursor-pointer w-full bg-surface border-border text-content shadow-lg p-4 pl-2 flex"}>
-        <p className={"text-content min-w-1/8 " + (isOpen ? "font-bold text-xl absolute left-1/2 transform -translate-y-1/4 -translate-x-1/2 pointer-events-none" : "relative ml-2 text-lg")}>
+    const closedDiv = (<div onClick={toggleDropdown} className={(isOpen ? "border-t border-r border-l rounded-t-2xl pt-2 pb-2 " : "border rounded-2xl pt-4 pl-4 pb-4 ") + " cursor-pointer w-full bg-surface border-border text-content shadow-lg pl-2 flex"}>
+        <p className={"text-content min-w-1/8 " + (isOpen ? "font-bold text-xl w-full text-center pl-[33px] " : "relative ml-2 text-lg")}>
             {recipeName}
         </p>
         {!isOpen && (
@@ -43,7 +43,7 @@ const RecipeDropdown = ({ recipeName, recipeTags, recipeId, openDeleteModal, ope
                 <TagDisplay tags={recipeTags} />
             </div>
         )}
-        <div className="ml-auto flex-shrink-0 content-center">
+        <div className="ml-auto flex-shrink-0 content-center pr-4">
             {isOpen ? (<svg xmlns="http://www.w3.org/2000/svg" width="25" height="20" fill="var(--color-primary)" className="bi bi-caret-up-fill" viewBox="0 0 16 16">
                 <path d="m7.247 4.86-4.796 5.481c-.566.647-.106 1.659.753 1.659h9.592a1 1 0 0 0 .753-1.659l-4.796-5.48a1 1 0 0 0-1.506 0z" />
             </svg>) : (<svg xmlns="http://www.w3.org/2000/svg" width="25" height="20" fill="var(--color-primary)" className="bi bi-caret-down-fill" viewBox="0 0 16 16">
@@ -63,7 +63,7 @@ const RecipeDropdown = ({ recipeName, recipeTags, recipeId, openDeleteModal, ope
         }).split(/\r?\n/)
     }
     return (
-        <div className="w-full max-w-4xl">
+        <div className="w-full max-w-2xl">
             {closedDiv}
             {isOpen && (
                 <div className=" bg-surface border-l border-r border-b border-border rounded-b-2xl shadow-lg p-2 pt-0">
@@ -72,14 +72,15 @@ const RecipeDropdown = ({ recipeName, recipeTags, recipeId, openDeleteModal, ope
                             <TagDisplay tags={recipeTags} />
                         </div>
                     </div>
+                    <div className="flex justify-center w-full gap-4 pb-2">
+                        <p className="text-content hover:text-primary underline cursor-pointer flex-1 text-right" onClick={() => openEditModal(data)}>Edit</p>
+                        <p className="text-content">|</p>
+                        <p className="text-content hover:text-red-700 underline cursor-pointer flex-1" onClick={openDeleteModal}>Delete</p>
+                    </div >
                     <div className="flex gap-4 justify-center w-full">
                         <p className="text-content">
-                            Cook Time: {(data.cook_time.hours > 0 ? data.cook_time.hours + (data.cook_time.hours > 1 ? " hours" : " hour") + (data.cook_time.minutes > 0 ? ", " : " ") : "") + (data.cook_time.minutes > 0 ? + data.cook_time.minutes + (data.cook_time.minutes > 1 ? " minutes " : " minute ") : "")}
+                            Time: {(data.cook_time.hours > 0 ? data.cook_time.hours + (data.cook_time.hours > 1 ? " hours" : " hour") + (data.cook_time.minutes > 0 ? ", " : " ") : "") + (data.cook_time.minutes > 0 ? + data.cook_time.minutes + (data.cook_time.minutes > 1 ? " minutes " : " minute ") : "")}
                         </p>
-                        <p className="text-content">|</p>
-                        <p className="text-content hover:text-primary underline cursor-pointer" onClick={() => openEditModal(data)}>Edit</p>
-                        <p className="text-content">|</p>
-                        <p className="text-content hover:text-red-700 underline cursor-pointer" onClick={openDeleteModal}>Delete</p>
                     </div>
                     <div className="flex gap-2 items-center pb-2">
                         <label htmlFor={recipeId + "_scale"} className="text-content font-semibold text-xl">Scale</label>

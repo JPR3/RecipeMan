@@ -4,7 +4,7 @@ import Modal from "./Modal";
 import RecipeIngredientsDropdown from "./RecipeIngredientsDropdown";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
-const RecipeSelectionModal = ({ openModal, closeModal, recipes, createListIngredient, updateList }) => {
+const RecipeSelectionModal = ({ openModal, closeModal, recipes, createListIngredient }) => {
     const { session, user } = useAuth();
     const queryClient = new QueryClient();
     const [incomingIngredients, setIncomingIngredients] = useState([])
@@ -12,14 +12,14 @@ const RecipeSelectionModal = ({ openModal, closeModal, recipes, createListIngred
     const uid = user?.id;
 
     const handleSubmit = () => {
-        const promises = Promise.all(incomingIngredients.map((ing) => createListIngredient({ ...ing, name_id: ing.ingredient_id })))
+        console.log(incomingIngredients)
+        const promises = Promise.all(incomingIngredients.map((ing) => createListIngredient({ ...ing, name_id: ing.ingredient_id, list_item_tags: [], global_tags: ing.tags })))
         promises.then(res => {
             closeRecipeModal()
         })
     }
     const closeRecipeModal = () => {
         setIncomingIngredients([])
-        updateList()
         closeModal()
     }
     const addToIncoming = (newIngs) => {

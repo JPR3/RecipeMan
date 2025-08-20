@@ -26,7 +26,6 @@ const SearchableDropdown = ({ ingredientPart, apiPath, onChangeEvent, index, fie
                     Authorization: `Bearer ${accessToken}`
                 }
             }).then(response => response.json()).then(data => {
-                console.log(data)
                 const filteredData = (existingIdsList ? data.filter(item => !existingIdsList.includes(item.id)) : data)
                 setIngredients(filteredData)
                 changeAddDisplay(localValue, data)
@@ -91,7 +90,7 @@ const SearchableDropdown = ({ ingredientPart, apiPath, onChangeEvent, index, fie
                                     onClick={(e) => { setIsOpen(false); onChangeEvent(ingredient.name, ingredient.id) }}
                                     key={ingredient.name}
                                     tabIndex="0"
-                                    className="border-r-2 border-l-2 border-primary bg-fields text-content w-full h-6.5 px-1 hover:bg-button"
+                                    className="border-r-2 border-l-2 border-primary bg-fields text-content w-full min-h-6.5 px-1 hover:bg-button"
                                 >
                                     {capitalizeEachWord(ingredient.name)}
                                 </p>

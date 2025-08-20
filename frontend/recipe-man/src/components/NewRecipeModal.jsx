@@ -6,11 +6,11 @@ import { useAuth } from "../AuthProvider";
 const NewRecipeModal = ({ openModal, closeModal }) => {
     const ref = useRef()
     const [title, setTitle] = useState("")
-    const [cookHrs, setCookHrs] = useState(0)
-    const [cookMins, setCookMins] = useState(0)
+    const [cookHrs, setCookHrs] = useState("")
+    const [cookMins, setCookMins] = useState("")
     const [instructions, setInstructions] = useState("")
     const [ingredients, setIngredients] = useState([{
-        ingQty: 0, ingUnit: "", unitID: "-1", ingName: "", nameID: "-1"
+        ingQty: "", ingUnit: "", unitID: "-1", ingName: "", nameID: "-1"
     }])
     const [notes, setNotes] = useState("")
     const [tags, setTags] = useState([])
@@ -98,7 +98,7 @@ const NewRecipeModal = ({ openModal, closeModal }) => {
     const handleAddIngredient = (e) => {
         e.preventDefault()
         setIsIngValid(false)
-        setIngredients([...ingredients, { ingQty: 0, ingUnit: "", unitID: "-1", ingName: "", nameID: "-1" }])
+        setIngredients([...ingredients, { ingQty: "", ingUnit: "", unitID: "-1", ingName: "", nameID: "-1" }])
     }
 
     const handleRemoveIngredient = (index) => {
@@ -177,13 +177,13 @@ const NewRecipeModal = ({ openModal, closeModal }) => {
     const closeRecipeModal = () => {
         ref.current?.reset();
         setTitle("");
-        setCookHrs(0);
-        setCookMins(0);
+        setCookHrs("");
+        setCookMins("");
         setInstructions("");
         setNotes("");
         setIsIngValid(false);
         setIngredients([{
-            ingQty: 0, ingUnit: "", unitID: "-1", ingName: "", nameID: "-1"
+            ingQty: "", ingUnit: "", unitID: "-1", ingName: "", nameID: "-1"
         }]);
         setTags([]);
         closeModal();
@@ -210,6 +210,7 @@ const NewRecipeModal = ({ openModal, closeModal }) => {
                         name="cookHrs"
                         type="number"
                         min="0"
+                        placeholder="0"
                         value={cookHrs}
                         className="border border-border bg-fields text-content px-2 py-1 w-14 rounded-md focus:border-2"
                         onChange={(e) => setCookHrs(e.target.value)}
@@ -221,6 +222,7 @@ const NewRecipeModal = ({ openModal, closeModal }) => {
                         name="cookMins"
                         type="number"
                         min="0"
+                        placeholder="0"
                         value={cookMins}
                         className="border border-border bg-fields text-content px-2 py-1 w-14 rounded-md focus:border-2"
                         onChange={(e) => setCookMins(e.target.value)}

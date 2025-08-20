@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useAuth } from '../AuthProvider';
 import supabase from '../components/SupabaseClient';
 import UserElementDisplay from '../components/UserElementDisplay';
@@ -19,6 +19,7 @@ const Profile = () => {
     const [deleteElement, setDeleteElement] = useState(null);
     const [ingredientTagsModal, setIngredientTagsModal] = useState(false)
     const [searchValue, setSearchValue] = useState('');
+    const [width, setWidth] = useState(0);
     const { session, user, loading } = useAuth();
     if (loading) {
         return <div className="text-content p-4">Loading...</div>;
@@ -26,9 +27,17 @@ const Profile = () => {
 
     const accessToken = session?.access_token;
     const uid = user?.id;
-
-    React.useEffect(() => {
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const handleResize = () => setWidth(window.innerWidth);
+            window.addEventListener('resize', handleResize);
+            handleResize();
+            return () => window.removeEventListener('resize', handleResize);
+        }
+    }, []);
+    useEffect(() => {
         if (!deleteModal && !newModal && !editModal) {
+            document.body.style.overflow = 'auto';
             fetch(`http://localhost:3000/api/users/${uid}`, {
                 headers: {
                     Authorization: `Bearer ${accessToken}`
@@ -74,6 +83,8 @@ const Profile = () => {
             }).then(response => response.json()).then(data => {
                 setUnits(data);
             });
+        } else {
+            document.body.style.overflow = 'hidden';
         }
 
     }, [accessToken, deleteModal, newModal, editModal, searchValue, tab, ingredientTagsModal]);
@@ -91,7 +102,7 @@ const Profile = () => {
             }}>
                 Sign Out
             </button>
-            <div className="flex flex-h content-center items-center rounded-md border border-border focus-within:outline-2 focus-within:outline-primary px-1 bg-fields text-content h-6.5 max-w-1/8">
+            <div className={"flex flex-h content-center items-center rounded-md border border-border focus-within:outline-2 focus-within:outline-primary px-1 bg-fields text-content h-6.5 " + ((width < 768) ? "max-w-1/4" : "max-w-1/8")}>
                 <input
                     type="text"
                     placeholder="Search..."
@@ -106,7 +117,7 @@ const Profile = () => {
                 }
             </div>
 
-            <div className="w-full flex justify-center items-end max-w-1/2">
+            <div className={"flex justify-center items-end max-w-[550px] " + ((width < 768) ? "w-3/4" : "w-1/2")}>
                 <div className="border-b-2 border-border w-full"></div>
                 <h2
                     className={"text-xl text-content mt-4 border-border border-t-2 border-r-2 border-l-2 rounded-tl-md px-2 cursor-pointer" + (tab === "tags" ? " pb-0.5 bg-surface font-semibold text-primary" : " border-b-2 text-content")}
@@ -151,7 +162,7 @@ const Profile = () => {
                 openModal={ingredientTagsModal}
                 closeModal={() => setIngredientTagsModal(false)}
             />
-            <div className="w-full max-h-dvh overflow-auto bg-surface max-w-1/2 border-b-2 border-r-2 border-l-2 border-border rounded-b-md">
+            <div className={"max-h-dvh overflow-auto bg-surface max-w-[550px] border-b-2 border-r-2 border-l-2 border-border rounded-b-md " + ((width < 768) ? "w-3/4" : "w-1/2")}>
                 <div className={"flex flex-col gap-2 px-2 py-1 w-full justify-center items-center " +
                     (tab === "tags" && tags.length > 0 ? "border-b-2 border-border" :
                         (tab === "ingredients" && ingredients.length > 0 ? "border-b-2 border-border" :
@@ -212,7 +223,7 @@ const Profile = () => {
                     ((tab === "tags" && tags.length === 0) ||
                         (tab === "ingredients" && ingredients.length === 0) ||
                         (tab === "units" && units.length === 0)) &&
-                    <div className="flex w-full justify-center border-t-2 border-border">{"Click \"New+\" to create a custom " + tab.slice(0, -1) + "!"}</div>
+                    <div className="flex w-full text-center justify-center border-t-2 border-border">{"Click \"New+\" to create a custom " + tab.slice(0, -1) + "!"}</div>
                 }
 
             </div>

@@ -16,6 +16,7 @@ const ListDisplay = () => {
     const [recipes, setRecipes] = useState([])
     const [sortMenu, setSortMenu] = useState(false)
     const [sortValue, setSortValue] = useState(0)
+    const [width, setWidth] = useState(0)
     if (loading) {
         return <div className="text-content p-4">Loading...</div>;
     }
@@ -23,6 +24,22 @@ const ListDisplay = () => {
     const uid = user?.id;
     let params = useParams();
 
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const handleResize = () => setWidth(window.innerWidth);
+            window.addEventListener('resize', handleResize);
+            handleResize();
+            return () => window.removeEventListener('resize', handleResize);
+        }
+    }, []);
+    useEffect(() => {
+        if (recipeSelectionModal) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = 'auto';
+            updateList();
+        }
+    }, [recipeSelectionModal]);
     useEffect(() => {
         updateList();
         fetch(`http://localhost:3000/api/users/${uid}/recipes`, {
@@ -151,7 +168,7 @@ const ListDisplay = () => {
         }))
     }
     const handleAddItem = () => {
-        setList({ ...list, ingredients: [{ checked: false, id: "-1", measurement_qty: 0, name: "", name_id: "-1", unit: "", unit_id: "", list_item_tags: [], global_tags: [] }, ...list.ingredients] })
+        setList({ ...list, ingredients: [{ checked: false, id: "-1", measurement_qty: "", name: "", name_id: "-1", unit: "", unit_id: "", list_item_tags: [], global_tags: [] }, ...list.ingredients] })
     }
     const handleRemoveChecked = () => {
         const promises = checkedIds.map((id) => {
@@ -249,89 +266,113 @@ const ListDisplay = () => {
             </div>
         )
     }
+    const selectAll = (
+        list.ingredients.length > 0 && (
+            <div className="flex ml-2.5 gap-1 items-center">
+                <input id="toggleAll" className="accent-primary cursor-pointer" type="checkbox" checked={checkedIds.length > 0} onChange={() => { if (enableEdits) { handleToggleAll() } }} />
+                <label htmlFor="toggleAll">{checkedIds.length > 0 ? "Deselect All" : "Select All"}</label>
+            </div>
+        )
+    )
+    const addButton = (
+        enableEdits ? (<button
+            className="cursor-pointer border border-border rounded-2xl bg-primary hover:bg-primary-hv px-2 mb-2"
+            onClick={() => handleAddItem()}>
+            New+
+        </button>) : (<button
+            className="cursor-pointer border border-border rounded-2xl bg-red-600 hover:bg-red-700 px-2 mb-2"
+            onClick={() => { setEnableEdits(true); updateList() }}>
+            Cancel
+        </button>)
+    )
+    const selectFromRecipe = (
+        list.ingredients.length > 0 && (<button
+            className={"border border-border rounded-2xl px-2 mb-2 " + (enableEdits ? "bg-primary hover:bg-primary-hv cursor-pointer" : "bg-button cursor-not-allowed")}
+            disabled={!enableEdits}
+            onClick={() => { setRecipeSelectionModal(true) }}>
+            From Recipe+
+        </button>)
+    )
+    const sortDropDown = (
+        list.ingredients.length > 0 && (
+            <div className="mb-2 relative min-w-30">
+                <div className={"cursor-pointer flex gap-2 border-border pr-1 pl-2 items-center justify-between border-2 " + (enableEdits ? " bg-surface" : "bg-button") + (sortMenu ? " rounded-t-xl" : " rounded-full")}
+                    onClick={() => { if (enableEdits) { setSortMenu(!sortMenu) } }}
+                    onBlur={handleSortBlur}
+                    tabIndex="0"
+                >
+                    {getSortText(sortValue)}
+                    {
+                        sortMenu ? (<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-chevron-up" viewBox="0 0 16 16">
+                            <path fillRule="evenodd" d="M7.646 4.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1-.708.708L8 5.707l-5.646 5.647a.5.5 0 0 1-.708-.708z" />
+                        </svg>) : (
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-chevron-down" viewBox="0 -2 16 16">
+                                <path fillRule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708" />
+                            </svg>)
+                    }
+
+                </div>
+                {sortMenu && (
+                    <div
+                        className="z-10 absolute w-full"
+                    >
+                        {
+                            [...Array(6).keys()].map((ind) => {
+                                if (ind !== sortValue) {
+                                    return (
+                                        <div
+                                            id={`sort-${ind}`}
+                                            key={`sort-${ind}`}
+                                            onKeyDownCapture={(e) => { if (e.key === "Enter") { setSortMenu(false); setSortValue(ind) } }}
+                                            onClick={(e) => { setSortMenu(false); setSortValue(ind); setSortedList(list, ind) }}
+                                            tabIndex="0"
+                                            className={"w-full cursor-pointer border-r-2 border-l-2 border-border bg-surface text-content h-6.5 px-1 hover:bg-fields" + ((ind === 5 || (sortValue === 5 && ind === 4)) ? " border-b-2 rounded-b-xl" : "")}
+                                        >
+                                            {getSortText(ind)}
+                                        </div>
+                                    )
+                                }
+
+                            })
+                        }
+
+                    </div>
+
+
+                )}
+            </div>
+        )
+    )
     return (
-        <div className="flex flex-col justify-start items-center w-full px-16">
+        <div className="flex flex-col justify-start items-center w-full max-w-[1000px]">
             <RecipeSelectionModal
                 openModal={recipeSelectionModal}
                 closeModal={() => { setRecipeSelectionModal(false); }}
                 recipes={recipes}
                 createListIngredient={(newVals) => createListIngredient(newVals, list, params.listId, uid, accessToken)}
-                updateList={updateList}
             />
             <h2 className="text-content p-4 text-4xl font-semibold">{list.title}</h2>
-            <div className={"flex w-full max-w-3/4 items-center " + (list.ingredients.length > 0 ? "justify-between" : "justify-center")}>
-                {list.ingredients.length > 0 && (
-                    <div className="flex ml-2.5 gap-1 items-center">
-                        <input id="toggleAll" className="accent-primary cursor-pointer" type="checkbox" checked={checkedIds.length > 0} onChange={() => { if (enableEdits) { handleToggleAll() } }} />
-                        <label htmlFor="toggleAll">{checkedIds.length > 0 ? "Deselect All" : "Select All"}</label>
-                    </div>
-                )}
-                {enableEdits ? (<button
-                    className="cursor-pointer border border-border rounded-2xl bg-primary hover:bg-primary-hv px-2 mb-2"
-                    onClick={() => handleAddItem()}>
-                    Add Item+
-                </button>) : (<button
-                    className="cursor-pointer border border-border rounded-2xl bg-red-600 hover:bg-red-700 px-2 mb-2"
-                    onClick={() => { setEnableEdits(true); updateList() }}>
-                    Cancel
-                </button>)}
-                {list.ingredients.length > 0 && (<button
-                    className={"border border-border rounded-2xl px-2 mb-2 " + (enableEdits ? "bg-primary hover:bg-primary-hv cursor-pointer" : "bg-button cursor-not-allowed")}
-                    disabled={!enableEdits}
-                    onClick={() => { setRecipeSelectionModal(true) }}>
-                    Select from Recipe
-                </button>)}
-
-                {list.ingredients.length > 0 && (
-                    <div className="mb-2 relative w-1/4">
-                        <div className={"cursor-pointer flex gap-2 border-border pr-1 pl-2 items-center justify-between border-2 " + (enableEdits ? " bg-surface" : "bg-button") + (sortMenu ? " rounded-t-xl" : " rounded-full")}
-                            onClick={() => { if (enableEdits) { setSortMenu(!sortMenu) } }}
-                            onBlur={handleSortBlur}
-                            tabIndex="0"
-                        >
-                            {getSortText(sortValue)}
-                            {
-                                sortMenu ? (<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-chevron-up" viewBox="0 0 16 16">
-                                    <path fillRule="evenodd" d="M7.646 4.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1-.708.708L8 5.707l-5.646 5.647a.5.5 0 0 1-.708-.708z" />
-                                </svg>) : (
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-chevron-down" viewBox="0 -2 16 16">
-                                        <path fillRule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708" />
-                                    </svg>)
-                            }
-
+            {
+                (width < 768 ? (
+                    <div className={"flex flex-col w-full items-center justify-center content-center"}>
+                        <div className={"flex w-full max-w-3/4 items-center justify-center gap-4"}>
+                            {addButton}
+                            {selectFromRecipe}
                         </div>
-                        {sortMenu && (
-                            <div
-                                className="z-10 absolute w-full"
-                            >
-                                {
-                                    [...Array(6).keys()].map((ind) => {
-                                        if (ind !== sortValue) {
-                                            return (
-                                                <div
-                                                    id={`sort-${ind}`}
-                                                    key={`sort-${ind}`}
-                                                    onKeyDownCapture={(e) => { if (e.key === "Enter") { setSortMenu(false); setSortValue(ind) } }}
-                                                    onClick={(e) => { setSortMenu(false); setSortValue(ind); setSortedList(list, ind) }}
-                                                    tabIndex="0"
-                                                    className={"w-full cursor-pointer border-r-2 border-l-2 border-border bg-surface text-content h-6.5 px-1 hover:bg-fields" + ((ind === 5 || (sortValue === 5 && ind === 4)) ? " border-b-2 rounded-b-xl" : "")}
-                                                >
-                                                    {getSortText(ind)}
-                                                </div>
-                                            )
-                                        }
-
-                                    })
-                                }
-
-                            </div>
-
-
-                        )}
+                        <div className={"flex w-full max-w-3/4 items-center justify-between"}>
+                            {selectAll}
+                            {sortDropDown}
+                        </div>
                     </div>
-                )}
+                ) : (
+                    <div className={"flex w-full max-w-3/4 items-center " + (list.ingredients.length > 0 ? "justify-between" : "justify-center")}>
+                        {selectAll}
+                        {addButton}
+                        {selectFromRecipe}
+                        {sortDropDown}
+                    </div>))
+            }
 
-            </div>
 
 
             {

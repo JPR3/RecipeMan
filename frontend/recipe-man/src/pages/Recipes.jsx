@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "../AuthProvider";
 import RecipeDropdown from "../components/RecipeDropdown";
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -22,13 +22,21 @@ const Recipes = () => {
     const [listSelectionModal, setListSelectionModal] = useState(false);
     const [listSelectionData, setListSelectionData] = useState(null);
     const [lists, setLists] = useState([]);
-
+    const [width, setWidth] = useState(0);
     if (loading) return <div>Loading...</div>;
 
     const accessToken = session?.access_token;
     const uid = user?.id;
 
-    React.useEffect(() => {
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const handleResize = () => setWidth(window.innerWidth);
+            window.addEventListener('resize', handleResize);
+            handleResize();
+            return () => window.removeEventListener('resize', handleResize);
+        }
+    }, []);
+    useEffect(() => {
         fetch(`http://localhost:3000/api/users/${uid}/lists`, {
             headers: {
                 Authorization: `Bearer ${accessToken}`
@@ -37,16 +45,18 @@ const Recipes = () => {
             setLists(data);
         });
     }, [accessToken])
-    React.useEffect(() => {
+    useEffect(() => {
         if (!recipeModal && !deleteModal && !editModal) {
+            document.body.style.overflow = 'auto';
             fetch(`http://localhost:3000/api/users/${uid}/recipes`, {
                 headers: {
                     Authorization: `Bearer ${accessToken}`
                 }
             }).then(response => response.json()).then(data => {
-                console.log(data)
                 setRecipes(data);
             });
+        } else {
+            document.body.style.overflow = 'hidden';
         }
     }, [accessToken, recipeModal, deleteModal, editModal]);
 
@@ -79,7 +89,7 @@ const Recipes = () => {
         setFilterTags(localTags);
     };
     return (
-        <div className="flex flex-col justify-start items-center w-full px-16 gap-2">
+        <div className={"flex flex-col justify-start items-center w-full gap-2 " + ((width < 768) ? "px-2" : "px-16")}>
             <h1 className="text-5xl font-semibold text-content pb-4">Recipes</h1>
             <div className="flex gap-2 items-top justify-center">
                 <div className="flex flex-col gap-1 max-w-3/8">
@@ -139,6 +149,7 @@ const Recipes = () => {
                             openEditModal={(data) => handleOpenEditModal(data)}
                             openListModal={(data) => handleOpenListModal(data)}
                             refreshTrigger={editModal && editModalData?.id === vals.id}
+                            width={width}
                         />
                     ))}
                 </div>
