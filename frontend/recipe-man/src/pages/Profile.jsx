@@ -84,10 +84,13 @@ const Profile = () => {
 
     return (
         <div className="flex flex-col justify-start items-center w-full">
-            <div className="grid gap-9 justify-center border border-border shadow-lg bg-surface p-6 mb-4 rounded-md max-w-md">
-                <h1 className="text-2xl w-full">Profile</h1>
-                <p className="text-content">This is your profile page, {username}</p>
-            </div>
+            <h1 className="text-5xl font-semibold text-content mb-4">Profile</h1>
+            <h1 className="text-lg mb-2">{"Signed in as: " + username}</h1>
+            <button className="text-content bg-red-600 dark:bg-red-700 hover:bg-red-800 font-semibold px-2 rounded-full mb-4" onClick={() => {
+                handleSignOut()
+            }}>
+                Sign Out
+            </button>
             <div className="flex flex-h content-center items-center rounded-md border border-border focus-within:outline-2 focus-within:outline-primary px-1 bg-fields text-content h-6.5 max-w-1/8">
                 <input
                     type="text"
@@ -179,6 +182,7 @@ const Profile = () => {
                         />
                     )
                 })}
+
                 {tab === "ingredients" && ingredients.map((ingredient, ind) => {
                     return (
                         <UserElementDisplay
@@ -204,13 +208,15 @@ const Profile = () => {
                         />
                     )
                 })}
+                {
+                    ((tab === "tags" && tags.length === 0) ||
+                        (tab === "ingredients" && ingredients.length === 0) ||
+                        (tab === "units" && units.length === 0)) &&
+                    <div className="flex w-full justify-center border-t-2 border-border">{"Click \"New+\" to create a custom " + tab.slice(0, -1) + "!"}</div>
+                }
 
             </div>
-            <button className="text-content bg-red-700 hover:bg-red-800 font-semibold py-2 px-4 rounded-md mt-4 mb-4" onClick={() => {
-                handleSignOut()
-            }}>
-                Sign Out
-            </button>
+
         </div>
     );
 }

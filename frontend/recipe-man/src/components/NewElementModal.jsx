@@ -136,7 +136,7 @@ const NewElementModal = ({ openModal, closeModal, elementType }) => {
                             <SearchableDropdown
                                 ingredientPart="Tag"
                                 apiPath="tags"
-                                index="0"
+                                index="New"
                                 onChangeEvent={(val, id) => handleAddTag(val, id)}
                                 fieldValue={""}
                                 existingIdsList={tags.map((tag) => (tag.id))}

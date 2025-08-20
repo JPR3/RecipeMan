@@ -169,7 +169,7 @@ const EditElementModal = ({ openModal, closeModal, elementType, elementName, ele
                             <SearchableDropdown
                                 ingredientPart="Tag"
                                 apiPath="tags"
-                                index="0"
+                                index="Edit"
                                 onChangeEvent={(val, id) => handleAddTag(val, id)}
                                 fieldValue={""}
                                 existingIdsList={tags.map((tag) => (tag.id))}
