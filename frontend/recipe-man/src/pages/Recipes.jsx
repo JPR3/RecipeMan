@@ -7,6 +7,7 @@ import DeleteConfirmationModal from "../components/DeleteConfirmationModal";
 import SearchableDropdown from "../components/SearchableDropdown";
 import EditRecipeModal from "../components/EditRecipeModal";
 import ListSelectionModal from "../components/ListSelectionModal";
+import { ToastContainer, toast } from 'react-toastify';
 
 const Recipes = () => {
     const queryClient = new QueryClient();
@@ -90,6 +91,7 @@ const Recipes = () => {
     };
     return (
         <div className={"flex flex-col justify-start items-center w-full gap-2 " + ((width < 768) ? "px-2" : "px-16")}>
+            <ToastContainer position="top-center" autoClose={3000} hideProgressBar={true} toastStyle={{ color: "var(--color-content)", backgroundColor: "var(--color-background)" }} />
             <h1 className="text-5xl font-semibold text-content pb-4">Recipes</h1>
             <div className="flex gap-2 items-top justify-center">
                 <div className="flex flex-col gap-1 max-w-3/8">
@@ -136,7 +138,7 @@ const Recipes = () => {
             <NewRecipeModal openModal={recipeModal} closeModal={() => setRecipeModal(false)}></NewRecipeModal>
             <EditRecipeModal openModal={editModal} closeModal={() => setEditModal(false)} recipeData={editModalData} />
             <DeleteConfirmationModal openModal={deleteModal} closeModal={() => setDeleteModal(false)} recipeId={deleteModalId} recipeName={recipes.find(recipe => recipe.id === deleteModalId)?.title} />
-            <ListSelectionModal openModal={listSelectionModal} closeModal={() => setListSelectionModal(false)} recipeData={listSelectionData} lists={lists} />
+            <ListSelectionModal openModal={listSelectionModal} closeModal={(updated) => { setListSelectionModal(false); if (updated) { toast.success("Ingredients added Successfully!") } }} recipeData={listSelectionData} lists={lists} />
             <QueryClientProvider client={queryClient}>
                 <div className="w-full flex flex-col gap-4 items-center mb-4">
                     {processRecipes(recipes).map((vals) => (

@@ -24,17 +24,17 @@ const ListSelectionModal = ({ openModal, closeModal, recipeData, lists }) => {
             Promise.all(recipeData.ingredients.map((ing) => {
                 return createListIngredient({ ...ing, name_id: ing.ingredient_id, list_item_tags: [], global_tags: ing.tags }, data, selectedList.id, uid, accessToken)
             })).then(res => {
-                closeListModal()
+                closeListModal(true)
             })
         })
 
     }
-    const closeListModal = () => {
+    const closeListModal = (updated) => {
         setSelectedList(null);
-        closeModal()
+        closeModal(updated)
     }
     return (
-        <Modal openModal={openModal} closeModal={() => { closeListModal() }}>
+        <Modal openModal={openModal} closeModal={() => { closeListModal(false) }}>
             <div className="flex flex-col items-center gap-2 mb-4">
                 <p className="text-2xl font-bold">Select List:</p>
                 <div className="w-full">
