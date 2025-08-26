@@ -3,12 +3,7 @@ import pkg from 'body-parser';
 const { json, urlencoded } = pkg;
 import cors from 'cors';
 import { verifySupabaseToken } from './auth.js';
-import usersRoutes from './routes/users.js';
-import recipesRoutes from './routes/recipes.js';
-import listsRoutes from './routes/lists.js';
-import ingredientsRoutes from './routes/ingredients.js';
-import unitsRoutes from './routes/units.js';
-import tagsRoutes from './routes/tags.js';
+import apiRouter from './routes/api.js';
 import path from 'path';
 
 const app = express()
@@ -26,15 +21,7 @@ app.use(
         extended: true,
     })
 )
-app.use(verifySupabaseToken)
-
-
-app.use('/api', usersRoutes)
-app.use('/api', recipesRoutes)
-app.use('/api', listsRoutes)
-app.use('/api', ingredientsRoutes)
-app.use('/api', unitsRoutes)
-app.use('/api', tagsRoutes)
+app.use(verifySupabaseToken, apiRouter)
 
 app.use(express.static(path.join(__dirname, 'frontend/dist')));
 
