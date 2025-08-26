@@ -204,6 +204,7 @@ const ListItemDisplay = ({ ingredient, index, lastInd, handleCheckChange, listId
                         existingIdsList={[...new Set([...ingredient.global_tags, ...ingredient.list_item_tags])].map((tag) => (tag.id))}
                     />
                 </div>
+                <p className=" mt-1 text-xs font-semibold text-button">Note: Tags added here only apply to this list. To apply a tag to an ingredient across all lists, use 'manage tags' on the profile page</p>
             </div >
         ) : (
             <div key={index} className={"flex gap-2 px-2 items-center w-full pb-2 border-b-2 border-l-2 border-r-2 border-border bg-surface max-w-3/4 pt-2" + (index === 0 ? " border-t-2 rounded-t-md" : (index === lastInd ? " rounded-b-md" : ""))}>
