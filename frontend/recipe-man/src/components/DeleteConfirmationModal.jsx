@@ -14,7 +14,6 @@ const DeleteConfirmationModal = ({ openModal, closeModal, recipeId, recipeName }
                 Authorization: `Bearer ${accessToken}`
             }
         }).then(response => {
-            console.log("Recipe deleted successfully");
             closeModal();
         }).catch(error => console.error("Error deleting recipe:", error));
     }

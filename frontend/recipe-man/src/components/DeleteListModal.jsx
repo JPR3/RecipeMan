@@ -14,7 +14,6 @@ const DeleteListModal = ({ openModal, closeModal, listId, listTitle }) => {
                 Authorization: `Bearer ${accessToken}`
             }
         }).then(response => {
-            console.log("List deleted successfully");
             closeModal();
         }).catch(error => console.error("Error deleting list:", error));
     }

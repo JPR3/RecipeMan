@@ -14,7 +14,6 @@ const DeleteElementModal = ({ openModal, closeModal, elementId, elementName, ele
                 Authorization: `Bearer ${accessToken}`
             }
         }).then(response => {
-            console.log("Deleted successfully");
             closeModal();
         }).catch(error => console.error("Error deleting element:", error));
     }

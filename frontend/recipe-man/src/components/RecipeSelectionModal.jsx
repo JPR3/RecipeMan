@@ -8,11 +8,8 @@ const RecipeSelectionModal = ({ openModal, closeModal, recipes, createListIngred
     const { session, user } = useAuth();
     const queryClient = new QueryClient();
     const [incomingIngredients, setIncomingIngredients] = useState([])
-    const accessToken = session?.access_token;
-    const uid = user?.id;
 
     const handleSubmit = () => {
-        console.log(incomingIngredients)
         const promises = Promise.all(incomingIngredients.map((ing) => createListIngredient({ ...ing, name_id: ing.ingredient_id, list_item_tags: [], global_tags: ing.tags })))
         promises.then(res => {
             closeRecipeModal()

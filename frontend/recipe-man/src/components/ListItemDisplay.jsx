@@ -150,7 +150,7 @@ const ListItemDisplay = ({ ingredient, index, lastInd, handleCheckChange, listId
                         placeholder="0"
                         value={newIng.measurement_qty}
                         className="border border-border bg-fields text-content pl-1 w-10 rounded-md h-6.5 focus:border-2"
-                        onChange={(e) => { console.log(newIng.measurement_qty); handleEdit(e.target.value, "Q") }}
+                        onChange={(e) => { handleEdit(e.target.value, "Q") }}
                     />
                     <SearchableDropdown
                         ingredientPart="Unit"

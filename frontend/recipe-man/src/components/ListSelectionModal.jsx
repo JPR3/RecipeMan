@@ -23,7 +23,6 @@ const ListSelectionModal = ({ openModal, closeModal, recipeData, lists }) => {
             return response.json();
         }).then(data => {
             Promise.all(recipeData.ingredients.map((ing) => {
-                console.log(ing)
                 return createListIngredient({ ...ing, name_id: ing.ingredient_id, measurement_qty: (ing.measurement_qty * scale), list_item_tags: [], global_tags: ing.tags }, data, selectedList.id, uid, accessToken)
             })).then(res => {
                 closeListModal(true)
