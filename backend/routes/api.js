@@ -8,11 +8,11 @@ import tagsRoutes from './tags.js';
 
 const apiRouter = express.Router();
 
-apiRouter.use('/api', usersRoutes);
-apiRouter.use('/api', recipesRoutes);
-apiRouter.use('/api', listsRoutes);
-apiRouter.use('/api', ingredientsRoutes);
-apiRouter.use('/api', unitsRoutes);
-apiRouter.use('/api', tagsRoutes);
+apiRouter.use(usersRoutes);
+apiRouter.use(recipesRoutes);
+apiRouter.use(listsRoutes);
+apiRouter.use(ingredientsRoutes);
+apiRouter.use(unitsRoutes);
+apiRouter.use(tagsRoutes);
 
 export default apiRouter;

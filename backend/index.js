@@ -21,7 +21,7 @@ app.use(
         extended: true,
     })
 )
-app.use(verifySupabaseToken, apiRouter)
+app.use('/api', verifySupabaseToken, apiRouter)
 
 app.use(express.static(path.join(__dirname, 'frontend/dist')));
 
