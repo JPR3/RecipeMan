@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "start": "node --env-file=backend/.env backend/index.js",
-    "dev": "node --watch-path=./ --env-file=.env backend/index.js",
+    "start": "node backend/index.js",
+    "dev": "node --watch-path=./ --env-file=backend/.env backend/index.js",
     "build": "npm install && npm install --prefix frontend && npm run build --prefix frontend"
   },
   "type": "module",
