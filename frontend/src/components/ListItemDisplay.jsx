@@ -9,6 +9,7 @@ const ListItemDisplay = ({ ingredient, index, lastInd, handleCheckChange, listId
     const [editMode, setEditMode] = useState(false);
     const [newIng, setNewIng] = useState({ ...ingredient })
     const [isValid, setIsValid] = useState(false)
+    const [width, setWidth] = useState(0);
     const { session, user, loading } = useAuth();
     if (loading) return <div>Loading...</div>;
     const accessToken = session?.access_token;
@@ -19,6 +20,14 @@ const ListItemDisplay = ({ ingredient, index, lastInd, handleCheckChange, listId
         validateIng(ingredient)
     }, [ingredient])
 
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const handleResize = () => setWidth(window.innerWidth);
+            window.addEventListener('resize', handleResize);
+            handleResize();
+            return () => window.removeEventListener('resize', handleResize);
+        }
+    }, []);
 
     const validateIng = (data) => {
         const localValid = (data.measurement_qty > 0 && data.unit !== "" && data.name != "" && data.name_id != "-1" && data.unit_id != "-1")
@@ -141,7 +150,7 @@ const ListItemDisplay = ({ ingredient, index, lastInd, handleCheckChange, listId
     }
     return (
         (editMode) ? (
-            <div key={index} className={"flex-col gap-2 px-2 items-center w-full pb-2 border-b-2 border-l-2 border-r-2 border-border bg-surface max-w-3/4 pt-2" + (index === 0 ? " border-t-2 rounded-t-md" : (index === lastInd ? " rounded-b-md" : ""))} >
+            <div key={index} className={"flex-col gap-2 px-2 items-center w-full pb-2 border-b-2 border-l-2 border-r-2 border-border bg-surface pt-2" + (index === 0 ? " border-t-2 rounded-t-md" : (index === lastInd ? " rounded-b-md" : "")) + (width < 768 ? "" : " max-w-3/4")} >
                 <div key={index} className="flex gap-2 items-center w-full">
                     <input
                         type="number"
@@ -208,7 +217,7 @@ const ListItemDisplay = ({ ingredient, index, lastInd, handleCheckChange, listId
                 <p className=" mt-1 text-xs font-semibold text-button">Note: Tags added here only apply to this list. To apply a tag to an ingredient across all lists, use 'manage tags' on the profile page</p>
             </div >
         ) : (
-            <div key={index} className={"flex gap-2 px-2 items-center w-full pb-2 border-b-2 border-l-2 border-r-2 border-border bg-surface max-w-3/4 pt-2" + (index === 0 ? " border-t-2 rounded-t-md" : (index === lastInd ? " rounded-b-md" : ""))}>
+            <div key={index} className={"flex gap-2 px-2 items-center w-full pb-2 border-b-2 border-l-2 border-r-2 border-border bg-surface pt-2" + (index === 0 ? " border-t-2 rounded-t-md" : (index === lastInd ? " rounded-b-md" : "")) + (width < 768 ? "" : " max-w-3/4")} >
                 <input className="accent-primary cursor-pointer" type="checkbox" checked={ingredient.checked} onChange={() => handleCheckChange(ingredient.id, index)} />
                 <span className="text-content">{capitalizeEachWord(ingredient.name) + ":"}</span>
                 <span className="text-content">{ingredient.measurement_qty} {capitalizeEachWord(ingredient.unit)}</span>
