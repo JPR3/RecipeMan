@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useAuth } from "../AuthProvider";
 import Modal from "../components/Modal";
 import SearchableDropdown from "./SearchableDropdown";
+const API_BASE = import.meta.env.VITE_API_BASE || '';
 
 const NewElementModal = ({ openModal, closeModal, elementType }) => {
     const [input, setInput] = useState("");
@@ -23,7 +24,7 @@ const NewElementModal = ({ openModal, closeModal, elementType }) => {
     const handleAdd = () => {
         if (validated && isValid) {
             const jsonBody = JSON.stringify(elementType === "tags" ? { description: input.trim().toLowerCase() } : elementType === "ingredients" ? { name: input.trim().toLowerCase() } : { unit: input.trim().toLowerCase() });
-            fetch(`http://localhost:3000/api/users/${uid}/${elementType}`, {
+            fetch(`${API_BASE}/api/users/${uid}/${elementType}`, {
                 method: 'POST',
                 headers: {
                     Accept: 'application/json',
@@ -34,7 +35,7 @@ const NewElementModal = ({ openModal, closeModal, elementType }) => {
                 body: jsonBody
             }).then(res => res.json().then(data => {
                 const tagPromiseArr = tags.map((tag, index) => {
-                    return fetch(`http://localhost:3000/api/users/${uid}/ingredients/${data.ingredient.id}/tags`, {
+                    return fetch(`${API_BASE}/api/users/${uid}/ingredients/${data.ingredient.id}/tags`, {
                         method: 'POST',
                         headers: {
                             Accept: 'application/json',
@@ -62,7 +63,7 @@ const NewElementModal = ({ openModal, closeModal, elementType }) => {
             setIsValid(false);
         } else {
             setValidated(false);
-            const url = `http://localhost:3000/api/users/${uid}/${elementType}?` + new URLSearchParams({ name: val.toLowerCase().trim() }).toString()
+            const url = `${API_BASE}/api/users/${uid}/${elementType}?` + new URLSearchParams({ name: val.toLowerCase().trim() }).toString()
             fetch(url, {
                 headers: {
                     Authorization: `Bearer ${accessToken}`
@@ -81,7 +82,7 @@ const NewElementModal = ({ openModal, closeModal, elementType }) => {
     }
     const handleAddTag = (val, id) => {
         if (id === "0") {
-            fetch(`http://localhost:3000/api/users/${uid}/tags`, {
+            fetch(`${API_BASE}/api/users/${uid}/tags`, {
                 method: 'POST',
                 headers: {
                     Accept: 'application/json',

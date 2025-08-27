@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useAuth } from '../AuthProvider';
 import TagDisplay from './TagDisplay';
 import { useQuery } from '@tanstack/react-query';
+const API_BASE = import.meta.env.VITE_API_BASE || '';
 
 const RecipeDropdown = ({ recipeName, recipeTags, recipeId, openDeleteModal, openEditModal, openListModal, refreshTrigger, width }) => {
     const [isOpen, setIsOpen] = useState(false);
@@ -17,7 +18,7 @@ const RecipeDropdown = ({ recipeName, recipeTags, recipeId, openDeleteModal, ope
 
     const { data, isLoading, refetch } = useQuery({
         queryKey: ['recipeData', recipeId],
-        queryFn: () => fetch(`http://localhost:3000/api/users/${uid}/recipes/${recipeId}`, {
+        queryFn: () => fetch(`${API_BASE}/api/users/${uid}/recipes/${recipeId}`, {
             headers: {
                 Authorization: `Bearer ${accessToken}`
             }

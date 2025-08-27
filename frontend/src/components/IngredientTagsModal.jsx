@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useAuth } from "../AuthProvider";
 import Modal from "../components/Modal";
 import SearchableDropdown from "./SearchableDropdown";
+const API_BASE = import.meta.env.VITE_API_BASE || '';
 
 const IngredientTagsModal = ({ openModal, closeModal }) => {
     const [tags, setTags] = useState([])
@@ -23,7 +24,7 @@ const IngredientTagsModal = ({ openModal, closeModal }) => {
     const handleSelect = (val, id) => {
         setSelectedIngredient({ name: val, id: id })
         setChangesMade(false)
-        fetch(`http://localhost:3000/api/users/${uid}/ingredients/${id}/tags`, {
+        fetch(`${API_BASE}/api/users/${uid}/ingredients/${id}/tags`, {
             method: 'GET',
             headers: {
                 Accept: 'application/json',
@@ -46,7 +47,7 @@ const IngredientTagsModal = ({ openModal, closeModal }) => {
         setChangesMade(true)
         setDisplayConfirmation(false)
         if (id === "0") {
-            fetch(`http://localhost:3000/api/users/${uid}/tags`, {
+            fetch(`${API_BASE}/api/users/${uid}/tags`, {
                 method: 'POST',
                 headers: {
                     Accept: 'application/json',
@@ -65,7 +66,7 @@ const IngredientTagsModal = ({ openModal, closeModal }) => {
         }
     }
     const handleEdit = async () => {
-        await fetch(`http://localhost:3000/api/users/${uid}/ingredients/${selectedIngredient.id}/tags`, {
+        await fetch(`${API_BASE}/api/users/${uid}/ingredients/${selectedIngredient.id}/tags`, {
             method: 'DELETE',
             headers: {
                 Accept: 'application/json',
@@ -74,7 +75,7 @@ const IngredientTagsModal = ({ openModal, closeModal }) => {
             }
         })
         const tagPromiseArr = tags.map((tag) => {
-            return fetch(`http://localhost:3000/api/users/${uid}/ingredients/${selectedIngredient.id}/tags`, {
+            return fetch(`${API_BASE}/api/users/${uid}/ingredients/${selectedIngredient.id}/tags`, {
                 method: 'POST',
                 headers: {
                     Accept: 'application/json',

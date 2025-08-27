@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useAuth } from "../AuthProvider"
 import Modal from "./Modal";
 import { createListIngredient } from "../helpers";
+const API_BASE = import.meta.env.VITE_API_BASE || '';
 
 const ListSelectionModal = ({ openModal, closeModal, recipeData, lists }) => {
     const { session, user } = useAuth();
@@ -12,7 +13,7 @@ const ListSelectionModal = ({ openModal, closeModal, recipeData, lists }) => {
     const uid = user?.id;
 
     const handleSubmit = () => {
-        fetch(`http://localhost:3000/api/users/${uid}/lists/${selectedList.id}`, {
+        fetch(`${API_BASE}/api/users/${uid}/lists/${selectedList.id}`, {
             headers: {
                 Authorization: `Bearer ${accessToken}`
             }

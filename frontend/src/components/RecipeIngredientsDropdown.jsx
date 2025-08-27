@@ -1,6 +1,7 @@
 import { useState } from "react"
 import { useAuth } from "../AuthProvider";
 import { useQuery } from '@tanstack/react-query';
+const API_BASE = import.meta.env.VITE_API_BASE || '';
 
 const RecipeIngredientsDropdown = ({ recipeTitle, recipeId, isLast, addToIncoming, removeFromIncoming }) => {
     const [isOpen, setIsOpen] = useState(false)
@@ -12,7 +13,7 @@ const RecipeIngredientsDropdown = ({ recipeTitle, recipeId, isLast, addToIncomin
 
     const { data, isLoading, refetch } = useQuery({
         queryKey: ['recipeData', recipeId],
-        queryFn: () => fetch(`http://localhost:3000/api/users/${uid}/recipes/${recipeId}`, {
+        queryFn: () => fetch(`${API_BASE}/api/users/${uid}/recipes/${recipeId}`, {
             headers: {
                 Authorization: `Bearer ${accessToken}`
             }

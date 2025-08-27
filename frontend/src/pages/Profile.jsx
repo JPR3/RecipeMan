@@ -6,6 +6,8 @@ import DeleteElementModal from '../components/DeleteElementModal';
 import NewElementModal from '../components/NewElementModal';
 import EditElementModal from '../components/EditElementModal';
 import IngredientTagsModal from '../components/IngredientTagsModal';
+const API_BASE = import.meta.env.VITE_API_BASE || '';
+
 const Profile = () => {
     const [username, setUsername] = useState('');
     const [tab, setTab] = useState("tags");
@@ -38,14 +40,14 @@ const Profile = () => {
     useEffect(() => {
         if (!deleteModal && !newModal && !editModal) {
             document.body.style.overflow = 'auto';
-            fetch(`http://localhost:3000/api/users/${uid}`, {
+            fetch(`${API_BASE}/api/users/${uid}`, {
                 headers: {
                     Authorization: `Bearer ${accessToken}`
                 }
             }).then(response => response.json()).then(data => {
                 setUsername(data.username);
             });
-            fetch(`http://localhost:3000/api/users/${uid}/tags/custom?` + new URLSearchParams({ name: searchValue.toLowerCase().trim() }).toString(), {
+            fetch(`${API_BASE}/api/users/${uid}/tags/custom?` + new URLSearchParams({ name: searchValue.toLowerCase().trim() }).toString(), {
                 headers: {
                     Authorization: `Bearer ${accessToken}`
                 }
@@ -53,13 +55,13 @@ const Profile = () => {
                 setTags(data);
             });
 
-            fetch(`http://localhost:3000/api/users/${uid}/ingredients/custom?` + new URLSearchParams({ name: searchValue.toLowerCase().trim() }).toString(), {
+            fetch(`${API_BASE}/api/users/${uid}/ingredients/custom?` + new URLSearchParams({ name: searchValue.toLowerCase().trim() }).toString(), {
                 headers: {
                     Authorization: `Bearer ${accessToken}`
                 }
             }).then(response => response.json()).then(data => {
                 const taggedData = data.map(async (ing) => {
-                    const res = await fetch(`http://localhost:3000/api/users/${uid}/ingredients/${ing.id}/tags`, {
+                    const res = await fetch(`${API_BASE}/api/users/${uid}/ingredients/${ing.id}/tags`, {
                         headers: {
                             Authorization: `Bearer ${accessToken}`
                         }
@@ -76,7 +78,7 @@ const Profile = () => {
 
             });
 
-            fetch(`http://localhost:3000/api/users/${uid}/units/custom?` + new URLSearchParams({ name: searchValue.toLowerCase().trim() }).toString(), {
+            fetch(`${API_BASE}/api/users/${uid}/units/custom?` + new URLSearchParams({ name: searchValue.toLowerCase().trim() }).toString(), {
                 headers: {
                     Authorization: `Bearer ${accessToken}`
                 }

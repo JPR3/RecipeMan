@@ -3,6 +3,7 @@ import SearchableDropdown from "./SearchableDropdown";
 import { useAuth } from "../AuthProvider"
 import { capitalizeEachWord } from "../helpers";
 import TagDisplay from "./TagDisplay";
+const API_BASE = import.meta.env.VITE_API_BASE || '';
 
 const ListItemDisplay = ({ ingredient, index, lastInd, handleCheckChange, listId, updateList, enableEdits, setEnableEdits, editListIngredient, createListIngredient }) => {
     const [editMode, setEditMode] = useState(false);
@@ -37,7 +38,7 @@ const ListItemDisplay = ({ ingredient, index, lastInd, handleCheckChange, listId
             localIng.name_id = newIng.name_id
             if (id === "0") {
                 //Create a new unit here
-                fetch(`http://localhost:3000/api/users/${uid}/units`, {
+                fetch(`${API_BASE}/api/users/${uid}/units`, {
                     method: 'POST',
                     headers: {
                         Accept: 'application/json',
@@ -58,7 +59,7 @@ const ListItemDisplay = ({ ingredient, index, lastInd, handleCheckChange, listId
             localIng.unit_id = newIng.unit_id
             if (id === "0") {
                 //Create a new raw ingredient here
-                fetch(`http://localhost:3000/api/users/${uid}/ingredients`, {
+                fetch(`${API_BASE}/api/users/${uid}/ingredients`, {
                     method: 'POST',
                     headers: {
                         Accept: 'application/json',
@@ -100,7 +101,7 @@ const ListItemDisplay = ({ ingredient, index, lastInd, handleCheckChange, listId
 
     }
     const handleRemove = () => {
-        fetch(`http://localhost:3000/api/users/${uid}/lists/${listId}/list_ingredients/${ingredient.id}`, {
+        fetch(`${API_BASE}/api/users/${uid}/lists/${listId}/list_ingredients/${ingredient.id}`, {
             method: 'DELETE',
             headers: {
                 Accept: 'application/json',
@@ -118,7 +119,7 @@ const ListItemDisplay = ({ ingredient, index, lastInd, handleCheckChange, listId
     }
     const handleAddTag = (val, id) => {
         if (id === "0") {
-            fetch(`http://localhost:3000/api/users/${uid}/tags`, {
+            fetch(`${API_BASE}/api/users/${uid}/tags`, {
                 method: 'POST',
                 headers: {
                     Accept: 'application/json',

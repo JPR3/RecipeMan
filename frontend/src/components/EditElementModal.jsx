@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useAuth } from "../AuthProvider";
 import Modal from "../components/Modal";
 import SearchableDropdown from "./SearchableDropdown";
+const API_BASE = import.meta.env.VITE_API_BASE || '';
 
 const EditElementModal = ({ openModal, closeModal, elementType, elementName, elementId }) => {
     const [input, setInput] = useState("bar");
@@ -25,7 +26,7 @@ const EditElementModal = ({ openModal, closeModal, elementType, elementName, ele
             setInput(elementName);
             validateInput(elementName);
             if (elementType === "ingredients") {
-                fetch(`http://localhost:3000/api/users/${uid}/ingredients/${elementId}/tags`, {
+                fetch(`${API_BASE}/api/users/${uid}/ingredients/${elementId}/tags`, {
                     method: 'GET',
                     headers: {
                         Accept: 'application/json',
@@ -44,7 +45,7 @@ const EditElementModal = ({ openModal, closeModal, elementType, elementName, ele
         if (validated && isValid) {
             if (input.trim() !== elementName) {
                 const jsonBody = JSON.stringify(elementType === "tags" ? { description: input.trim().toLowerCase() } : elementType === "ingredients" ? { name: input.trim().toLowerCase() } : { unit: input.trim().toLowerCase() });
-                await fetch(`http://localhost:3000/api/users/${uid}/${elementType}/${elementId}`, {
+                await fetch(`${API_BASE}/api/users/${uid}/${elementType}/${elementId}`, {
                     method: 'PATCH',
                     headers: {
                         Accept: 'application/json',
@@ -56,7 +57,7 @@ const EditElementModal = ({ openModal, closeModal, elementType, elementName, ele
                 })
             }
             if (elementType === "ingredients") {
-                await fetch(`http://localhost:3000/api/users/${uid}/ingredients/${elementId}/tags`, {
+                await fetch(`${API_BASE}/api/users/${uid}/ingredients/${elementId}/tags`, {
                     method: 'DELETE',
                     headers: {
                         Accept: 'application/json',
@@ -65,7 +66,7 @@ const EditElementModal = ({ openModal, closeModal, elementType, elementName, ele
                     }
                 })
                 const tagPromiseArr = tags.map((tag, index) => {
-                    return fetch(`http://localhost:3000/api/users/${uid}/ingredients/${elementId}/tags`, {
+                    return fetch(`${API_BASE}/api/users/${uid}/ingredients/${elementId}/tags`, {
                         method: 'POST',
                         headers: {
                             Accept: 'application/json',
@@ -94,7 +95,7 @@ const EditElementModal = ({ openModal, closeModal, elementType, elementName, ele
             setValidated(true);
         } else {
             setValidated(false);
-            const url = `http://localhost:3000/api/users/${uid}/${elementType}?` + new URLSearchParams({ name: val.toLowerCase().trim() }).toString()
+            const url = `${API_BASE}/api/users/${uid}/${elementType}?` + new URLSearchParams({ name: val.toLowerCase().trim() }).toString()
             fetch(url, {
                 headers: {
                     Authorization: `Bearer ${accessToken}`
@@ -113,7 +114,7 @@ const EditElementModal = ({ openModal, closeModal, elementType, elementName, ele
     }
     const handleAddTag = (val, id) => {
         if (id === "0") {
-            fetch(`http://localhost:3000/api/users/${uid}/tags`, {
+            fetch(`${API_BASE}/api/users/${uid}/tags`, {
                 method: 'POST',
                 headers: {
                     Accept: 'application/json',

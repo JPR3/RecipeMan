@@ -4,6 +4,7 @@ import { useAuth } from '../AuthProvider';
 import ListItemDisplay from "../components/ListItemDisplay";
 import { editListIngredient, createListIngredient } from "../helpers";
 import RecipeSelectionModal from "../components/RecipeSelectionModal"
+const API_BASE = import.meta.env.VITE_API_BASE || '';
 
 const ListDisplay = () => {
     const { session, user, loading } = useAuth();
@@ -42,7 +43,7 @@ const ListDisplay = () => {
     }, [recipeSelectionModal]);
     useEffect(() => {
         updateList();
-        fetch(`http://localhost:3000/api/users/${uid}/recipes`, {
+        fetch(`${API_BASE}/api/users/${uid}/recipes`, {
             headers: {
                 Authorization: `Bearer ${accessToken}`
             }
@@ -112,7 +113,7 @@ const ListDisplay = () => {
     const updateList = () => {
         setDataLoaded(false);
         setError(null);
-        fetch(`http://localhost:3000/api/users/${uid}/lists/${params.listId}`, {
+        fetch(`${API_BASE}/api/users/${uid}/lists/${params.listId}`, {
             headers: {
                 Authorization: `Bearer ${accessToken}`
             }
@@ -143,7 +144,7 @@ const ListDisplay = () => {
     }
 
     const handleCheckChange = (ingredientId, ingredientIndex) => {
-        fetch(`http://localhost:3000/api/users/${uid}/lists/${params.listId}/list_ingredients/${ingredientId}`, {
+        fetch(`${API_BASE}/api/users/${uid}/lists/${params.listId}/list_ingredients/${ingredientId}`, {
             method: 'PATCH',
             headers: {
                 Accept: 'application/json',
@@ -172,7 +173,7 @@ const ListDisplay = () => {
     }
     const handleRemoveChecked = () => {
         const promises = checkedIds.map((id) => {
-            return fetch(`http://localhost:3000/api/users/${uid}/lists/${params.listId}/list_ingredients/${id}`, {
+            return fetch(`${API_BASE}/api/users/${uid}/lists/${params.listId}/list_ingredients/${id}`, {
                 method: 'DELETE',
                 headers: {
                     Accept: 'application/json',
@@ -189,7 +190,7 @@ const ListDisplay = () => {
         if (checkedIds.length > 0) {
             //Deselect all
             const promises = checkedIds.map((id) => {
-                fetch(`http://localhost:3000/api/users/${uid}/lists/${params.listId}/list_ingredients/${id}`, {
+                fetch(`${API_BASE}/api/users/${uid}/lists/${params.listId}/list_ingredients/${id}`, {
                     method: 'PATCH',
                     headers: {
                         Accept: 'application/json',
@@ -211,7 +212,7 @@ const ListDisplay = () => {
         } else {
             //Select all
             const promises = list.ingredients.map((ing) => {
-                fetch(`http://localhost:3000/api/users/${uid}/lists/${params.listId}/list_ingredients/${ing.id}`, {
+                fetch(`${API_BASE}/api/users/${uid}/lists/${params.listId}/list_ingredients/${ing.id}`, {
                     method: 'PATCH',
                     headers: {
                         Accept: 'application/json',

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../AuthProvider";
 import Modal from "../components/Modal";
+const API_BASE = import.meta.env.VITE_API_BASE || '';
 
 const EditListModal = ({ openModal, closeModal, existingLists, oldTitle, listId }) => {
     const [input, setInput] = useState(oldTitle)
@@ -24,7 +25,7 @@ const EditListModal = ({ openModal, closeModal, existingLists, oldTitle, listId 
 
     const handleSubmit = () => {
         if (isValid) {
-            fetch(`http://localhost:3000/api/users/${uid}/lists/${listId}`, {
+            fetch(`${API_BASE}/api/users/${uid}/lists/${listId}`, {
                 method: 'PATCH',
                 headers: {
                     Accept: 'application/json',

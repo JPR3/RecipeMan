@@ -8,6 +8,7 @@ import SearchableDropdown from "../components/SearchableDropdown";
 import EditRecipeModal from "../components/EditRecipeModal";
 import ListSelectionModal from "../components/ListSelectionModal";
 import { ToastContainer, toast } from 'react-toastify';
+const API_BASE = import.meta.env.VITE_API_BASE || '';
 
 const Recipes = () => {
     const queryClient = new QueryClient();
@@ -38,7 +39,7 @@ const Recipes = () => {
         }
     }, []);
     useEffect(() => {
-        fetch(`http://localhost:3000/api/users/${uid}/lists`, {
+        fetch(`${API_BASE}/api/users/${uid}/lists`, {
             headers: {
                 Authorization: `Bearer ${accessToken}`
             }
@@ -49,7 +50,7 @@ const Recipes = () => {
     useEffect(() => {
         if (!recipeModal && !deleteModal && !editModal) {
             document.body.style.overflow = 'auto';
-            fetch(`http://localhost:3000/api/users/${uid}/recipes`, {
+            fetch(`${API_BASE}/api/users/${uid}/recipes`, {
                 headers: {
                     Authorization: `Bearer ${accessToken}`
                 }

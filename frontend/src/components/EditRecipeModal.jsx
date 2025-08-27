@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import Modal from "../components/Modal";
 import SearchableDropdown from "./SearchableDropdown";
 import { useAuth } from "../AuthProvider";
+const API_BASE = import.meta.env.VITE_API_BASE || '';
 
 const EditRecipeModal = ({ openModal, closeModal, recipeData }) => {
     const ref = useRef()
@@ -26,7 +27,7 @@ const EditRecipeModal = ({ openModal, closeModal, recipeData }) => {
             localIng[index].nameID = ingredients[index].nameID
             if (id === "0") {
                 //Create a new unit here
-                fetch(`http://localhost:3000/api/users/${uid}/units`, {
+                fetch(`${API_BASE}/api/users/${uid}/units`, {
                     method: 'POST',
                     headers: {
                         Accept: 'application/json',
@@ -47,7 +48,7 @@ const EditRecipeModal = ({ openModal, closeModal, recipeData }) => {
             localIng[index].unitID = ingredients[index].unitID
             if (id === "0") {
                 //Create a new raw ingredient here
-                fetch(`http://localhost:3000/api/users/${uid}/ingredients`, {
+                fetch(`${API_BASE}/api/users/${uid}/ingredients`, {
                     method: 'POST',
                     headers: {
                         Accept: 'application/json',
@@ -74,7 +75,7 @@ const EditRecipeModal = ({ openModal, closeModal, recipeData }) => {
     }
     const handleAddTag = (val, id) => {
         if (id === "0") {
-            fetch(`http://localhost:3000/api/users/${uid}/tags`, {
+            fetch(`${API_BASE}/api/users/${uid}/tags`, {
                 method: 'POST',
                 headers: {
                     Accept: 'application/json',
@@ -118,7 +119,7 @@ const EditRecipeModal = ({ openModal, closeModal, recipeData }) => {
     }
     const updateRecipe = async () => {
         setIsIngValid(false)
-        await fetch(`http://localhost:3000/api/users/${uid}/recipes/${recipeData.id}`, {
+        await fetch(`${API_BASE}/api/users/${uid}/recipes/${recipeData.id}`, {
             method: 'PATCH',
             headers: {
                 Accept: 'application/json',
@@ -134,7 +135,7 @@ const EditRecipeModal = ({ openModal, closeModal, recipeData }) => {
             })
         })
         await Promise.all([
-            fetch(`http://localhost:3000/api/users/${uid}/recipes/${recipeData.id}/recipe_ingredients`, {
+            fetch(`${API_BASE}/api/users/${uid}/recipes/${recipeData.id}/recipe_ingredients`, {
                 method: 'DELETE',
                 headers: {
                     Accept: 'application/json',
@@ -142,7 +143,7 @@ const EditRecipeModal = ({ openModal, closeModal, recipeData }) => {
                     Authorization: `Bearer ${accessToken}`
                 }
             }),
-            fetch(`http://localhost:3000/api/users/${uid}/recipes/${recipeData.id}/tags`, {
+            fetch(`${API_BASE}/api/users/${uid}/recipes/${recipeData.id}/tags`, {
                 method: 'DELETE',
                 headers: {
                     Accept: 'application/json',
@@ -153,7 +154,7 @@ const EditRecipeModal = ({ openModal, closeModal, recipeData }) => {
         ])
         //Recipe ingredients
         const ingPromiseArr = ingredients.map((ing, index) => {
-            return fetch(`http://localhost:3000/api/users/${uid}/recipes/${recipeData.id}/recipe_ingredients`, {
+            return fetch(`${API_BASE}/api/users/${uid}/recipes/${recipeData.id}/recipe_ingredients`, {
                 method: 'POST',
                 headers: {
                     Accept: 'application/json',
@@ -170,7 +171,7 @@ const EditRecipeModal = ({ openModal, closeModal, recipeData }) => {
         })
         //Tags
         const tagPromiseArr = tags.map((tag, index) => {
-            return fetch(`http://localhost:3000/api/users/${uid}/recipes/${recipeData.id}/tags`, {
+            return fetch(`${API_BASE}/api/users/${uid}/recipes/${recipeData.id}/tags`, {
                 method: 'POST',
                 headers: {
                     Accept: 'application/json',

@@ -1,3 +1,5 @@
+const API_BASE = import.meta.env.VITE_API_BASE || '';
+
 const familiesDict = {
     //Kilograms, Grams, Milligrams
     "0bd42772-0f5a-4fc6-b8df-9d1e92ed59d3": ["5cb494f8-1c63-4456-91cb-1764099b8a3d", "f8fdf552-c9db-4391-8064-f5a2fb6dc4df"],
@@ -88,7 +90,7 @@ const checkMerge = (newIngredient, list) => {
 export const editListIngredient = async (newVals, list, listId, uid, accessToken) => {
     const mergedVals = checkMerge(newVals, list);
     if (mergedVals) {
-        await fetch(`http://localhost:3000/api/users/${uid}/lists/${listId}/list_ingredients/${mergedVals.id}/tags`, {
+        await fetch(`${API_BASE}/api/users/${uid}/lists/${listId}/list_ingredients/${mergedVals.id}/tags`, {
             method: 'DELETE',
             headers: {
                 Accept: 'application/json',
@@ -97,7 +99,7 @@ export const editListIngredient = async (newVals, list, listId, uid, accessToken
             }
         })
         const tagPromiseArr = mergedVals.list_item_tags.map((tag, index) => {
-            return fetch(`http://localhost:3000/api/users/${uid}/lists/${listId}/list_ingredients/${mergedVals.id}/tags`, {
+            return fetch(`${API_BASE}/api/users/${uid}/lists/${listId}/list_ingredients/${mergedVals.id}/tags`, {
                 method: 'POST',
                 headers: {
                     Accept: 'application/json',
@@ -111,7 +113,7 @@ export const editListIngredient = async (newVals, list, listId, uid, accessToken
             })
         })
         return Promise.all([
-            fetch(`http://localhost:3000/api/users/${uid}/lists/${listId}/list_ingredients/${mergedVals.id}`, {
+            fetch(`${API_BASE}/api/users/${uid}/lists/${listId}/list_ingredients/${mergedVals.id}`, {
                 method: 'PATCH',
                 headers: {
                     Accept: 'application/json',
@@ -125,7 +127,7 @@ export const editListIngredient = async (newVals, list, listId, uid, accessToken
                     ingredient_id: mergedVals.name_id
                 })
             }),
-            fetch(`http://localhost:3000/api/users/${uid}/lists/${listId}/list_ingredients/${newVals.id}`, {
+            fetch(`${API_BASE}/api/users/${uid}/lists/${listId}/list_ingredients/${newVals.id}`, {
                 method: 'DELETE',
                 headers: {
                     Accept: 'application/json',
@@ -137,7 +139,7 @@ export const editListIngredient = async (newVals, list, listId, uid, accessToken
             ...tagPromiseArr
         ])
     }
-    await fetch(`http://localhost:3000/api/users/${uid}/lists/${listId}/list_ingredients/${newVals.id}/tags`, {
+    await fetch(`${API_BASE}/api/users/${uid}/lists/${listId}/list_ingredients/${newVals.id}/tags`, {
         method: 'DELETE',
         headers: {
             Accept: 'application/json',
@@ -146,7 +148,7 @@ export const editListIngredient = async (newVals, list, listId, uid, accessToken
         }
     })
     const tagPromiseArr = newVals.list_item_tags.map((tag, index) => {
-        return fetch(`http://localhost:3000/api/users/${uid}/lists/${listId}/list_ingredients/${newVals.id}/tags`, {
+        return fetch(`${API_BASE}/api/users/${uid}/lists/${listId}/list_ingredients/${newVals.id}/tags`, {
             method: 'POST',
             headers: {
                 Accept: 'application/json',
@@ -160,7 +162,7 @@ export const editListIngredient = async (newVals, list, listId, uid, accessToken
         })
     })
     return Promise.all([
-        fetch(`http://localhost:3000/api/users/${uid}/lists/${listId}/list_ingredients/${newVals.id}`, {
+        fetch(`${API_BASE}/api/users/${uid}/lists/${listId}/list_ingredients/${newVals.id}`, {
             method: 'PATCH',
             headers: {
                 Accept: 'application/json',
@@ -185,7 +187,7 @@ export const editListIngredient = async (newVals, list, listId, uid, accessToken
 export const createListIngredient = async (newVals, list, listId, uid, accessToken) => {
     const mergedVals = checkMerge(newVals, list);
     if (mergedVals) {
-        await fetch(`http://localhost:3000/api/users/${uid}/lists/${listId}/list_ingredients/${mergedVals.id}/tags`, {
+        await fetch(`${API_BASE}/api/users/${uid}/lists/${listId}/list_ingredients/${mergedVals.id}/tags`, {
             method: 'DELETE',
             headers: {
                 Accept: 'application/json',
@@ -194,7 +196,7 @@ export const createListIngredient = async (newVals, list, listId, uid, accessTok
             }
         })
         const tagPromiseArr = mergedVals.list_item_tags.map((tag, index) => {
-            return fetch(`http://localhost:3000/api/users/${uid}/lists/${listId}/list_ingredients/${mergedVals.id}/tags`, {
+            return fetch(`${API_BASE}/api/users/${uid}/lists/${listId}/list_ingredients/${mergedVals.id}/tags`, {
                 method: 'POST',
                 headers: {
                     Accept: 'application/json',
@@ -207,7 +209,7 @@ export const createListIngredient = async (newVals, list, listId, uid, accessTok
                 })
             })
         })
-        return Promise.all([fetch(`http://localhost:3000/api/users/${uid}/lists/${listId}/list_ingredients/${mergedVals.id}`, {
+        return Promise.all([fetch(`${API_BASE}/api/users/${uid}/lists/${listId}/list_ingredients/${mergedVals.id}`, {
             method: 'PATCH',
             headers: {
                 Accept: 'application/json',
@@ -223,7 +225,7 @@ export const createListIngredient = async (newVals, list, listId, uid, accessTok
         }),
         ...tagPromiseArr])
     }
-    const res = await fetch(`http://localhost:3000/api/users/${uid}/lists/${listId}/list_ingredients`, {
+    const res = await fetch(`${API_BASE}/api/users/${uid}/lists/${listId}/list_ingredients`, {
         method: 'POST',
         headers: {
             Accept: 'application/json',
@@ -239,7 +241,7 @@ export const createListIngredient = async (newVals, list, listId, uid, accessTok
     })
     const data = await res.json()
     const tagPromiseArr = newVals.list_item_tags.map((tag, index) => {
-        return fetch(`http://localhost:3000/api/users/${uid}/lists/${listId}/list_ingredients/${data.item.id}/tags`, {
+        return fetch(`${API_BASE}/api/users/${uid}/lists/${listId}/list_ingredients/${data.item.id}/tags`, {
             method: 'POST',
             headers: {
                 Accept: 'application/json',

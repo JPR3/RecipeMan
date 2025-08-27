@@ -1,5 +1,6 @@
 import { useAuth } from "../AuthProvider";
 import Modal from "../components/Modal";
+const API_BASE = import.meta.env.VITE_API_BASE || '';
 
 const DeleteConfirmationModal = ({ openModal, closeModal, recipeId, recipeName }) => {
     const { session, user, loading } = useAuth();
@@ -8,7 +9,7 @@ const DeleteConfirmationModal = ({ openModal, closeModal, recipeId, recipeName }
     const uid = user?.id;
 
     const handleDelete = () => {
-        fetch(`http://localhost:3000/api/users/${uid}/recipes/${recipeId}`, {
+        fetch(`${API_BASE}/api/users/${uid}/recipes/${recipeId}`, {
             method: 'DELETE',
             headers: {
                 Authorization: `Bearer ${accessToken}`

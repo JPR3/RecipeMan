@@ -2,6 +2,7 @@ import React, { useState, useRef } from "react";
 import Modal from "../components/Modal";
 import SearchableDropdown from "./SearchableDropdown";
 import { useAuth } from "../AuthProvider";
+const API_BASE = import.meta.env.VITE_API_BASE || '';
 
 const NewRecipeModal = ({ openModal, closeModal }) => {
     const ref = useRef()
@@ -28,7 +29,7 @@ const NewRecipeModal = ({ openModal, closeModal }) => {
             localIng[index].nameID = ingredients[index].nameID
             if (id === "0") {
                 //Create a new unit here
-                fetch(`http://localhost:3000/api/users/${uid}/units`, {
+                fetch(`${API_BASE}/api/users/${uid}/units`, {
                     method: 'POST',
                     headers: {
                         Accept: 'application/json',
@@ -49,7 +50,7 @@ const NewRecipeModal = ({ openModal, closeModal }) => {
             localIng[index].unitID = ingredients[index].unitID
             if (id === "0") {
                 //Create a new raw ingredient here
-                fetch(`http://localhost:3000/api/users/${uid}/ingredients`, {
+                fetch(`${API_BASE}/api/users/${uid}/ingredients`, {
                     method: 'POST',
                     headers: {
                         Accept: 'application/json',
@@ -76,7 +77,7 @@ const NewRecipeModal = ({ openModal, closeModal }) => {
     }
     const handleAddTag = (val, id) => {
         if (id === "0") {
-            fetch(`http://localhost:3000/api/users/${uid}/tags`, {
+            fetch(`${API_BASE}/api/users/${uid}/tags`, {
                 method: 'POST',
                 headers: {
                     Accept: 'application/json',
@@ -120,7 +121,7 @@ const NewRecipeModal = ({ openModal, closeModal }) => {
     }
     const createRecipe = () => {
         setIsIngValid(false)
-        fetch(`http://localhost:3000/api/users/${uid}/recipes`, {
+        fetch(`${API_BASE}/api/users/${uid}/recipes`, {
             method: 'POST',
             headers: {
                 Accept: 'application/json',
@@ -137,7 +138,7 @@ const NewRecipeModal = ({ openModal, closeModal }) => {
         }).then(response => response.json()).then(data => {
             const recipe_id = data.recipe.id
             const ingPromiseArr = ingredients.map((ing, index) => {
-                return fetch(`http://localhost:3000/api/users/${uid}/recipes/${recipe_id}/recipe_ingredients`, {
+                return fetch(`${API_BASE}/api/users/${uid}/recipes/${recipe_id}/recipe_ingredients`, {
                     method: 'POST',
                     headers: {
                         Accept: 'application/json',
@@ -154,7 +155,7 @@ const NewRecipeModal = ({ openModal, closeModal }) => {
             })
             const ingPromise = Promise.all(ingPromiseArr)
             const tagPromiseArr = tags.map((tag, index) => {
-                return fetch(`http://localhost:3000/api/users/${uid}/recipes/${recipe_id}/tags`, {
+                return fetch(`${API_BASE}/api/users/${uid}/recipes/${recipe_id}/tags`, {
                     method: 'POST',
                     headers: {
                         Accept: 'application/json',

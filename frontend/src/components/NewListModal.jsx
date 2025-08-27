@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../AuthProvider";
 import Modal from "../components/Modal";
+const API_BASE = import.meta.env.VITE_API_BASE || '';
 
 const NewListModal = ({ openModal, closeModal, existingLists }) => {
     const [input, setInput] = useState("")
@@ -22,7 +23,7 @@ const NewListModal = ({ openModal, closeModal, existingLists }) => {
     }
     const handleSubmit = () => {
         if (isValid) {
-            fetch(`http://localhost:3000/api/users/${uid}/lists`, {
+            fetch(`${API_BASE}/api/users/${uid}/lists`, {
                 method: 'POST',
                 headers: {
                     Accept: 'application/json',

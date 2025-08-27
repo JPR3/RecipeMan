@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import NewListModal from '../components/NewListModal';
 import DeleteListModal from '../components/DeleteListModal';
 import EditListModal from '../components/EditListModal';
+const API_BASE = import.meta.env.VITE_API_BASE || '';
 
 const Lists = () => {
     const [lists, setLists] = useState([]);
@@ -35,7 +36,7 @@ const Lists = () => {
             document.body.style.overflow = 'hidden';
         } else {
             document.body.style.overflow = 'auto';
-            fetch(`http://localhost:3000/api/users/${uid}/lists`, {
+            fetch(`${API_BASE}/api/users/${uid}/lists`, {
                 headers: {
                     Authorization: `Bearer ${accessToken}`
                 }

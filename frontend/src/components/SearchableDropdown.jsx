@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useAuth } from '../AuthProvider';
 import { useRef } from 'react';
 import { capitalizeEachWord } from '../helpers';
+const API_BASE = import.meta.env.VITE_API_BASE || '';
 
 const SearchableDropdown = ({ ingredientPart, apiPath, onChangeEvent, index, fieldValue, existingIdsList, disableAdd }) => {
     const [localValue, setLocalValue] = useState("")
@@ -20,7 +21,7 @@ const SearchableDropdown = ({ ingredientPart, apiPath, onChangeEvent, index, fie
 
     React.useEffect(() => {
         if (localValue.length >= 1) {
-            const url = `http://localhost:3000/api/users/${uid}/${apiPath}?` + new URLSearchParams({ name: localValue.toLowerCase().trim() }).toString()
+            const url = `${API_BASE}/api/users/${uid}/${apiPath}?` + new URLSearchParams({ name: localValue.toLowerCase().trim() }).toString()
             fetch(url, {
                 headers: {
                     Authorization: `Bearer ${accessToken}`
